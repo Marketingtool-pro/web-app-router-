@@ -1,5 +1,5 @@
 import { lazy } from "react";
-import { createBrowserRouter } from "react-router-dom";
+import { createBrowserRouter, Navigate } from "react-router-dom";
 
 // @routes
 import AuthRoutes from "./AuthRoutes";
@@ -19,6 +19,12 @@ const GoogleAdsCallbackPage = Loadable(lazy(() => import("@/views/admin/google-a
 const LegalPage = Loadable(lazy(() => import("@/views/legal")));
 
 /***************************  ROUTING RENDER  ***************************/
+
+const RootRedirect = {
+  path: "/",
+  errorElement: <ErrorBoundary />,
+  element: <Navigate to="/dashboard" replace />,
+};
 
 const OnboardingRoutes = [
   {
@@ -61,6 +67,7 @@ const CatchAllRoute = {
 
 const router = createBrowserRouter(
   [
+    RootRedirect,
     ...AuthRoutes.map((route) => ({ ...route, errorElement: <ErrorBoundary /> })),
     ...OnboardingRoutes,
     ...LegalRoutes,
