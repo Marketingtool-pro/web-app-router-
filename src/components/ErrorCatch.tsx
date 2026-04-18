@@ -1,12 +1,30 @@
 import * as React from "react";
-import { ErrorComponentProps } from "@tanstack/react-router";
+import { useRouteError, isRouteErrorResponse, Link } from "react-router-dom";
 import Error500 from "@/components/Error500";
+import Error404 from "@/components/Error404";
 import { Box, Typography, Button, Container, Stack } from "@mui/material";
 
-export function ErrorCatch({ error, reset }: ErrorComponentProps) {
+export function ErrorCatch() {
+  const error = useRouteError();
+
   React.useEffect(() => {
     console.error("Application Error:", error);
   }, [error]);
+
+  if (isRouteErrorResponse(error)) {
+    if (error.status === 404) {
+      return (
+        <Error404
+          heading="The page you are looking for does not exist."
+          primaryBtn={{
+            children: "Go to Home",
+            component: Link,
+            to: "/",
+          }}
+        />
+      );
+    }
+  }
 
   const errorMessage =
     error instanceof Error ? error.message : String(error || "Unknown application error");
@@ -17,17 +35,10 @@ export function ErrorCatch({ error, reset }: ErrorComponentProps) {
         heading={errorMessage}
         primaryBtn={{
           children: "Try Again",
-          onClick: () => {
-            // Clear any local caches that might be causing the error
-            if (typeof window !== "undefined") {
-              // Optional: localStorage.removeItem('some-problematic-key');
-            }
-            reset();
-          },
+          onClick: () => window.location.reload(),
         }}
       />
 
-      {/* Developer fallback if Error500 fails to render or for detailed debugging */}
       <Container maxWidth="md" sx={{ mt: -10, mb: 10, position: "relative", zIndex: 10 }}>
         <Stack
           spacing={2}

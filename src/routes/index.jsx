@@ -1,57 +1,76 @@
-import { lazy } from 'react';
-import { createBrowserRouter } from 'react-router-dom';
+import { lazy } from "react";
+import { createBrowserRouter } from "react-router-dom";
 
 // @routes
-import AuthRoutes from './AuthRoutes';
-import MainRoutes from './MainRoutes';
-import PagesRoutes from './PagesRoutes';
+import AuthRoutes from "./AuthRoutes";
+import MainRoutes from "./MainRoutes";
+import PagesRoutes from "./PagesRoutes";
+import ErrorBoundary from "./ErrorBoundary";
 
 // @project
-import Loadable from '@/components/Loadable';
-import { AuthProvider } from '@/contexts/AuthContext';
-import AuthGuard from '@/utils/route-guard/AuthGuard';
+import Loadable from "@/components/Loadable";
+import { AuthProvider } from "@/contexts/AuthContext";
+import AuthGuard from "@/utils/route-guard/AuthGuard";
+import NotFoundCatch from "@/components/NotFoundCatch";
 
 // Standalone pages (no AdminLayout)
-const FbAdsCallbackPage = Loadable(lazy(() => import('@/views/admin/fb-connect-callback')));
-const GoogleAdsCallbackPage = Loadable(lazy(() => import('@/views/admin/google-ads-callback')));
-const LegalPage = Loadable(lazy(() => import('@/views/legal')));
+const FbAdsCallbackPage = Loadable(lazy(() => import("@/views/admin/fb-connect-callback")));
+const GoogleAdsCallbackPage = Loadable(lazy(() => import("@/views/admin/google-ads-callback")));
+const LegalPage = Loadable(lazy(() => import("@/views/legal")));
 
 /***************************  ROUTING RENDER  ***************************/
 
 const OnboardingRoutes = [
   {
-    path: '/oauth/facebook-ads',
+    path: "/oauth/facebook-ads",
+    errorElement: <ErrorBoundary />,
     element: (
       <AuthProvider>
         <AuthGuard>
           <FbAdsCallbackPage />
         </AuthGuard>
       </AuthProvider>
-    )
+    ),
   },
   {
-    path: '/oauth/google-ads',
+    path: "/oauth/google-ads",
+    errorElement: <ErrorBoundary />,
     element: (
       <AuthProvider>
         <AuthGuard>
           <GoogleAdsCallbackPage />
         </AuthGuard>
       </AuthProvider>
-    )
-  }
+    ),
+  },
 ];
 
 // Public legal pages (no auth required — accessible by Google)
 const LegalRoutes = [
-  { path: '/privacy-policy', element: <LegalPage /> },
-  { path: '/terms-policy', element: <LegalPage /> },
-  { path: '/cookie-policy', element: <LegalPage /> },
-  { path: '/trust-verification', element: <LegalPage /> },
-  { path: '/delete-account', element: <LegalPage /> },
+  { path: "/privacy-policy", errorElement: <ErrorBoundary />, element: <LegalPage /> },
+  { path: "/terms-policy", errorElement: <ErrorBoundary />, element: <LegalPage /> },
+  { path: "/cookie-policy", errorElement: <ErrorBoundary />, element: <LegalPage /> },
+  { path: "/trust-verification", errorElement: <ErrorBoundary />, element: <LegalPage /> },
+  { path: "/delete-account", errorElement: <ErrorBoundary />, element: <LegalPage /> },
 ];
 
-const router = createBrowserRouter([...AuthRoutes, ...OnboardingRoutes, ...LegalRoutes, MainRoutes, PagesRoutes], {
-  basename: import.meta.env.VITE_APP_BASE_URL
-});
+const CatchAllRoute = {
+  path: "*",
+  element: <NotFoundCatch />,
+};
+
+const router = createBrowserRouter(
+  [
+    ...AuthRoutes.map((route) => ({ ...route, errorElement: <ErrorBoundary /> })),
+    ...OnboardingRoutes,
+    ...LegalRoutes,
+    { ...MainRoutes, errorElement: <ErrorBoundary /> },
+    { ...PagesRoutes, errorElement: <ErrorBoundary /> },
+    CatchAllRoute,
+  ],
+  {
+    basename: import.meta.env.VITE_APP_BASE_URL,
+  },
+);
 
 export default router;
