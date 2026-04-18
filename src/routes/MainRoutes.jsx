@@ -41,7 +41,7 @@ const PlanCreatePage = Loadable(lazy(() => import("@/views/admin/setting/pricing
 const PlanEditPage = Loadable(lazy(() => import("@/views/admin/setting/pricing/plan-edit")));
 
 const MainRoutes = {
-  path: "/dashboard",
+  path: "/",
   element: (
     <AuthProvider>
       <AuthGuard>
@@ -52,15 +52,21 @@ const MainRoutes = {
     </AuthProvider>
   ),
   children: [
-    // Default redirect to analytics overview
-    { index: true, element: <Navigate to="analytics/overview" replace /> },
+    // Default redirect to dashboard
+    { index: true, element: <Navigate to="dashboard" replace /> },
 
     // Dashboard — template's 3-tab analytics (Overview, User Behavior, Performance)
     {
-      path: "analytics",
+      path: "dashboard",
       children: [
-        { index: true, element: <Navigate to="overview" replace /> },
-        { path: ":tab", element: <AnalyticsPage /> },
+        { index: true, element: <Navigate to="analytics/overview" replace /> },
+        {
+          path: "analytics",
+          children: [
+            { index: true, element: <Navigate to="overview" replace /> },
+            { path: ":tab", element: <AnalyticsPage /> },
+          ],
+        },
       ],
     },
 
