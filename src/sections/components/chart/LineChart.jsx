@@ -1,17 +1,17 @@
-import { useState } from 'react';
+import { useState } from "react";
 
 // @mui
-import { useTheme } from '@mui/material/styles';
-import { LineChart } from '@mui/x-charts/LineChart';
-import Stack from '@mui/material/Stack';
-import Tab from '@mui/material/Tab';
-import Tabs from '@mui/material/Tabs';
-import Typography from '@mui/material/Typography';
+import { useTheme } from "@mui/material/styles";
+import { LineChart } from "@mui/x-charts-pro/LineChart";
+import Stack from "@mui/material/Stack";
+import Tab from "@mui/material/Tab";
+import Tabs from "@mui/material/Tabs";
+import Typography from "@mui/material/Typography";
 
 // @project
-import MainCard from '@/components/MainCard';
-import Legend from '@/components/third-party/chart/Legend';
-import { TabsType, ViewMode } from '@/enum';
+import MainCard from "@/components/MainCard";
+import Legend from "@/components/third-party/chart/Legend";
+import { TabsType, ViewMode } from "@/enum";
 
 /***************************  CHART - DATA  ***************************/
 
@@ -65,18 +65,20 @@ const yearlyPoints = [
   new Date(2023, 2, 1),
   new Date(2023, 5, 1),
   new Date(2023, 8, 1),
-  new Date(2023, 11, 1)
+  new Date(2023, 11, 1),
 ];
 
 const yearlyData = {
   pageViewData: [
-    190, 230, 240, 230, 240, 230, 250, 270, 300, 320, 340, 360, 400, 420, 450, 470, 490, 500, 480, 450, 420, 380, 420, 380, 190, 230, 240,
-    230, 240, 230, 250, 270, 300, 320, 400, 440, 480, 520, 540, 580, 620, 640, 680, 720, 650, 680, 720, 840, 950, 800
+    190, 230, 240, 230, 240, 230, 250, 270, 300, 320, 340, 360, 400, 420, 450, 470, 490, 500, 480,
+    450, 420, 380, 420, 380, 190, 230, 240, 230, 240, 230, 250, 270, 300, 320, 400, 440, 480, 520,
+    540, 580, 620, 640, 680, 720, 650, 680, 720, 840, 950, 800,
   ],
   uniqueVisitorData: [
-    900, 920, 930, 860, 840, 820, 800, 840, 860, 840, 800, 780, 760, 790, 740, 710, 670, 650, 690, 750, 780, 760, 730, 680, 650, 620, 500,
-    470, 430, 400, 380, 360, 340, 320, 300, 280, 260, 240, 220, 260, 300, 340, 380, 420, 460, 360, 450, 520, 450, 600
-  ]
+    900, 920, 930, 860, 840, 820, 800, 840, 860, 840, 800, 780, 760, 790, 740, 710, 670, 650, 690,
+    750, 780, 760, 730, 680, 650, 620, 500, 470, 430, 400, 380, 360, 340, 320, 300, 280, 260, 240,
+    220, 260, 300, 340, 380, 420, 460, 360, 450, 520, 450, 600,
+  ],
 };
 
 const monthlyPoints = [
@@ -115,18 +117,18 @@ const monthlyPoints = [
   new Date(2023, 10, 30),
   new Date(2023, 11, 1),
   new Date(2023, 11, 15),
-  new Date(2023, 11, 31)
+  new Date(2023, 11, 31),
 ];
 
 const monthlyData = {
   pageViewData: [
-    190, 230, 240, 230, 300, 230, 250, 270, 230, 320, 340, 450, 400, 420, 485, 470, 490, 500, 480, 450, 420, 380, 420, 380, 400, 600, 575,
-    540, 550, 520, 580, 570, 600, 600, 720, 780
+    190, 230, 240, 230, 300, 230, 250, 270, 230, 320, 340, 450, 400, 420, 485, 470, 490, 500, 480,
+    450, 420, 380, 420, 380, 400, 600, 575, 540, 550, 520, 580, 570, 600, 600, 720, 780,
   ],
   uniqueVisitorData: [
-    900, 920, 930, 860, 840, 820, 800, 840, 860, 840, 800, 780, 760, 790, 740, 710, 670, 650, 690, 750, 780, 760, 730, 680, 650, 680, 630,
-    510, 460, 460, 405, 460, 415, 430, 410, 500
-  ]
+    900, 920, 930, 860, 840, 820, 800, 840, 860, 840, 800, 780, 760, 790, 740, 710, 670, 650, 690,
+    750, 780, 760, 730, 680, 650, 680, 630, 510, 460, 460, 405, 460, 415, 430, 410, 500,
+  ],
 };
 
 const dailyPoints = [
@@ -136,22 +138,22 @@ const dailyPoints = [
   new Date(2024, 0, 4),
   new Date(2024, 0, 5),
   new Date(2024, 0, 6),
-  new Date(2024, 0, 7)
+  new Date(2024, 0, 7),
 ];
 
 const dailyData = {
   pageViewData: [10, 5, 12, 8, 35, 14, 30],
-  uniqueVisitorData: [15, 20, 22, 18, 21, 30, 38]
+  uniqueVisitorData: [15, 20, 22, 18, 21, 30, 38],
 };
 
-const timeFilter = ['Daily', 'Monthly', 'Yearly'];
+const timeFilter = ["Daily", "Monthly", "Yearly"];
 
 const valueFormatter = (date, view) => {
   switch (view) {
     case ViewMode.DAILY:
-      return date.toLocaleDateString('en-us', { weekday: 'short' });
+      return date.toLocaleDateString("en-us", { weekday: "short" });
     case ViewMode.MONTHLY:
-      return date.toLocaleDateString('en-US', { month: 'short' });
+      return date.toLocaleDateString("en-US", { month: "short" });
     case ViewMode.YEARLY:
     default:
       return date.getFullYear().toString();
@@ -170,7 +172,11 @@ const tickInterval = (date, view) => {
   }
 };
 
-const dataMap = { [ViewMode.MONTHLY]: monthlyData, [ViewMode.DAILY]: dailyData, [ViewMode.YEARLY]: yearlyData };
+const dataMap = {
+  [ViewMode.MONTHLY]: monthlyData,
+  [ViewMode.DAILY]: dailyData,
+  [ViewMode.YEARLY]: yearlyData,
+};
 
 /***************************  CHART - LINE  ***************************/
 
@@ -180,7 +186,7 @@ export default function AnalyticsLineChart() {
   const [view, setView] = useState(ViewMode.MONTHLY);
   const [visibilityOption, setVisibilityOption] = useState({
     page_views: true,
-    unique_visitor: true
+    unique_visitor: true,
   });
 
   const handleViewChange = (_event, newValue) => {
@@ -193,45 +199,67 @@ export default function AnalyticsLineChart() {
 
   const seriesData = [
     {
-      id: 'page_views',
+      id: "page_views",
       data: dataMap[view].pageViewData,
       color: theme.vars.palette.primary.light,
-      visible: visibilityOption['page_views'],
-      label: 'Page View'
+      visible: visibilityOption["page_views"],
+      label: "Page View",
     },
     {
-      id: 'unique_visitor',
+      id: "unique_visitor",
       data: dataMap[view].uniqueVisitorData,
       color: theme.vars.palette.primary.main,
-      visible: visibilityOption['unique_visitor'],
-      label: 'Unique Visitor'
-    }
+      visible: visibilityOption["unique_visitor"],
+      label: "Unique Visitor",
+    },
   ];
 
   const visibleSeries = seriesData.filter((s) => s.visible);
-  const lagendItems = seriesData.map((series) => ({ label: series.label, color: series.color, visible: series.visible, id: series.id }));
+  const lagendItems = seriesData.map((series) => ({
+    label: series.label,
+    color: series.color,
+    visible: series.visible,
+    id: series.id,
+  }));
 
-  const xData = view === ViewMode.MONTHLY ? monthlyPoints : view === ViewMode.DAILY ? dailyPoints : yearlyPoints;
+  const xData =
+    view === ViewMode.MONTHLY
+      ? monthlyPoints
+      : view === ViewMode.DAILY
+        ? dailyPoints
+        : yearlyPoints;
 
   // Dynamic styles for visible series
   const dynamicSeriesStyles = visibleSeries.reduce((acc, series) => {
-    acc[`& .MuiAreaElement-series-${series.id}`] = { fill: `url(#${series.id})`, opacity: series.id === 'page-views' ? 0 : 0.15 };
+    acc[`& .MuiAreaElement-series-${series.id}`] = {
+      fill: `url(#${series.id})`,
+      opacity: series.id === "page-views" ? 0 : 0.15,
+    };
     return acc;
   }, {});
 
   return (
     <MainCard>
       <Stack sx={{ gap: 3 }}>
-        <Stack direction="row" sx={{ alignItems: 'end', justifyContent: 'space-between', gap: 2, flexWrap: 'wrap' }}>
+        <Stack
+          direction="row"
+          sx={{ alignItems: "end", justifyContent: "space-between", gap: 2, flexWrap: "wrap" }}
+        >
           <Stack sx={{ gap: 0.5 }}>
             <Typography variant="h4" sx={{ fontWeight: 400 }}>
               Line Chart
             </Typography>
-            <Typography variant="caption" sx={{ color: 'grey.700' }}>
+            <Typography variant="caption" sx={{ color: "grey.700" }}>
               Analyze user engagement and improve your product with real-time analytics.
             </Typography>
           </Stack>
-          <Tabs value={view} onChange={handleViewChange} aria-label="filter tabs" type={TabsType.SEGMENTED} sx={{ width: 'fit-content' }}>
+          <Tabs
+            value={view}
+            onChange={handleViewChange}
+            aria-label="filter tabs"
+            type={TabsType.SEGMENTED}
+            sx={{ width: "fit-content" }}
+          >
             {timeFilter.map((filter, index) => (
               <Tab label={filter} value={filter} key={index} />
             ))}
@@ -242,23 +270,33 @@ export default function AnalyticsLineChart() {
       </Stack>
 
       <LineChart
-        series={visibleSeries.map((series) => ({ ...series, showMark: false, curve: 'linear', area: true }))}
+        series={visibleSeries.map((series) => ({
+          ...series,
+          showMark: false,
+          curve: "linear",
+          area: true,
+        }))}
         height={261}
         grid={{ horizontal: true }}
         margin={{ top: 25, right: 0, bottom: -4, left: 0 }}
         xAxis={[
           {
             data: xData,
-            scaleType: 'point',
+            scaleType: "point",
             disableLine: true,
             disableTicks: true,
             valueFormatter: (value) => valueFormatter(value, view),
-            tickInterval: (time) => tickInterval(time, view)
-          }
+            tickInterval: (time) => tickInterval(time, view),
+          },
         ]}
-        yAxis={[{ scaleType: 'linear', disableLine: true, disableTicks: true, label: 'Active users' }]}
+        yAxis={[
+          { scaleType: "linear", disableLine: true, disableTicks: true, label: "Active users" },
+        ]}
         hideLegend
-        sx={{ '& .MuiLineElement-root': { strokeDasharray: '0', strokeWidth: 2 }, ...dynamicSeriesStyles }}
+        sx={{
+          "& .MuiLineElement-root": { strokeDasharray: "0", strokeWidth: 2 },
+          ...dynamicSeriesStyles,
+        }}
       >
         <defs>
           {visibleSeries.map((series, index) => (

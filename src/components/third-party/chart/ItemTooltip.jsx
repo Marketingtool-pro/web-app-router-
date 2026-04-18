@@ -1,12 +1,12 @@
-import PropTypes from 'prop-types';
-import * as React from 'react';
-import NoSsr from '@mui/material/NoSsr';
-import Popper from '@mui/material/Popper';
-import { useItemTooltip } from '@mui/x-charts/ChartsTooltip';
-import { useSvgRef } from '@mui/x-charts/hooks';
+import PropTypes from "prop-types";
+import * as React from "react";
+import NoSsr from "@mui/material/NoSsr";
+import Popper from "@mui/material/Popper";
+import { useItemTooltip } from "@mui/x-charts-pro/ChartsTooltip";
+import { useChartRootRef } from "@mui/x-charts-pro/hooks";
 
 function usePointer() {
-  const svgRef = useSvgRef();
+  const svgRef = useChartRootRef();
   const popperRef = React.useRef(null);
   const positionRef = React.useRef({ x: 0, y: 0 });
 
@@ -14,7 +14,7 @@ function usePointer() {
   const [pointer, setPointer] = React.useState({
     isActive: false,
     isMousePointer: false,
-    pointerHeight: 0
+    pointerHeight: 0,
   });
 
   React.useEffect(() => {
@@ -24,10 +24,10 @@ function usePointer() {
     }
 
     const handleOut = (event) => {
-      if (event.pointerType !== 'mouse') {
+      if (event.pointerType !== "mouse") {
         setPointer((prev) => ({
           ...prev,
-          isActive: false
+          isActive: false,
         }));
       }
     };
@@ -35,27 +35,27 @@ function usePointer() {
     const handleEnter = (event) => {
       setPointer({
         isActive: true,
-        isMousePointer: event.pointerType === 'mouse',
-        pointerHeight: event.height
+        isMousePointer: event.pointerType === "mouse",
+        pointerHeight: event.height,
       });
     };
 
     const handleMove = (event) => {
       positionRef.current = {
         x: event.clientX,
-        y: event.clientY
+        y: event.clientY,
       };
       popperRef.current?.update();
     };
 
-    element.addEventListener('pointerenter', handleEnter);
-    element.addEventListener('pointerup', handleOut);
-    element.addEventListener('pointermove', handleMove);
+    element.addEventListener("pointerenter", handleEnter);
+    element.addEventListener("pointerup", handleOut);
+    element.addEventListener("pointermove", handleMove);
 
     return () => {
-      element.removeEventListener('pointerenter', handleEnter);
-      element.removeEventListener('pointerup', handleOut);
-      element.removeEventListener('pointermove', handleMove);
+      element.removeEventListener("pointerenter", handleEnter);
+      element.removeEventListener("pointerup", handleOut);
+      element.removeEventListener("pointermove", handleMove);
     };
   }, [svgRef]);
 
@@ -72,9 +72,9 @@ function usePointer() {
         bottom: positionRef.current.y,
         width: 0,
         height: 0,
-        toJSON: () => ''
-      })
-    }
+        toJSON: () => "",
+      }),
+    },
   };
 }
 
@@ -94,20 +94,20 @@ export function ItemTooltip({ children }) {
     <NoSsr>
       <Popper
         sx={{
-          pointerEvents: 'none',
-          zIndex: (theme) => theme.zIndex.modal
+          pointerEvents: "none",
+          zIndex: (theme) => theme.zIndex.modal,
         }}
         open
-        placement={isMousePointer ? 'top-end' : 'top'}
+        placement={isMousePointer ? "top-end" : "top"}
         anchorEl={anchorEl}
         popperRef={popperRef}
         modifiers={[
           {
-            name: 'offset',
+            name: "offset",
             options: {
-              offset: [0, yOffset]
-            }
-          }
+              offset: [0, yOffset],
+            },
+          },
         ]}
       >
         {children}

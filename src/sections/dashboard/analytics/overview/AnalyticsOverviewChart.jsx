@@ -1,18 +1,18 @@
-import PropTypes from 'prop-types';
-import { useState } from 'react';
+import PropTypes from "prop-types";
+import { useState } from "react";
 
 // @mui
-import { useTheme } from '@mui/material/styles';
-import { LineChart } from '@mui/x-charts/LineChart';
-import Stack from '@mui/material/Stack';
-import Tab from '@mui/material/Tab';
-import Tabs from '@mui/material/Tabs';
-import Typography from '@mui/material/Typography';
+import { useTheme } from "@mui/material/styles";
+import { LineChart } from "@mui/x-charts-pro/LineChart";
+import Stack from "@mui/material/Stack";
+import Tab from "@mui/material/Tab";
+import Tabs from "@mui/material/Tabs";
+import Typography from "@mui/material/Typography";
 
 // @project
-import MainCard from '@/components/MainCard';
-import Legend from '@/components/third-party/chart/Legend';
-import { TabsType, ViewMode } from '@/enum';
+import MainCard from "@/components/MainCard";
+import Legend from "@/components/third-party/chart/Legend";
+import { TabsType, ViewMode } from "@/enum";
 
 /***************************  CHART - DATA  ***************************/
 
@@ -66,12 +66,12 @@ const yearlyPoints = [
   new Date(2023, 2, 1),
   new Date(2023, 5, 1),
   new Date(2023, 8, 1),
-  new Date(2023, 11, 1)
+  new Date(2023, 11, 1),
 ];
 
 const yearlyData = {
   pageViewData: new Array(50).fill(0),
-  uniqueVisitorData: new Array(50).fill(0)
+  uniqueVisitorData: new Array(50).fill(0),
 };
 
 const monthlyPoints = [
@@ -110,12 +110,12 @@ const monthlyPoints = [
   new Date(2023, 10, 30),
   new Date(2023, 11, 1),
   new Date(2023, 11, 15),
-  new Date(2023, 11, 31)
+  new Date(2023, 11, 31),
 ];
 
 const monthlyData = {
   pageViewData: new Array(36).fill(0),
-  uniqueVisitorData: new Array(36).fill(0)
+  uniqueVisitorData: new Array(36).fill(0),
 };
 
 const dailyPoints = [
@@ -125,22 +125,22 @@ const dailyPoints = [
   new Date(2024, 0, 4),
   new Date(2024, 0, 5),
   new Date(2024, 0, 6),
-  new Date(2024, 0, 7)
+  new Date(2024, 0, 7),
 ];
 
 const dailyData = {
   pageViewData: new Array(7).fill(0),
-  uniqueVisitorData: new Array(7).fill(0)
+  uniqueVisitorData: new Array(7).fill(0),
 };
 
-const timeFilter = ['Daily', 'Monthly', 'Yearly'];
+const timeFilter = ["Daily", "Monthly", "Yearly"];
 
 const valueFormatter = (date, view) => {
   switch (view) {
     case ViewMode.DAILY:
-      return date.toLocaleDateString('en-us', { weekday: 'short' });
+      return date.toLocaleDateString("en-us", { weekday: "short" });
     case ViewMode.MONTHLY:
-      return date.toLocaleDateString('en-US', { month: 'short' });
+      return date.toLocaleDateString("en-US", { month: "short" });
     case ViewMode.YEARLY:
     default:
       return date.getFullYear().toString();
@@ -159,7 +159,11 @@ const tickInterval = (date, view) => {
   }
 };
 
-const dataMap = { [ViewMode.MONTHLY]: monthlyData, [ViewMode.DAILY]: dailyData, [ViewMode.YEARLY]: yearlyData };
+const dataMap = {
+  [ViewMode.MONTHLY]: monthlyData,
+  [ViewMode.DAILY]: dailyData,
+  [ViewMode.YEARLY]: yearlyData,
+};
 
 /***************************  CHART - 1  ***************************/
 
@@ -169,7 +173,7 @@ export default function Chart1({ data }) {
   const [view, setView] = useState(ViewMode.MONTHLY);
   const [visibilityOption, setVisibilityOption] = useState({
     page_views: true,
-    unique_visitor: true
+    unique_visitor: true,
   });
 
   const handleViewChange = (_event, newValue) => {
@@ -185,45 +189,67 @@ export default function Chart1({ data }) {
 
   const seriesData = [
     {
-      id: 'page_views',
+      id: "page_views",
       data: chartData.spend || chartData.pageViewData,
       color: theme.vars.palette.primary.light,
-      visible: visibilityOption['page_views'],
-      label: 'Ad Spend'
+      visible: visibilityOption["page_views"],
+      label: "Ad Spend",
     },
     {
-      id: 'unique_visitor',
+      id: "unique_visitor",
       data: chartData.revenue || chartData.uniqueVisitorData,
       color: theme.vars.palette.primary.main,
-      visible: visibilityOption['unique_visitor'],
-      label: 'Revenue'
-    }
+      visible: visibilityOption["unique_visitor"],
+      label: "Revenue",
+    },
   ];
 
   const visibleSeries = seriesData.filter((s) => s.visible);
-  const lagendItems = seriesData.map((series) => ({ label: series.label, color: series.color, visible: series.visible, id: series.id }));
+  const lagendItems = seriesData.map((series) => ({
+    label: series.label,
+    color: series.color,
+    visible: series.visible,
+    id: series.id,
+  }));
 
-  const xData = view === ViewMode.MONTHLY ? monthlyPoints : view === ViewMode.DAILY ? dailyPoints : yearlyPoints;
+  const xData =
+    view === ViewMode.MONTHLY
+      ? monthlyPoints
+      : view === ViewMode.DAILY
+        ? dailyPoints
+        : yearlyPoints;
 
   // Dynamic styles for visible series
   const dynamicSeriesStyles = visibleSeries.reduce((acc, series) => {
-    acc[`& .MuiAreaElement-series-${series.id}`] = { fill: `url(#${series.id})`, opacity: series.id === 'page_views' ? 0 : 0.15 };
+    acc[`& .MuiAreaElement-series-${series.id}`] = {
+      fill: `url(#${series.id})`,
+      opacity: series.id === "page_views" ? 0 : 0.15,
+    };
     return acc;
   }, {});
 
   return (
     <MainCard>
       <Stack sx={{ gap: 3 }}>
-        <Stack direction="row" sx={{ alignItems: 'end', justifyContent: 'space-between', gap: 2, flexWrap: 'wrap' }}>
+        <Stack
+          direction="row"
+          sx={{ alignItems: "end", justifyContent: "space-between", gap: 2, flexWrap: "wrap" }}
+        >
           <Stack sx={{ gap: 0.5 }}>
             <Typography variant="h4" sx={{ fontWeight: 400 }}>
               Spend vs Revenue
             </Typography>
-            <Typography variant="caption" sx={{ color: 'grey.700' }}>
+            <Typography variant="caption" sx={{ color: "grey.700" }}>
               Track ad spend against revenue to optimize your marketing ROI.
             </Typography>
           </Stack>
-          <Tabs value={view} onChange={handleViewChange} aria-label="filter tabs" type={TabsType.SEGMENTED} sx={{ width: 'fit-content' }}>
+          <Tabs
+            value={view}
+            onChange={handleViewChange}
+            aria-label="filter tabs"
+            type={TabsType.SEGMENTED}
+            sx={{ width: "fit-content" }}
+          >
             {timeFilter.map((filter, index) => (
               <Tab label={filter} value={filter} key={index} />
             ))}
@@ -234,23 +260,40 @@ export default function Chart1({ data }) {
       </Stack>
 
       <LineChart
-        series={visibleSeries.map((series) => ({ ...series, showMark: false, curve: 'linear', area: true }))}
+        series={visibleSeries.map((series) => ({
+          ...series,
+          showMark: false,
+          curve: "linear",
+          area: true,
+        }))}
         height={261}
         grid={{ horizontal: true }}
         margin={{ top: 25, right: 0, bottom: -4, left: 0 }}
         xAxis={[
           {
             data: xData,
-            scaleType: 'point',
+            scaleType: "point",
             disableLine: true,
             disableTicks: true,
             valueFormatter: (value) => valueFormatter(value, view),
-            tickInterval: (time) => tickInterval(time, view)
-          }
+            tickInterval: (time) => tickInterval(time, view),
+          },
         ]}
-        yAxis={[{ scaleType: 'linear', disableLine: true, disableTicks: true, label: 'Visits', min: 0, max: visibleSeries.every((s) => s.data.every((v) => v === 0)) ? 1000 : undefined }]}
+        yAxis={[
+          {
+            scaleType: "linear",
+            disableLine: true,
+            disableTicks: true,
+            label: "Visits",
+            min: 0,
+            max: visibleSeries.every((s) => s.data.every((v) => v === 0)) ? 1000 : undefined,
+          },
+        ]}
         hideLegend
-        sx={{ '& .MuiLineElement-root': { strokeDasharray: '0', strokeWidth: 2 }, ...dynamicSeriesStyles }}
+        sx={{
+          "& .MuiLineElement-root": { strokeDasharray: "0", strokeWidth: 2 },
+          ...dynamicSeriesStyles,
+        }}
       >
         <defs>
           {visibleSeries.map((series, index) => (
