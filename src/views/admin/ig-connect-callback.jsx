@@ -13,7 +13,6 @@ export default function IgConnectCallback() {
 
   useEffect(() => {
     const processCallback = async () => {
-      // Instagram uses token flow, usually via #access_token
       const hash = location.hash;
       const params = new URLSearchParams(hash.replace("#", "?"));
       const accessToken = params.get("access_token");
@@ -49,11 +48,25 @@ export default function IgConnectCallback() {
           console.error("Windmill sync error:", e);
         }
 
-        enqueueSnackbar("Instagram connected successfully!", { variant: "success" });
-        navigate("/setting/profile");
+        // If opened in popup, communicate with parent
+        if (window.opener) {
+          window.opener.postMessage(
+            { type: "IG_AUTH_SUCCESS", data: { id: user?.id, access_token: accessToken } },
+            window.location.origin,
+          );
+          window.close();
+        } else {
+          enqueueSnackbar("Instagram connected successfully!", { variant: "success" });
+          navigate("/setting/profile");
+        }
       } else {
-        enqueueSnackbar("Failed to connect Instagram.", { variant: "error" });
-        navigate("/setting/profile");
+        if (window.opener) {
+          window.opener.postMessage({ type: "IG_AUTH_FAILURE" }, window.location.origin);
+          window.close();
+        } else {
+          enqueueSnackbar("Failed to connect Instagram.", { variant: "error" });
+          navigate("/setting/profile");
+        }
       }
     };
 
