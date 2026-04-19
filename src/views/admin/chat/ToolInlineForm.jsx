@@ -749,7 +749,25 @@ h3{font-size:17px;font-weight:700;color:#0f172a;margin:8px 0}.hook{color:#6366f1
 
 /* ═══════════════════  SHIMMER SKELETON  ═══════════════════ */
 
-function ResultSkeleton() {
+function ResultSkeleton({ toolSlug }) {
+  const [step, setStep] = useState(0);
+  const isScheduler = toolSlug === "post-scheduler";
+
+  const steps = [
+    { label: "Creative Image Generation", icon: <IconSparkles size={16} />, duration: 3000 },
+    { label: "AI Video Synthesis (FAL.ai)", icon: <IconPlayerPlay size={16} />, duration: 4000 },
+    { label: "Optimal Timing Calculation", icon: <IconClock size={16} />, duration: 2500 },
+    { label: "Finalising Post Preview", icon: <IconLayout size={16} />, duration: 2000 },
+  ];
+
+  useEffect(() => {
+    if (!isScheduler) return;
+    const interval = setInterval(() => {
+      setStep((s) => (s < steps.length - 1 ? s + 1 : s));
+    }, steps[step]?.duration || 3000);
+    return () => clearInterval(interval);
+  }, [step, isScheduler]);
+
   const shimmerSx = {
     position: "absolute",
     inset: 0,
@@ -761,6 +779,7 @@ function ResultSkeleton() {
       "100%": { transform: "translateX(100%)" },
     },
   };
+
   return (
     <Box
       sx={{
@@ -770,34 +789,118 @@ function ResultSkeleton() {
         border: "1px solid rgba(255,255,255,0.04)",
       }}
     >
-      <Box
-        sx={{
-          height: 100,
-          position: "relative",
-          overflow: "hidden",
-          background: "rgba(255,255,255,0.015)",
-        }}
-      >
-        <Box sx={shimmerSx} />
-      </Box>
-      <Box sx={{ p: 3.5 }}>
-        {[85, 100, 45, 95, 72, 100, 60, 88, 40].map((w, i) => (
+      {isScheduler ? (
+        <Box sx={{ p: 4, textAlign: "center" }}>
+          <Box sx={{ position: "relative", display: "inline-flex", mb: 3 }}>
+            <CircularProgress
+              size={80}
+              thickness={2}
+              sx={{ color: "rgba(139,92,246,0.15)" }}
+              variant="determinate"
+              value={100}
+            />
+            <CircularProgress
+              size={80}
+              thickness={4}
+              sx={{
+                color: "#8b5cf6",
+                position: "absolute",
+                left: 0,
+                [`& .MuiCircularProgress-circle`]: {
+                  strokeLinecap: "round",
+                },
+              }}
+            />
+            <Box
+              sx={{
+                top: 0,
+                left: 0,
+                bottom: 0,
+                right: 0,
+                position: "absolute",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                color: "#8b5cf6",
+              }}
+            >
+              <motion.div
+                key={step}
+                initial={{ scale: 0.5, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                transition={{ type: "spring", stiffness: 200 }}
+              >
+                {steps[step].icon}
+              </motion.div>
+            </Box>
+          </Box>
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={step}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              transition={{ duration: 0.3 }}
+            >
+              <Typography sx={{ fontWeight: 800, fontSize: "1.1rem", mb: 1, color: "#fff" }}>
+                {steps[step].label}
+              </Typography>
+              <Typography sx={{ fontSize: "0.85rem", color: "rgba(255,255,255,0.4)" }}>
+                Step {step + 1} of {steps.length} — Processing through 10-model pipeline
+              </Typography>
+            </motion.div>
+          </AnimatePresence>
+          <Stack
+            direction="row"
+            spacing={1}
+            sx={{ mt: 4, justifyContent: "center", alignItems: "center" }}
+          >
+            {steps.map((_, i) => (
+              <Box
+                key={i}
+                sx={{
+                  width: i === step ? 24 : 8,
+                  height: 4,
+                  borderRadius: 1,
+                  bgcolor: i <= step ? "#8b5cf6" : "rgba(255,255,255,0.1)",
+                  transition: "all 0.4s ease",
+                }}
+              />
+            ))}
+          </Stack>
+        </Box>
+      ) : (
+        <>
           <Box
-            key={i}
             sx={{
-              height: i === 0 ? 16 : 11,
-              borderRadius: 1,
-              mb: i === 0 ? 2.5 : 1.5,
-              width: `${w}%`,
+              height: 100,
               position: "relative",
               overflow: "hidden",
-              bgcolor: i === 0 ? "rgba(255,255,255,0.05)" : "rgba(255,255,255,0.025)",
+              background: "rgba(255,255,255,0.015)",
             }}
           >
-            <Box sx={{ ...shimmerSx, animationDelay: `${i * 0.12}s` }} />
+            <Box sx={shimmerSx} />
           </Box>
-        ))}
-      </Box>
+          <Box sx={{ p: 3.5 }}>
+            {[85, 100, 45, 95, 72, 100, 60, 88, 40].map((w, i) => (
+              <Box
+                key={i}
+                sx={{
+                  height: i === 0 ? 16 : 11,
+                  borderRadius: 1,
+                  mb: i === 0 ? 2.5 : 1.5,
+                  width: `${w}%`,
+                  position: "relative",
+                  overflow: "hidden",
+                  bgcolor: i === 0 ? "rgba(255,255,255,0.05)" : "rgba(255,255,255,0.025)",
+                }}
+              >
+                <Box sx={{ ...shimmerSx, animationDelay: `${i * 0.12}s` }} />
+              </Box>
+            ))}
+          </Box>
+        </>
+      )}
     </Box>
   );
 }
@@ -2409,18 +2512,48 @@ function AutomationResults({ response }) {
           transition={{ duration: 0.5 }}
         >
           <Box sx={{ mb: 4 }}>
-            <Typography
-              sx={{
-                fontSize: "0.65rem",
-                fontWeight: 800,
-                color: "rgba(255,255,255,0.3)",
-                textTransform: "uppercase",
-                mb: 2,
-                letterSpacing: "0.12em",
-              }}
+            <Stack
+              direction="row"
+              sx={{ justifyContent: "space-between", alignItems: "center", mb: 2 }}
             >
-              AI-Powered Optimal Schedule
-            </Typography>
+              <Typography
+                sx={{
+                  fontSize: "0.65rem",
+                  fontWeight: 800,
+                  color: "rgba(255,255,255,0.3)",
+                  textTransform: "uppercase",
+                  letterSpacing: "0.12em",
+                }}
+              >
+                AI-Powered Optimal Schedule
+              </Typography>
+              <Stack direction="row" spacing={1}>
+                <Chip
+                  icon={<IconCheck size={12} color="#10b981" />}
+                  label="Image (DALL-E 3)"
+                  size="small"
+                  sx={{
+                    height: 20,
+                    fontSize: "0.6rem",
+                    bgcolor: "rgba(16,185,129,0.06)",
+                    color: "#10b981",
+                    border: "1px solid rgba(16,185,129,0.1)",
+                  }}
+                />
+                <Chip
+                  icon={<IconCheck size={12} color="#10b981" />}
+                  label="Video (FAL.ai)"
+                  size="small"
+                  sx={{
+                    height: 20,
+                    fontSize: "0.6rem",
+                    bgcolor: "rgba(16,185,129,0.06)",
+                    color: "#10b981",
+                    border: "1px solid rgba(16,185,129,0.1)",
+                  }}
+                />
+              </Stack>
+            </Stack>
             <Grid container spacing={1.5}>
               {d.scheduleGrid.map((day, idx) => (
                 <Grid size={{ xs: 6, sm: 4, md: 1.7 }} key={idx}>
@@ -2496,7 +2629,7 @@ function AutomationResults({ response }) {
                   }}
                 >
                   <RichText content={platform.content} accentColor={accent} />
-                  {platform.imageUrl && (
+                  {platform.imageUrl && !platform.videoUrl && (
                     <Box
                       sx={{
                         mt: 2,
@@ -2509,6 +2642,28 @@ function AutomationResults({ response }) {
                         src={platform.imageUrl}
                         alt="Post preview"
                         style={{ width: "100%", height: "auto", display: "block" }}
+                      />
+                    </Box>
+                  )}
+                  {platform.videoUrl && (
+                    <Box
+                      sx={{
+                        mt: 2,
+                        borderRadius: 2,
+                        overflow: "hidden",
+                        border: "1px solid rgba(255,255,255,0.08)",
+                        bgcolor: "#000",
+                        aspectRatio: "16/9",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                      }}
+                    >
+                      <video
+                        src={platform.videoUrl}
+                        controls
+                        poster={platform.imageUrl}
+                        style={{ width: "100%", height: "100%", objectFit: "contain" }}
                       />
                     </Box>
                   )}
@@ -3999,6 +4154,32 @@ export default function ToolInlineForm({ toolSlug, onBack }) {
             />
           </Box>
         );
+      case "boolean":
+        return (
+          <Box key={field.name} sx={{ mt: 1 }}>
+            <FormControlLabel
+              control={
+                <Switch
+                  checked={formData[field.name] ?? field.default ?? false}
+                  onChange={(e) => handleFieldChange(field.name, e.target.checked)}
+                  sx={{
+                    "& .MuiSwitch-switchBase.Mui-checked": { color: "#8b5cf6" },
+                    "& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track": {
+                      backgroundColor: "#8b5cf6",
+                    },
+                  }}
+                />
+              }
+              label={
+                <Typography
+                  sx={{ fontSize: "0.82rem", fontWeight: 600, color: "rgba(255,255,255,0.7)" }}
+                >
+                  {field.label}
+                </Typography>
+              }
+            />
+          </Box>
+        );
       case "checkbox":
         return (
           <FormControlLabel
@@ -4448,7 +4629,7 @@ export default function ToolInlineForm({ toolSlug, onBack }) {
               </Box>
 
               {/* Loading skeleton */}
-              {loading && <ResultSkeleton />}
+              {loading && <ResultSkeleton toolSlug={tool.slug} />}
 
               {error && (
                 <Alert severity="error" onClose={() => setError(null)} sx={{ borderRadius: 3 }}>

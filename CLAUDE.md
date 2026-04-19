@@ -78,7 +78,7 @@ Web App → Appwrite (auth login + Stripe ONLY)
 
 ## AI Router (FastAPI — VPS 1 port 9000, PM2: ai-router)
 
-**PM2, 10 models, server-side only, not exposed to internet**
+**PM2, 10-model pipeline, server-side only, not exposed to internet**
 
 Windmill calls `POST http://localhost:9000/generate` with `{"task": "...", "prompt": "..."}`.
 Frozen task names — use these exactly in frontend, Windmill, API docs:
@@ -96,6 +96,7 @@ Frozen task names — use these exactly in frontend, Windmill, API docs:
 | automation      | Llama 3.3 70B      | Groq         | Bulk tagging, classification, cheap jobs  |
 | default         | Claude Sonnet 4    | Anthropic    | Everything else                           |
 
+- 10-model pipeline ensures optimal task allocation across providers
 - vision_analysis and ocr require `image_url` or `image_urls` field
 - Unknown tasks return 400 with valid task list
 - Provider errors return 502 with clean error message

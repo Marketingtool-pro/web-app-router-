@@ -54,13 +54,7 @@
         "name": "tone",
         "label": "Tone of Voice",
         "type": "select",
-        "options": [
-          "Professional",
-          "Casual",
-          "Friendly",
-          "Formal",
-          "Persuasive"
-        ],
+        "options": ["Professional", "Casual", "Friendly", "Formal", "Persuasive"],
         "required": false
       },
       {
@@ -909,13 +903,7 @@
         "name": "campaignType",
         "label": "Campaign Type",
         "type": "select",
-        "options": [
-          "Search",
-          "Shopping",
-          "Display",
-          "Performance Max",
-          "All Types"
-        ],
+        "options": ["Search", "Shopping", "Display", "Performance Max", "All Types"],
         "required": true
       },
       {
@@ -1350,13 +1338,7 @@
         "name": "tone",
         "label": "Tone of Voice",
         "type": "select",
-        "options": [
-          "Professional",
-          "Casual",
-          "Friendly",
-          "Formal",
-          "Persuasive"
-        ],
+        "options": ["Professional", "Casual", "Friendly", "Formal", "Persuasive"],
         "required": false
       },
       {
@@ -1423,13 +1405,7 @@
         "name": "tone",
         "label": "Tone of Voice",
         "type": "select",
-        "options": [
-          "Professional",
-          "Casual",
-          "Friendly",
-          "Formal",
-          "Persuasive"
-        ],
+        "options": ["Professional", "Casual", "Friendly", "Formal", "Persuasive"],
         "required": false
       },
       {
@@ -1496,13 +1472,7 @@
         "name": "tone",
         "label": "Tone of Voice",
         "type": "select",
-        "options": [
-          "Professional",
-          "Casual",
-          "Friendly",
-          "Formal",
-          "Persuasive"
-        ],
+        "options": ["Professional", "Casual", "Friendly", "Formal", "Persuasive"],
         "required": false
       },
       {
@@ -1648,12 +1618,7 @@
         "name": "scaleType",
         "label": "Scaling Direction",
         "type": "select",
-        "options": [
-          "Scale Up Winners",
-          "Scale Down Losers",
-          "Both",
-          "Redistribute Budget"
-        ],
+        "options": ["Scale Up Winners", "Scale Down Losers", "Both", "Redistribute Budget"],
         "required": true
       },
       {
@@ -1840,11 +1805,7 @@
         "name": "tone",
         "label": "Tone",
         "type": "select",
-        "options": [
-          "Professional",
-          "Friendly",
-          "Casual"
-        ],
+        "options": ["Professional", "Friendly", "Casual"],
         "required": false
       }
     ]
@@ -1978,12 +1939,7 @@
         "name": "goal",
         "label": "Bidding Goal",
         "type": "select",
-        "options": [
-          "Lower CPA",
-          "Higher Position",
-          "More Impressions",
-          "Better ROAS"
-        ],
+        "options": ["Lower CPA", "Higher Position", "More Impressions", "Better ROAS"],
         "required": true
       },
       {
@@ -2050,13 +2006,7 @@
         "name": "tone",
         "label": "Tone of Voice",
         "type": "select",
-        "options": [
-          "Professional",
-          "Casual",
-          "Friendly",
-          "Formal",
-          "Persuasive"
-        ],
+        "options": ["Professional", "Casual", "Friendly", "Formal", "Persuasive"],
         "required": false
       },
       {
@@ -2123,13 +2073,7 @@
         "name": "tone",
         "label": "Tone of Voice",
         "type": "select",
-        "options": [
-          "Professional",
-          "Casual",
-          "Friendly",
-          "Formal",
-          "Persuasive"
-        ],
+        "options": ["Professional", "Casual", "Friendly", "Formal", "Persuasive"],
         "required": false
       },
       {
@@ -2196,13 +2140,7 @@
         "name": "tone",
         "label": "Tone of Voice",
         "type": "select",
-        "options": [
-          "Professional",
-          "Casual",
-          "Friendly",
-          "Formal",
-          "Persuasive"
-        ],
+        "options": ["Professional", "Casual", "Friendly", "Formal", "Persuasive"],
         "required": false
       },
       {
@@ -2269,13 +2207,7 @@
         "name": "tone",
         "label": "Tone of Voice",
         "type": "select",
-        "options": [
-          "Professional",
-          "Casual",
-          "Friendly",
-          "Formal",
-          "Persuasive"
-        ],
+        "options": ["Professional", "Casual", "Friendly", "Formal", "Persuasive"],
         "required": false
       },
       {
@@ -2342,13 +2274,7 @@
         "name": "tone",
         "label": "Tone of Voice",
         "type": "select",
-        "options": [
-          "Professional",
-          "Casual",
-          "Friendly",
-          "Formal",
-          "Persuasive"
-        ],
+        "options": ["Professional", "Casual", "Friendly", "Formal", "Persuasive"],
         "required": false
       },
       {
@@ -2602,12 +2528,7 @@
         "name": "issue",
         "label": "Main Issue",
         "type": "select",
-        "options": [
-          "Overspending",
-          "Underspending",
-          "Uneven Distribution",
-          "No Budget Tracking"
-        ],
+        "options": ["Overspending", "Underspending", "Uneven Distribution", "No Budget Tracking"],
         "required": false
       }
     ]
@@ -2667,25 +2588,14 @@
         "name": "period",
         "label": "Analysis Period",
         "type": "select",
-        "options": [
-          "Last 7 Days",
-          "Last 30 Days",
-          "Last 90 Days",
-          "Year-to-Date"
-        ],
+        "options": ["Last 7 Days", "Last 30 Days", "Last 90 Days", "Year-to-Date"],
         "required": false
       },
       {
         "name": "metric",
         "label": "Key Metric",
         "type": "select",
-        "options": [
-          "CPA",
-          "ROAS",
-          "Conversion Rate",
-          "Cost Per Click",
-          "Budget Utilization"
-        ],
+        "options": ["CPA", "ROAS", "Conversion Rate", "Cost Per Click", "Budget Utilization"],
         "required": false
       }
     ]
@@ -2758,23 +2668,14 @@
         "name": "duration",
         "label": "Test Duration",
         "type": "select",
-        "options": [
-          "2 Weeks",
-          "4 Weeks",
-          "6 Weeks",
-          "8 Weeks"
-        ],
+        "options": ["2 Weeks", "4 Weeks", "6 Weeks", "8 Weeks"],
         "required": false
       },
       {
         "name": "trafficSplit",
         "label": "Traffic Split",
         "type": "select",
-        "options": [
-          "50/50",
-          "70/30",
-          "80/20"
-        ],
+        "options": ["50/50", "70/30", "80/20"],
         "required": false
       }
     ]
@@ -2834,14 +2735,7 @@
         "name": "campaignType",
         "label": "Campaign Type",
         "type": "select",
-        "options": [
-          "Search",
-          "Display",
-          "Shopping",
-          "Performance Max",
-          "Video",
-          "All Types"
-        ],
+        "options": ["Search", "Display", "Shopping", "Performance Max", "Video", "All Types"],
         "required": false
       },
       {
@@ -2927,11 +2821,7 @@
         "name": "frequency",
         "label": "Optimization Frequency",
         "type": "select",
-        "options": [
-          "Daily",
-          "Weekly",
-          "Bi-Weekly"
-        ],
+        "options": ["Daily", "Weekly", "Bi-Weekly"],
         "required": false
       }
     ]
@@ -3152,12 +3042,7 @@
         "name": "adType",
         "label": "Ad Type",
         "type": "select",
-        "options": [
-          "Search Ads",
-          "Display Ads",
-          "Shopping Ads",
-          "Video Ads"
-        ],
+        "options": ["Search Ads", "Display Ads", "Shopping Ads", "Video Ads"],
         "required": false
       }
     ]
@@ -3230,11 +3115,7 @@
         "name": "frequency",
         "label": "Check Frequency",
         "type": "select",
-        "options": [
-          "Hourly",
-          "Every 6 Hours",
-          "Daily"
-        ],
+        "options": ["Hourly", "Every 6 Hours", "Daily"],
         "required": false
       }
     ]
@@ -3307,11 +3188,7 @@
         "name": "timeframe",
         "label": "Implementation Window",
         "type": "select",
-        "options": [
-          "This Week",
-          "This Month",
-          "This Quarter"
-        ],
+        "options": ["This Week", "This Month", "This Quarter"],
         "required": false
       }
     ]
@@ -3394,12 +3271,7 @@
         "name": "goal",
         "label": "Primary Goal",
         "type": "select",
-        "options": [
-          "Conversions",
-          "Revenue",
-          "Leads",
-          "Brand Awareness"
-        ],
+        "options": ["Conversions", "Revenue", "Leads", "Brand Awareness"],
         "required": false
       }
     ]
@@ -3626,12 +3498,7 @@
         "name": "scale",
         "label": "Account Size",
         "type": "select",
-        "options": [
-          "Small (1-5 campaigns)",
-          "Medium (5-20)",
-          "Large (20-50)",
-          "Enterprise (50+)"
-        ],
+        "options": ["Small (1-5 campaigns)", "Medium (5-20)", "Large (20-50)", "Enterprise (50+)"],
         "required": false
       }
     ]
@@ -3837,13 +3704,7 @@
         "name": "tone",
         "label": "Tone of Voice",
         "type": "select",
-        "options": [
-          "Professional",
-          "Casual",
-          "Friendly",
-          "Formal",
-          "Persuasive"
-        ],
+        "options": ["Professional", "Casual", "Friendly", "Formal", "Persuasive"],
         "required": false
       },
       {
@@ -4415,13 +4276,7 @@
         "name": "tone",
         "label": "Tone of Voice",
         "type": "select",
-        "options": [
-          "Professional",
-          "Casual",
-          "Friendly",
-          "Formal",
-          "Persuasive"
-        ],
+        "options": ["Professional", "Casual", "Friendly", "Formal", "Persuasive"],
         "required": false
       },
       {
@@ -4498,12 +4353,7 @@
         "name": "dateRange",
         "label": "Analysis Period",
         "type": "select",
-        "options": [
-          "Last 7 days",
-          "Last 14 days",
-          "Last 30 days",
-          "Last 60 days"
-        ]
+        "options": ["Last 7 days", "Last 14 days", "Last 30 days", "Last 60 days"]
       }
     ]
   },
@@ -4573,13 +4423,7 @@
         "name": "format",
         "label": "Creative Format",
         "type": "select",
-        "options": [
-          "All Formats",
-          "Static Images",
-          "Videos",
-          "Carousels",
-          "Stories/Reels"
-        ]
+        "options": ["All Formats", "Static Images", "Videos", "Carousels", "Stories/Reels"]
       }
     ]
   },
@@ -4650,11 +4494,7 @@
         "name": "testingSpeed",
         "label": "Testing Speed",
         "type": "select",
-        "options": [
-          "Conservative (7+ days)",
-          "Standard (3-5 days)",
-          "Aggressive (1-2 days)"
-        ]
+        "options": ["Conservative (7+ days)", "Standard (3-5 days)", "Aggressive (1-2 days)"]
       }
     ]
   },
@@ -4726,13 +4566,7 @@
         "name": "metric",
         "label": "Primary Metric",
         "type": "select",
-        "options": [
-          "ROAS",
-          "CPA",
-          "CTR",
-          "Engagement Rate",
-          "Conversion Rate"
-        ]
+        "options": ["ROAS", "CPA", "CTR", "Engagement Rate", "Conversion Rate"]
       }
     ]
   },
@@ -4934,13 +4768,7 @@
         "name": "tone",
         "label": "Tone of Voice",
         "type": "select",
-        "options": [
-          "Professional",
-          "Casual",
-          "Friendly",
-          "Formal",
-          "Persuasive"
-        ],
+        "options": ["Professional", "Casual", "Friendly", "Formal", "Persuasive"],
         "required": false
       },
       {
@@ -5007,12 +4835,7 @@
         "name": "position",
         "label": "Expected Position",
         "type": "select",
-        "options": [
-          "Absolute Top (1)",
-          "Top (2-3)",
-          "Bottom of Page (4-7)",
-          "Unknown"
-        ],
+        "options": ["Absolute Top (1)", "Top (2-3)", "Bottom of Page (4-7)", "Unknown"],
         "required": false
       },
       {
@@ -5638,23 +5461,13 @@
         "name": "viewLevel",
         "label": "View Level",
         "type": "select",
-        "options": [
-          "Campaign",
-          "Ad Set",
-          "Ad",
-          "All Levels"
-        ]
+        "options": ["Campaign", "Ad Set", "Ad", "All Levels"]
       },
       {
         "name": "dateRange",
         "label": "Date Range",
         "type": "select",
-        "options": [
-          "Today",
-          "Last 7 days",
-          "Last 30 days",
-          "Last 90 days"
-        ]
+        "options": ["Today", "Last 7 days", "Last 30 days", "Last 90 days"]
       }
     ]
   },
@@ -5713,12 +5526,7 @@
         "name": "campaignCount",
         "label": "Number of Campaigns",
         "type": "select",
-        "options": [
-          "2-3",
-          "4-6",
-          "7-10",
-          "10+"
-        ]
+        "options": ["2-3", "4-6", "7-10", "10+"]
       },
       {
         "name": "totalBudget",
@@ -5836,22 +5644,13 @@
         "name": "focus",
         "label": "Primary Focus",
         "type": "select",
-        "options": [
-          "Paid Advertising",
-          "Content Scheduling",
-          "Analytics & Reporting",
-          "Full Suite"
-        ]
+        "options": ["Paid Advertising", "Content Scheduling", "Analytics & Reporting", "Full Suite"]
       },
       {
         "name": "platforms",
         "label": "Platforms",
         "type": "select",
-        "options": [
-          "Facebook Only",
-          "Facebook + Instagram",
-          "Facebook + Instagram + Messenger"
-        ]
+        "options": ["Facebook Only", "Facebook + Instagram", "Facebook + Instagram + Messenger"]
       }
     ]
   },
@@ -5921,11 +5720,7 @@
         "name": "refreshRate",
         "label": "Data Refresh Rate",
         "type": "select",
-        "options": [
-          "Real-time",
-          "Hourly",
-          "Daily"
-        ]
+        "options": ["Real-time", "Hourly", "Daily"]
       }
     ]
   },
@@ -5984,13 +5779,7 @@
         "name": "tone",
         "label": "Tone of Voice",
         "type": "select",
-        "options": [
-          "Professional",
-          "Casual",
-          "Friendly",
-          "Formal",
-          "Persuasive"
-        ],
+        "options": ["Professional", "Casual", "Friendly", "Formal", "Persuasive"],
         "required": false
       },
       {
@@ -6117,27 +5906,14 @@
         "name": "country",
         "label": "Target Country",
         "type": "select",
-        "options": [
-          "US",
-          "UK",
-          "India",
-          "Australia",
-          "Canada",
-          "Global"
-        ],
+        "options": ["US", "UK", "India", "Australia", "Canada", "Global"],
         "required": false
       },
       {
         "name": "language",
         "label": "Language",
         "type": "select",
-        "options": [
-          "English",
-          "Spanish",
-          "French",
-          "German",
-          "Hindi"
-        ],
+        "options": ["English", "Spanish", "French", "German", "Hindi"],
         "required": false
       }
     ]
@@ -6197,13 +5973,7 @@
         "name": "scope",
         "label": "Geographic Scope",
         "type": "select",
-        "options": [
-          "City-Level",
-          "State/Region",
-          "Country-Level",
-          "Radius Targeting",
-          "Global"
-        ],
+        "options": ["City-Level", "State/Region", "Country-Level", "Radius Targeting", "Global"],
         "required": true
       },
       {
@@ -6433,12 +6203,7 @@
         "name": "version",
         "label": "Analytics Version",
         "type": "select",
-        "options": [
-          "GA4",
-          "Universal Analytics",
-          "Both",
-          "Not Sure"
-        ],
+        "options": ["GA4", "Universal Analytics", "Both", "Not Sure"],
         "required": true
       },
       {
@@ -6511,24 +6276,13 @@
         "name": "platform",
         "label": "Platform",
         "type": "select",
-        "options": [
-          "Instagram",
-          "TikTok",
-          "Twitter/X",
-          "LinkedIn",
-          "Universal"
-        ]
+        "options": ["Instagram", "TikTok", "Twitter/X", "LinkedIn", "Universal"]
       },
       {
         "name": "count",
         "label": "Hashtag Count",
         "type": "select",
-        "options": [
-          "10 hashtags",
-          "15 hashtags",
-          "20 hashtags",
-          "30 hashtags (Instagram max)"
-        ]
+        "options": ["10 hashtags", "15 hashtags", "20 hashtags", "30 hashtags (Instagram max)"]
       }
     ]
   },
@@ -6599,11 +6353,7 @@
         "name": "outputFormat",
         "label": "Output Format",
         "type": "select",
-        "options": [
-          "PNG (Best Quality)",
-          "JPEG (Smaller Size)",
-          "WebP (Modern Browsers)"
-        ]
+        "options": ["PNG (Best Quality)", "JPEG (Smaller Size)", "WebP (Modern Browsers)"]
       }
     ]
   },
@@ -6674,12 +6424,7 @@
         "name": "frequency",
         "label": "Posting Frequency",
         "type": "select",
-        "options": [
-          "Daily",
-          "3x per week",
-          "5x per week",
-          "Multiple per day"
-        ]
+        "options": ["Daily", "3x per week", "5x per week", "Multiple per day"]
       }
     ]
   },
@@ -6751,25 +6496,13 @@
         "name": "postType",
         "label": "Post Type",
         "type": "select",
-        "options": [
-          "Feed Post",
-          "Reel",
-          "Carousel",
-          "Story",
-          "IGTV"
-        ]
+        "options": ["Feed Post", "Reel", "Carousel", "Story", "IGTV"]
       },
       {
         "name": "hashtagCount",
         "label": "Hashtag Count",
         "type": "select",
-        "options": [
-          "5 hashtags",
-          "10 hashtags",
-          "15 hashtags",
-          "20 hashtags",
-          "30 hashtags (max)"
-        ]
+        "options": ["5 hashtags", "10 hashtags", "15 hashtags", "20 hashtags", "30 hashtags (max)"]
       }
     ]
   },
@@ -6828,13 +6561,7 @@
         "name": "postsPerWeek",
         "label": "Posts Per Week",
         "type": "select",
-        "options": [
-          "3 posts",
-          "5 posts",
-          "7 posts (daily)",
-          "10+ posts",
-          "14 posts (2x daily)"
-        ]
+        "options": ["3 posts", "5 posts", "7 posts (daily)", "10+ posts", "14 posts (2x daily)"]
       },
       {
         "name": "contentMix",
@@ -6916,12 +6643,7 @@
         "name": "dateRange",
         "label": "Date Range",
         "type": "select",
-        "options": [
-          "Last 7 days",
-          "Last 14 days",
-          "Last 30 days",
-          "Last 90 days"
-        ]
+        "options": ["Last 7 days", "Last 14 days", "Last 30 days", "Last 90 days"]
       }
     ]
   },
@@ -7063,12 +6785,7 @@
         "name": "accountCount",
         "label": "Number of Accounts",
         "type": "select",
-        "options": [
-          "1 account",
-          "2-5 accounts",
-          "6-10 accounts",
-          "10+ accounts"
-        ]
+        "options": ["1 account", "2-5 accounts", "6-10 accounts", "10+ accounts"]
       }
     ]
   },
@@ -7282,22 +6999,13 @@
         "name": "catalogSize",
         "label": "Catalog Size",
         "type": "select",
-        "options": [
-          "1-10 products",
-          "10-50 products",
-          "50-200 products",
-          "200+ products"
-        ]
+        "options": ["1-10 products", "10-50 products", "50-200 products", "200+ products"]
       },
       {
         "name": "adFormat",
         "label": "Shopping Ad Format",
         "type": "select",
-        "options": [
-          "Feed Shopping Ads",
-          "Explore Shopping Ads",
-          "All Formats"
-        ]
+        "options": ["Feed Shopping Ads", "Explore Shopping Ads", "All Formats"]
       }
     ]
   },
@@ -7493,12 +7201,7 @@
         "name": "maxSuggestions",
         "label": "Max Suggestions",
         "type": "select",
-        "options": [
-          "5",
-          "10",
-          "20",
-          "50"
-        ],
+        "options": ["5", "10", "20", "50"],
         "required": false
       }
     ]
@@ -7638,12 +7341,7 @@
         "name": "period",
         "label": "Data Period",
         "type": "select",
-        "options": [
-          "Last 30 Days",
-          "Last 90 Days",
-          "Last 6 Months",
-          "Last Year"
-        ],
+        "options": ["Last 30 Days", "Last 90 Days", "Last 6 Months", "Last Year"],
         "required": false
       }
     ]
@@ -7703,11 +7401,7 @@
         "name": "clusterMethod",
         "label": "Clustering Method",
         "type": "select",
-        "options": [
-          "Semantic",
-          "Intent-Based",
-          "Topic-Based"
-        ],
+        "options": ["Semantic", "Intent-Based", "Topic-Based"],
         "required": false
       }
     ]
@@ -7767,11 +7461,7 @@
         "name": "outputFormat",
         "label": "Output Format",
         "type": "select",
-        "options": [
-          "Table",
-          "JSON",
-          "CSV"
-        ],
+        "options": ["Table", "JSON", "CSV"],
         "required": false
       }
     ]
@@ -7831,26 +7521,14 @@
         "name": "country",
         "label": "Target Country",
         "type": "select",
-        "options": [
-          "US",
-          "UK",
-          "India",
-          "Australia",
-          "Canada",
-          "Global"
-        ],
+        "options": ["US", "UK", "India", "Australia", "Canada", "Global"],
         "required": false
       },
       {
         "name": "difficulty",
         "label": "Max Difficulty",
         "type": "select",
-        "options": [
-          "Easy (0-30)",
-          "Medium (30-60)",
-          "Hard (60-100)",
-          "Any"
-        ],
+        "options": ["Easy (0-30)", "Medium (30-60)", "Hard (60-100)", "Any"],
         "required": false
       }
     ]
@@ -7917,13 +7595,7 @@
         "name": "goal",
         "label": "Conversion Goal",
         "type": "select",
-        "options": [
-          "Form Submission",
-          "Purchase",
-          "Phone Call",
-          "App Download",
-          "Sign Up"
-        ],
+        "options": ["Form Submission", "Purchase", "Phone Call", "App Download", "Sign Up"],
         "required": false
       }
     ]
@@ -8089,24 +7761,14 @@
         "name": "count",
         "label": "Number of Keywords",
         "type": "select",
-        "options": [
-          "10",
-          "25",
-          "50",
-          "100"
-        ],
+        "options": ["10", "25", "50", "100"],
         "required": false
       },
       {
         "name": "intent",
         "label": "Search Intent",
         "type": "select",
-        "options": [
-          "Informational",
-          "Transactional",
-          "Commercial",
-          "All"
-        ],
+        "options": ["Informational", "Transactional", "Commercial", "All"],
         "required": false
       }
     ]
@@ -8405,12 +8067,7 @@
         "name": "planningPeriod",
         "label": "Planning Period",
         "type": "select",
-        "options": [
-          "1 week",
-          "2 weeks",
-          "1 month",
-          "3 months"
-        ]
+        "options": ["1 week", "2 weeks", "1 month", "3 months"]
       },
       {
         "name": "channels",
@@ -8809,12 +8466,7 @@
         "name": "tone",
         "label": "Response Tone",
         "type": "select",
-        "options": [
-          "Professional",
-          "Friendly & Casual",
-          "Formal",
-          "Match Brand Voice"
-        ]
+        "options": ["Professional", "Friendly & Casual", "Formal", "Match Brand Voice"]
       }
     ]
   },
@@ -8962,12 +8614,7 @@
         "name": "size",
         "label": "Target Audience Size",
         "type": "select",
-        "options": [
-          "Narrow (100K-500K)",
-          "Medium (500K-2M)",
-          "Broad (2M-10M)",
-          "Very Broad (10M+)"
-        ]
+        "options": ["Narrow (100K-500K)", "Medium (500K-2M)", "Broad (2M-10M)", "Very Broad (10M+)"]
       }
     ]
   },
@@ -9032,12 +8679,7 @@
         "name": "optimizationGoal",
         "label": "Optimization Goal",
         "type": "select",
-        "options": [
-          "Maximum ROAS",
-          "Lowest CPA",
-          "Maximum Conversions",
-          "Balanced (ROAS + Volume)"
-        ]
+        "options": ["Maximum ROAS", "Lowest CPA", "Maximum Conversions", "Balanced (ROAS + Volume)"]
       }
     ]
   },
@@ -9107,14 +8749,7 @@
         "name": "industry",
         "label": "Your Industry",
         "type": "select",
-        "options": [
-          "E-commerce",
-          "SaaS",
-          "Lead Gen",
-          "App Install",
-          "Local Business",
-          "Agency"
-        ]
+        "options": ["E-commerce", "SaaS", "Lead Gen", "App Install", "Local Business", "Agency"]
       }
     ]
   },
@@ -9184,12 +8819,7 @@
         "name": "autoReply",
         "label": "Auto-Reply",
         "type": "select",
-        "options": [
-          "Disabled",
-          "Questions Only",
-          "All Positive Comments",
-          "All Comments"
-        ]
+        "options": ["Disabled", "Questions Only", "All Positive Comments", "All Comments"]
       }
     ]
   },
@@ -9323,11 +8953,7 @@
         "name": "creativeFormat",
         "label": "Creative Format",
         "type": "select",
-        "options": [
-          "Single Image (Feed)",
-          "Carousel",
-          "Collection"
-        ]
+        "options": ["Single Image (Feed)", "Carousel", "Collection"]
       },
       {
         "name": "style",
@@ -10388,13 +10014,7 @@
         "name": "campaignType",
         "label": "Campaign Type",
         "type": "select",
-        "options": [
-          "Display Network",
-          "YouTube",
-          "Discovery",
-          "Performance Max",
-          "All"
-        ],
+        "options": ["Display Network", "YouTube", "Discovery", "Performance Max", "All"],
         "required": true
       },
       {
@@ -10540,13 +10160,7 @@
         "name": "tone",
         "label": "Tone of Voice",
         "type": "select",
-        "options": [
-          "Professional",
-          "Casual",
-          "Friendly",
-          "Formal",
-          "Persuasive"
-        ],
+        "options": ["Professional", "Casual", "Friendly", "Formal", "Persuasive"],
         "required": false
       },
       {
@@ -10613,14 +10227,7 @@
         "name": "platforms",
         "label": "Platforms",
         "type": "select",
-        "options": [
-          "Instagram",
-          "Facebook",
-          "TikTok",
-          "LinkedIn",
-          "Twitter/X",
-          "All Platforms"
-        ]
+        "options": ["Instagram", "Facebook", "TikTok", "LinkedIn", "Twitter/X", "All Platforms"]
       },
       {
         "name": "timing",
@@ -10634,6 +10241,12 @@
           "Evening (7-9pm)",
           "Custom Time"
         ]
+      },
+      {
+        "name": "enableVideo",
+        "label": "AI Video Production (Image-to-Video)",
+        "type": "boolean",
+        "default": true
       }
     ]
   },
@@ -10692,13 +10305,7 @@
         "name": "tone",
         "label": "Tone of Voice",
         "type": "select",
-        "options": [
-          "Professional",
-          "Casual",
-          "Friendly",
-          "Formal",
-          "Persuasive"
-        ],
+        "options": ["Professional", "Casual", "Friendly", "Formal", "Persuasive"],
         "required": false
       },
       {
@@ -10765,13 +10372,7 @@
         "name": "tone",
         "label": "Tone of Voice",
         "type": "select",
-        "options": [
-          "Professional",
-          "Casual",
-          "Friendly",
-          "Formal",
-          "Persuasive"
-        ],
+        "options": ["Professional", "Casual", "Friendly", "Formal", "Persuasive"],
         "required": false
       },
       {
@@ -11256,13 +10857,7 @@
         "name": "targetMetric",
         "label": "Target Metric",
         "type": "select",
-        "options": [
-          "ROAS",
-          "CPA",
-          "CTR",
-          "CPM",
-          "Conversion Rate"
-        ]
+        "options": ["ROAS", "CPA", "CTR", "CPM", "Conversion Rate"]
       }
     ]
   },
@@ -11533,25 +11128,14 @@
         "name": "ruleType",
         "label": "Rule Category",
         "type": "select",
-        "options": [
-          "Bid Rules",
-          "Budget Rules",
-          "Pause/Enable Rules",
-          "Alert Rules",
-          "Combined"
-        ],
+        "options": ["Bid Rules", "Budget Rules", "Pause/Enable Rules", "Alert Rules", "Combined"],
         "required": true
       },
       {
         "name": "frequency",
         "label": "Rule Frequency",
         "type": "select",
-        "options": [
-          "Hourly",
-          "Daily",
-          "Weekly",
-          "Monthly"
-        ],
+        "options": ["Hourly", "Daily", "Weekly", "Monthly"],
         "required": false
       }
     ]
@@ -11753,11 +11337,7 @@
         "name": "period",
         "label": "Data Period",
         "type": "select",
-        "options": [
-          "Last 30 Days",
-          "Last 90 Days",
-          "Last 6 Months"
-        ],
+        "options": ["Last 30 Days", "Last 90 Days", "Last 6 Months"],
         "required": false
       }
     ]
@@ -12169,24 +11749,14 @@
         "name": "count",
         "label": "Number of Titles",
         "type": "select",
-        "options": [
-          "5",
-          "10",
-          "20"
-        ],
+        "options": ["5", "10", "20"],
         "required": false
       },
       {
         "name": "style",
         "label": "Style",
         "type": "select",
-        "options": [
-          "Clickbait",
-          "Professional",
-          "Question-Based",
-          "How-To",
-          "Listicle"
-        ],
+        "options": ["Clickbait", "Professional", "Question-Based", "How-To", "Listicle"],
         "required": false
       }
     ]
@@ -12246,25 +11816,14 @@
         "name": "country",
         "label": "Country",
         "type": "select",
-        "options": [
-          "US",
-          "UK",
-          "India",
-          "Australia",
-          "Canada",
-          "Global"
-        ],
+        "options": ["US", "UK", "India", "Australia", "Canada", "Global"],
         "required": false
       },
       {
         "name": "depth",
         "label": "Analysis Depth",
         "type": "select",
-        "options": [
-          "Top 5",
-          "Top 10",
-          "Top 20"
-        ],
+        "options": ["Top 5", "Top 10", "Top 20"],
         "required": false
       }
     ]
@@ -12588,12 +12147,7 @@
         "name": "reportType",
         "label": "Report Type",
         "type": "select",
-        "options": [
-          "Weekly Summary",
-          "Monthly Deep Dive",
-          "Quarterly Review",
-          "Custom Date Range"
-        ]
+        "options": ["Weekly Summary", "Monthly Deep Dive", "Quarterly Review", "Custom Date Range"]
       }
     ]
   },
@@ -12664,13 +12218,7 @@
         "name": "platform",
         "label": "Platform",
         "type": "select",
-        "options": [
-          "Instagram",
-          "TikTok",
-          "Twitter/X",
-          "YouTube",
-          "All Platforms"
-        ]
+        "options": ["Instagram", "TikTok", "Twitter/X", "YouTube", "All Platforms"]
       }
     ]
   },
@@ -12743,12 +12291,7 @@
         "name": "postCount",
         "label": "Number of Posts",
         "type": "select",
-        "options": [
-          "1 post",
-          "3 posts",
-          "5 posts",
-          "10 posts"
-        ]
+        "options": ["1 post", "3 posts", "5 posts", "10 posts"]
       }
     ]
   },
@@ -13201,13 +12744,7 @@
         "name": "tone",
         "label": "Tone of Voice",
         "type": "select",
-        "options": [
-          "Professional",
-          "Casual",
-          "Friendly",
-          "Formal",
-          "Persuasive"
-        ],
+        "options": ["Professional", "Casual", "Friendly", "Formal", "Persuasive"],
         "required": false
       },
       {
@@ -13348,13 +12885,7 @@
         "name": "tone",
         "label": "Tone of Voice",
         "type": "select",
-        "options": [
-          "Professional",
-          "Casual",
-          "Friendly",
-          "Formal",
-          "Persuasive"
-        ],
+        "options": ["Professional", "Casual", "Friendly", "Formal", "Persuasive"],
         "required": false
       },
       {
@@ -13481,12 +13012,7 @@
         "name": "duration",
         "label": "Video Duration",
         "type": "select",
-        "options": [
-          "Short (<1 min)",
-          "Medium (1-5 min)",
-          "Long (5-15 min)",
-          "Extended (15+ min)"
-        ],
+        "options": ["Short (<1 min)", "Medium (1-5 min)", "Long (5-15 min)", "Extended (15+ min)"],
         "required": false
       }
     ]
@@ -13553,12 +13079,7 @@
         "name": "duration",
         "label": "Video Duration",
         "type": "select",
-        "options": [
-          "Short (<1 min)",
-          "Medium (1-5 min)",
-          "Long (5-15 min)",
-          "Extended (15+ min)"
-        ],
+        "options": ["Short (<1 min)", "Medium (1-5 min)", "Long (5-15 min)", "Extended (15+ min)"],
         "required": false
       }
     ]
@@ -13625,12 +13146,7 @@
         "name": "duration",
         "label": "Video Duration",
         "type": "select",
-        "options": [
-          "Short (<1 min)",
-          "Medium (1-5 min)",
-          "Long (5-15 min)",
-          "Extended (15+ min)"
-        ],
+        "options": ["Short (<1 min)", "Medium (1-5 min)", "Long (5-15 min)", "Extended (15+ min)"],
         "required": false
       }
     ]
@@ -13690,24 +13206,14 @@
         "name": "goal",
         "label": "Test Goal",
         "type": "select",
-        "options": [
-          "Higher CTR",
-          "More Conversions",
-          "Lower CPA",
-          "Better Quality Score"
-        ],
+        "options": ["Higher CTR", "More Conversions", "Lower CPA", "Better Quality Score"],
         "required": true
       },
       {
         "name": "variants",
         "label": "Number of Variants",
         "type": "select",
-        "options": [
-          "2",
-          "3",
-          "4",
-          "5"
-        ],
+        "options": ["2", "3", "4", "5"],
         "required": false
       },
       {
@@ -13874,12 +13380,7 @@
         "name": "frequency",
         "label": "Check Frequency",
         "type": "select",
-        "options": [
-          "Every Hour",
-          "Every 6 Hours",
-          "Daily",
-          "Weekly"
-        ],
+        "options": ["Every Hour", "Every 6 Hours", "Daily", "Weekly"],
         "required": false
       },
       {
@@ -14118,11 +13619,7 @@
         "name": "platform",
         "label": "Platform",
         "type": "select",
-        "options": [
-          "Google Ads",
-          "Microsoft Ads",
-          "Both"
-        ],
+        "options": ["Google Ads", "Microsoft Ads", "Both"],
         "required": false
       },
       {
@@ -14196,13 +13693,7 @@
         "name": "budget",
         "label": "Tool Budget",
         "type": "select",
-        "options": [
-          "Free Only",
-          "Under $50/mo",
-          "$50-$200/mo",
-          "$200-$500/mo",
-          "$500+/mo"
-        ],
+        "options": ["Free Only", "Under $50/mo", "$50-$200/mo", "$200-$500/mo", "$500+/mo"],
         "required": false
       }
     ]
@@ -14276,12 +13767,7 @@
         "name": "scale",
         "label": "Scale",
         "type": "select",
-        "options": [
-          "Under 100 items",
-          "100-500 items",
-          "500-2000 items",
-          "2000+ items"
-        ],
+        "options": ["Under 100 items", "100-500 items", "500-2000 items", "2000+ items"],
         "required": false
       }
     ]
@@ -14525,12 +14011,7 @@
         "name": "frequency",
         "label": "Check Frequency",
         "type": "select",
-        "options": [
-          "Hourly",
-          "Every 6 Hours",
-          "Daily",
-          "Weekly"
-        ],
+        "options": ["Hourly", "Every 6 Hours", "Daily", "Weekly"],
         "required": false
       }
     ]
@@ -14590,12 +14071,7 @@
         "name": "objective",
         "label": "Campaign Objective",
         "type": "select",
-        "options": [
-          "Online Sales",
-          "Lead Generation",
-          "Store Visits",
-          "Brand Awareness"
-        ],
+        "options": ["Online Sales", "Lead Generation", "Store Visits", "Brand Awareness"],
         "required": true
       },
       {
@@ -14682,14 +14158,7 @@
         "name": "tone",
         "label": "Brand Tone",
         "type": "select",
-        "options": [
-          "Professional",
-          "Casual",
-          "Urgent",
-          "Friendly",
-          "Technical",
-          "Luxury"
-        ],
+        "options": ["Professional", "Casual", "Urgent", "Friendly", "Technical", "Luxury"],
         "required": false
       },
       {
@@ -14776,12 +14245,7 @@
         "name": "accountAge",
         "label": "Account Age",
         "type": "select",
-        "options": [
-          "Less than 3 months",
-          "3-12 months",
-          "1-3 years",
-          "3+ years"
-        ],
+        "options": ["Less than 3 months", "3-12 months", "1-3 years", "3+ years"],
         "required": false
       }
     ]
@@ -14841,25 +14305,14 @@
         "name": "entity",
         "label": "Apply To",
         "type": "select",
-        "options": [
-          "Keywords",
-          "Ads",
-          "Ad Groups",
-          "Campaigns",
-          "All Levels"
-        ],
+        "options": ["Keywords", "Ads", "Ad Groups", "Campaigns", "All Levels"],
         "required": true
       },
       {
         "name": "action",
         "label": "When Triggered",
         "type": "select",
-        "options": [
-          "Send Alert",
-          "Auto-Pause",
-          "Adjust Bid",
-          "Flag for Review"
-        ],
+        "options": ["Send Alert", "Auto-Pause", "Adjust Bid", "Flag for Review"],
         "required": false
       }
     ]
@@ -15007,13 +14460,7 @@
         "name": "conversionLag",
         "label": "Average Conversion Lag",
         "type": "select",
-        "options": [
-          "Same Day",
-          "1-3 Days",
-          "3-7 Days",
-          "7-14 Days",
-          "14+ Days"
-        ],
+        "options": ["Same Day", "1-3 Days", "3-7 Days", "7-14 Days", "14+ Days"],
         "required": false
       }
     ]
@@ -15073,13 +14520,7 @@
         "name": "campaignType",
         "label": "Campaign Type",
         "type": "select",
-        "options": [
-          "Search",
-          "Shopping",
-          "Display",
-          "Performance Max",
-          "Video"
-        ],
+        "options": ["Search", "Shopping", "Display", "Performance Max", "Video"],
         "required": true
       },
       {
@@ -15100,12 +14541,7 @@
         "name": "matchType",
         "label": "Keyword Match Type",
         "type": "select",
-        "options": [
-          "Broad Match",
-          "Phrase Match",
-          "Exact Match",
-          "Mix of All"
-        ],
+        "options": ["Broad Match", "Phrase Match", "Exact Match", "Mix of All"],
         "required": false
       }
     ]
@@ -15325,11 +14761,7 @@
         "name": "timeframe",
         "label": "Timeframe",
         "type": "select",
-        "options": [
-          "This Week",
-          "This Month",
-          "Next 90 Days"
-        ],
+        "options": ["This Week", "This Month", "Next 90 Days"],
         "required": false
       },
       {
@@ -15403,12 +14835,7 @@
         "name": "reportFrequency",
         "label": "Report Frequency",
         "type": "select",
-        "options": [
-          "Daily Summary",
-          "Weekly Report",
-          "Monthly Report",
-          "Real-time Alerts"
-        ],
+        "options": ["Daily Summary", "Weekly Report", "Monthly Report", "Real-time Alerts"],
         "required": false
       }
     ]
@@ -15475,12 +14902,7 @@
         "name": "priority",
         "label": "Priority Component",
         "type": "select",
-        "options": [
-          "Expected CTR",
-          "Ad Relevance",
-          "Landing Page Experience",
-          "All Components"
-        ],
+        "options": ["Expected CTR", "Ad Relevance", "Landing Page Experience", "All Components"],
         "required": false
       }
     ]
@@ -15540,37 +14962,21 @@
         "name": "period",
         "label": "Reporting Period",
         "type": "select",
-        "options": [
-          "Last 7 Days",
-          "Last 30 Days",
-          "Last Quarter",
-          "Year-to-Date",
-          "Custom Range"
-        ],
+        "options": ["Last 7 Days", "Last 30 Days", "Last Quarter", "Year-to-Date", "Custom Range"],
         "required": true
       },
       {
         "name": "audience",
         "label": "Report Audience",
         "type": "select",
-        "options": [
-          "Client/Executive",
-          "Marketing Team",
-          "Internal Review",
-          "Investor/Board"
-        ],
+        "options": ["Client/Executive", "Marketing Team", "Internal Review", "Investor/Board"],
         "required": false
       },
       {
         "name": "format",
         "label": "Output Format",
         "type": "select",
-        "options": [
-          "PDF Report",
-          "Dashboard",
-          "Spreadsheet",
-          "Slide Deck"
-        ],
+        "options": ["PDF Report", "Dashboard", "Spreadsheet", "Slide Deck"],
         "required": false
       }
     ]
@@ -15630,12 +15036,7 @@
         "name": "frequency",
         "label": "Report Frequency",
         "type": "select",
-        "options": [
-          "Daily",
-          "Weekly",
-          "Bi-Weekly",
-          "Monthly"
-        ],
+        "options": ["Daily", "Weekly", "Bi-Weekly", "Monthly"],
         "required": true
       },
       {
@@ -15788,11 +15189,7 @@
         "name": "confidence",
         "label": "Confidence Level",
         "type": "select",
-        "options": [
-          "90%",
-          "95%",
-          "99%"
-        ],
+        "options": ["90%", "95%", "99%"],
         "required": false
       },
       {
@@ -15859,12 +15256,7 @@
         "name": "goal",
         "label": "Position Goal",
         "type": "select",
-        "options": [
-          "Top of Page",
-          "Absolute Top",
-          "Cost-Efficient Position",
-          "Maximum Visibility"
-        ],
+        "options": ["Top of Page", "Absolute Top", "Cost-Efficient Position", "Maximum Visibility"],
         "required": false
       },
       {
@@ -16012,11 +15404,7 @@
         "name": "matchType",
         "label": "Match Type",
         "type": "select",
-        "options": [
-          "Broad Match",
-          "Phrase Match",
-          "Exact Match"
-        ],
+        "options": ["Broad Match", "Phrase Match", "Exact Match"],
         "required": false
       },
       {
@@ -16230,12 +15618,7 @@
         "name": "timeframe",
         "label": "Time Range",
         "type": "select",
-        "options": [
-          "Past 12 Months",
-          "Past 5 Years",
-          "Past 30 Days",
-          "Real-Time (7 Days)"
-        ],
+        "options": ["Past 12 Months", "Past 5 Years", "Past 30 Days", "Real-Time (7 Days)"],
         "required": false
       }
     ]
@@ -16434,12 +15817,7 @@
         "name": "level",
         "label": "Apply To",
         "type": "select",
-        "options": [
-          "Account Level",
-          "Campaign Level",
-          "Ad Group Level",
-          "Shared List"
-        ],
+        "options": ["Account Level", "Campaign Level", "Ad Group Level", "Shared List"],
         "required": false
       }
     ]
@@ -16535,9 +15913,7 @@
     "badgeColor": "info",
     "description": "Analyze your ad copy performance across campaigns to discover which headlines, CTAs, and messaging angles drive the highest conversions and lowest CPA on Facebook and Instagram.",
     "heroVideo": "",
-    "tabs": [
-      "overview"
-    ],
+    "tabs": ["overview"],
     "tips": [
       {
         "title": "Test messaging angles",
@@ -16564,24 +15940,13 @@
         "name": "dateRange",
         "label": "Date Range",
         "type": "select",
-        "options": [
-          "Last 7 days",
-          "Last 14 days",
-          "Last 30 days",
-          "Last 90 days"
-        ]
+        "options": ["Last 7 days", "Last 14 days", "Last 30 days", "Last 90 days"]
       },
       {
         "name": "metric",
         "label": "Primary Metric",
         "type": "select",
-        "options": [
-          "CTR",
-          "CPA",
-          "ROAS",
-          "Conversion Rate",
-          "Engagement Rate"
-        ]
+        "options": ["CTR", "CPA", "ROAS", "Conversion Rate", "Engagement Rate"]
       }
     ]
   },
@@ -16592,9 +15957,7 @@
     "badgeColor": "info",
     "description": "Calculate estimated Facebook and Instagram ad costs based on your target audience, placement, objective, and industry benchmarks. Plan budgets with confidence before launching campaigns.",
     "heroVideo": "",
-    "tabs": [
-      "overview"
-    ],
+    "tabs": ["overview"],
     "tips": [
       {
         "title": "Set realistic budgets",
@@ -16660,9 +16023,7 @@
     "badgeColor": "info",
     "description": "Launch hundreds of winning Facebook and Instagram ads instantly by combining top-performing creatives with high-converting ad copy. Convert organic posts into paid ads with one click.",
     "heroVideo": "",
-    "tabs": [
-      "overview"
-    ],
+    "tabs": ["overview"],
     "tips": [
       {
         "title": "Combine winners",
@@ -16689,34 +16050,19 @@
         "name": "adFormat",
         "label": "Ad Format",
         "type": "select",
-        "options": [
-          "Single Image",
-          "Carousel",
-          "Collection"
-        ]
+        "options": ["Single Image", "Carousel", "Collection"]
       },
       {
         "name": "objective",
         "label": "Campaign Objective",
         "type": "select",
-        "options": [
-          "Conversions",
-          "Traffic",
-          "Engagement",
-          "Lead Generation",
-          "Sales"
-        ]
+        "options": ["Conversions", "Traffic", "Engagement", "Lead Generation", "Sales"]
       },
       {
         "name": "variations",
         "label": "Number of Variations",
         "type": "select",
-        "options": [
-          "5",
-          "10",
-          "20",
-          "50"
-        ]
+        "options": ["5", "10", "20", "50"]
       }
     ]
   },
@@ -16727,9 +16073,7 @@
     "badgeColor": "info",
     "description": "Track every change made to your Facebook ad sets and see exactly how each modification impacts performance. Monitor team actions, automation triggers, and KPI shifts with color-coded analytics.",
     "heroVideo": "",
-    "tabs": [
-      "overview"
-    ],
+    "tabs": ["overview"],
     "tips": [
       {
         "title": "Monitor team changes",
@@ -16756,22 +16100,13 @@
         "name": "accountType",
         "label": "Account Type",
         "type": "select",
-        "options": [
-          "E-commerce",
-          "Lead Generation",
-          "App Installs"
-        ]
+        "options": ["E-commerce", "Lead Generation", "App Installs"]
       },
       {
         "name": "timeframe",
         "label": "Analysis Timeframe",
         "type": "select",
-        "options": [
-          "Last 7 days",
-          "Last 14 days",
-          "Last 30 days",
-          "Last 60 days"
-        ]
+        "options": ["Last 7 days", "Last 14 days", "Last 30 days", "Last 60 days"]
       }
     ]
   },
@@ -16782,9 +16117,7 @@
     "badgeColor": "info",
     "description": "Next-generation Facebook ads management with unified performance dashboards, bulk asset editing, AI-powered bidding optimization, and real-time ROAS trend tracking in one centralized platform.",
     "heroVideo": "",
-    "tabs": [
-      "overview"
-    ],
+    "tabs": ["overview"],
     "tips": [
       {
         "title": "Bulk edit assets",
@@ -16811,24 +16144,13 @@
         "name": "viewType",
         "label": "Dashboard View",
         "type": "select",
-        "options": [
-          "Campaign Level",
-          "Ad Set Level",
-          "Ad Level",
-          "All Assets"
-        ]
+        "options": ["Campaign Level", "Ad Set Level", "Ad Level", "All Assets"]
       },
       {
         "name": "primaryMetric",
         "label": "Primary KPI",
         "type": "select",
-        "options": [
-          "ROAS",
-          "CPA",
-          "CTR",
-          "CPM",
-          "Conversion Rate"
-        ]
+        "options": ["ROAS", "CPA", "CTR", "CPM", "Conversion Rate"]
       }
     ]
   },
@@ -16839,9 +16161,7 @@
     "badgeColor": "info",
     "description": "Generate high-converting Facebook and Instagram ad copy with AI trained on Meta advertising data. Create compelling headlines, descriptions, and CTAs across multiple formats including Stories, Reels, and Feed ads.",
     "heroVideo": "",
-    "tabs": [
-      "overview"
-    ],
+    "tabs": ["overview"],
     "tips": [
       {
         "title": "Spy on competitors",
@@ -16868,34 +16188,19 @@
         "name": "tone",
         "label": "Tone of Voice",
         "type": "select",
-        "options": [
-          "Professional",
-          "Casual",
-          "Urgent",
-          "Playful",
-          "Inspirational",
-          "Direct"
-        ]
+        "options": ["Professional", "Casual", "Urgent", "Playful", "Inspirational", "Direct"]
       },
       {
         "name": "adFormat",
         "label": "Ad Format",
         "type": "select",
-        "options": [
-          "Feed Ad",
-          "Carousel",
-          "Collection"
-        ]
+        "options": ["Feed Ad", "Carousel", "Collection"]
       },
       {
         "name": "outputCount",
         "label": "Number of Variations",
         "type": "select",
-        "options": [
-          "3",
-          "5",
-          "10"
-        ]
+        "options": ["3", "5", "10"]
       }
     ]
   },
@@ -16906,9 +16211,7 @@
     "badgeColor": "info",
     "description": "Your personal AI advertising consultant that audits Meta ad accounts 24/7, delivers data-driven optimization recommendations, and prepares campaigns for one-click launch \u2014 eliminating costly manual mistakes.",
     "heroVideo": "",
-    "tabs": [
-      "overview"
-    ],
+    "tabs": ["overview"],
     "tips": [
       {
         "title": "Let AI audit daily",
@@ -16935,13 +16238,7 @@
         "name": "goal",
         "label": "Primary Goal",
         "type": "select",
-        "options": [
-          "Increase ROAS",
-          "Lower CPA",
-          "Scale Spend",
-          "Improve CTR",
-          "Reduce Waste"
-        ]
+        "options": ["Increase ROAS", "Lower CPA", "Scale Spend", "Improve CTR", "Reduce Waste"]
       },
       {
         "name": "monthlyBudget",
@@ -16958,9 +16255,7 @@
     "badgeColor": "info",
     "description": "Access 100+ ready-to-deploy Facebook audiences covering your entire sales funnel. Launch AI-powered preset audiences, Super Lookalikes, and data-driven demographics in just a few clicks.",
     "heroVideo": "",
-    "tabs": [
-      "overview"
-    ],
+    "tabs": ["overview"],
     "tips": [
       {
         "title": "Use AI Audiences",
@@ -16998,11 +16293,7 @@
         "name": "audienceSize",
         "label": "Audience Size Preference",
         "type": "select",
-        "options": [
-          "Narrow (High Intent)",
-          "Medium (Balanced)",
-          "Broad (Maximum Reach)"
-        ]
+        "options": ["Narrow (High Intent)", "Medium (Balanced)", "Broad (Maximum Reach)"]
       }
     ]
   },
@@ -17013,9 +16304,7 @@
     "badgeColor": "info",
     "description": "Targeting intelligence platform that analyzes your Facebook ad account performance to rank interests by profitability, predict top targeting options, and build precision audiences with drag-and-drop tools.",
     "heroVideo": "",
-    "tabs": [
-      "overview"
-    ],
+    "tabs": ["overview"],
     "tips": [
       {
         "title": "Discover hidden interests",
@@ -17053,12 +16342,7 @@
         "name": "lookbackPeriod",
         "label": "Data Lookback Period",
         "type": "select",
-        "options": [
-          "Last 30 days",
-          "Last 60 days",
-          "Last 90 days",
-          "Last 180 days"
-        ]
+        "options": ["Last 30 days", "Last 60 days", "Last 90 days", "Last 180 days"]
       }
     ]
   },
@@ -17069,9 +16353,7 @@
     "badgeColor": "info",
     "description": "Generate and distribute white-labeled ad performance reports automatically on daily, weekly, or monthly schedules. Custom metrics, branded PDFs with your logo, and team-wide distribution built in.",
     "heroVideo": "",
-    "tabs": [
-      "overview"
-    ],
+    "tabs": ["overview"],
     "tips": [
       {
         "title": "Schedule smartly",
@@ -17098,12 +16380,7 @@
         "name": "frequency",
         "label": "Report Frequency",
         "type": "select",
-        "options": [
-          "Daily",
-          "Weekly",
-          "Bi-Weekly",
-          "Monthly"
-        ]
+        "options": ["Daily", "Weekly", "Bi-Weekly", "Monthly"]
       },
       {
         "name": "metrics",
@@ -17125,9 +16402,7 @@
     "badgeColor": "info",
     "description": "Deploy 4 proven automation tactics used by top-tier media buyers for Facebook ads. Real-time triggers (not 15-30 minute delays) automatically scale winners, kill losers, and maximize ROAS.",
     "heroVideo": "",
-    "tabs": [
-      "overview"
-    ],
+    "tabs": ["overview"],
     "tips": [
       {
         "title": "Start with proven tactics",
@@ -17166,11 +16441,7 @@
         "name": "riskLevel",
         "label": "Risk Tolerance",
         "type": "select",
-        "options": [
-          "Conservative",
-          "Moderate",
-          "Aggressive"
-        ]
+        "options": ["Conservative", "Moderate", "Aggressive"]
       }
     ]
   },
@@ -17181,9 +16452,7 @@
     "badgeColor": "info",
     "description": "AI-powered budget optimization that automatically redistributes Facebook ad spend to top-performing campaigns, ad sets, and creatives in real-time \u2014 maximizing ROAS without manual intervention.",
     "heroVideo": "",
-    "tabs": [
-      "overview"
-    ],
+    "tabs": ["overview"],
     "tips": [
       {
         "title": "Set guardrails",
@@ -17216,12 +16485,7 @@
         "name": "optimizeFor",
         "label": "Optimize For",
         "type": "select",
-        "options": [
-          "Maximum ROAS",
-          "Lowest CPA",
-          "Maximum Conversions",
-          "Maximum Revenue"
-        ]
+        "options": ["Maximum ROAS", "Lowest CPA", "Maximum Conversions", "Maximum Revenue"]
       }
     ]
   },
@@ -17232,9 +16496,7 @@
     "badgeColor": "info",
     "description": "Set up and optimize Meta Conversions API (CAPI) for server-side event tracking. Restore attribution accuracy lost after iOS 14.5+ privacy changes and see 20-30% more conversion data in Ads Manager.",
     "heroVideo": "",
-    "tabs": [
-      "overview"
-    ],
+    "tabs": ["overview"],
     "tips": [
       {
         "title": "Pair with Pixel",
@@ -17261,14 +16523,7 @@
         "name": "platform",
         "label": "Website Platform",
         "type": "select",
-        "options": [
-          "Shopify",
-          "WooCommerce",
-          "WordPress",
-          "Custom/Other",
-          "Magento",
-          "BigCommerce"
-        ]
+        "options": ["Shopify", "WooCommerce", "WordPress", "Custom/Other", "Magento", "BigCommerce"]
       },
       {
         "name": "events",
@@ -17290,9 +16545,7 @@
     "badgeColor": "info",
     "description": "AI-powered creative analytics that unifies billions of data points to identify which Facebook and Instagram ad creatives generate the highest revenue, detect ad fatigue, and recommend creative direction.",
     "heroVideo": "",
-    "tabs": [
-      "overview"
-    ],
+    "tabs": ["overview"],
     "tips": [
       {
         "title": "Watch for fatigue",
@@ -17319,24 +16572,13 @@
         "name": "analysisScope",
         "label": "Analysis Scope",
         "type": "select",
-        "options": [
-          "All Creatives",
-          "Top Performers Only",
-          "Underperformers",
-          "Fatigued Creatives"
-        ]
+        "options": ["All Creatives", "Top Performers Only", "Underperformers", "Fatigued Creatives"]
       },
       {
         "name": "format",
         "label": "Creative Format",
         "type": "select",
-        "options": [
-          "All Formats",
-          "Images Only",
-          "Videos Only",
-          "Carousels Only",
-          "Stories/Reels"
-        ]
+        "options": ["All Formats", "Images Only", "Videos Only", "Carousels Only", "Stories/Reels"]
       }
     ]
   },
@@ -17347,9 +16589,7 @@
     "badgeColor": "info",
     "description": "Build high-converting Facebook Custom Audiences from website visitors, customer lists, app users, and engagement data. Create layered audience segments for precise retargeting across Meta platforms.",
     "heroVideo": "",
-    "tabs": [
-      "overview"
-    ],
+    "tabs": ["overview"],
     "tips": [
       {
         "title": "Layer audiences",
@@ -17407,9 +16647,7 @@
     "badgeColor": "info",
     "description": "Build personalized Facebook ad automation workflows from 300+ metrics. Create sophisticated rules that automatically scale winners, pause losers, and optimize budgets \u2014 like a trained media buyer working 24/7.",
     "heroVideo": "",
-    "tabs": [
-      "overview"
-    ],
+    "tabs": ["overview"],
     "tips": [
       {
         "title": "Start simple",
@@ -17466,9 +16704,7 @@
     "badgeColor": "info",
     "description": "Comprehensive Facebook ad automation and optimization software that combines AI bidding, audience management, creative rotation, and budget allocation into one unified platform for hands-free campaign management.",
     "heroVideo": "",
-    "tabs": [
-      "overview"
-    ],
+    "tabs": ["overview"],
     "tips": [
       {
         "title": "Enable all modules",
@@ -17505,13 +16741,7 @@
         "name": "primaryKPI",
         "label": "Primary KPI",
         "type": "select",
-        "options": [
-          "ROAS",
-          "CPA",
-          "Revenue",
-          "Conversions",
-          "Profit"
-        ]
+        "options": ["ROAS", "CPA", "Revenue", "Conversions", "Profit"]
       }
     ]
   },
@@ -17522,9 +16752,7 @@
     "badgeColor": "info",
     "description": "Cross-channel reporting dashboard that unifies Meta Ads, Google Ads, GA4, Shopify, Klaviyo, and TikTok data into real-time, always-updated dashboards \u2014 replacing manual spreadsheets and fragmented reports.",
     "heroVideo": "",
-    "tabs": [
-      "overview"
-    ],
+    "tabs": ["overview"],
     "tips": [
       {
         "title": "Connect all channels",
@@ -17578,9 +16806,7 @@
     "badgeColor": "info",
     "description": "AI-powered audience discovery that explores 100+ targeting opportunities, launches preset audiences built on eRFM modeling, and uses predictive analytics to identify your next best Facebook audience.",
     "heroVideo": "",
-    "tabs": [
-      "overview"
-    ],
+    "tabs": ["overview"],
     "tips": [
       {
         "title": "Try predictive audiences",
@@ -17635,9 +16861,7 @@
     "badgeColor": "info",
     "description": "Uncover performance blind spots and hidden audience segments in your Meta ad account that standard Ads Manager can't reveal. Discover untapped demographics, placements, and optimization opportunities.",
     "heroVideo": "",
-    "tabs": [
-      "overview"
-    ],
+    "tabs": ["overview"],
     "tips": [
       {
         "title": "Check unknown segments",
@@ -17676,12 +16900,7 @@
         "name": "dateRange",
         "label": "Date Range",
         "type": "select",
-        "options": [
-          "Last 7 days",
-          "Last 14 days",
-          "Last 30 days",
-          "Last 90 days"
-        ]
+        "options": ["Last 7 days", "Last 14 days", "Last 30 days", "Last 90 days"]
       }
     ]
   },
@@ -17692,9 +16911,7 @@
     "badgeColor": "info",
     "description": "Server-side tracking solution that restores accurate conversion data lost after iOS 14.5+ privacy updates. See approximately 20% more conversions in Meta Ads Manager with real-time event transmission and zero-maintenance cloud infrastructure.",
     "heroVideo": "",
-    "tabs": [
-      "overview"
-    ],
+    "tabs": ["overview"],
     "tips": [
       {
         "title": "No coding required",
@@ -17721,13 +16938,7 @@
         "name": "platform",
         "label": "E-commerce Platform",
         "type": "select",
-        "options": [
-          "Shopify",
-          "WooCommerce",
-          "Magento",
-          "BigCommerce",
-          "Custom/Other"
-        ]
+        "options": ["Shopify", "WooCommerce", "Magento", "BigCommerce", "Custom/Other"]
       },
       {
         "name": "pixelId",
@@ -17744,9 +16955,7 @@
     "badgeColor": "info",
     "description": "Advanced filtering system for Facebook campaigns that lets you slice performance data by any combination of metrics, funnel stages, ad types, and custom parameters to instantly find what's working and what's not.",
     "heroVideo": "",
-    "tabs": [
-      "overview"
-    ],
+    "tabs": ["overview"],
     "tips": [
       {
         "title": "Save filter presets",
@@ -17785,12 +16994,7 @@
         "name": "threshold",
         "label": "Performance Threshold",
         "type": "select",
-        "options": [
-          "Top 10% Performers",
-          "Above Average",
-          "Below Average",
-          "Bottom 10% (Losers)"
-        ]
+        "options": ["Top 10% Performers", "Above Average", "Below Average", "Bottom 10% (Losers)"]
       }
     ]
   },
@@ -17801,9 +17005,7 @@
     "badgeColor": "info",
     "description": "White-label Facebook ad management for agencies \u2014 rebrand campaigns, ad sets, and ads under your agency name. Generate branded PDF reports with your logo on automated schedules for professional client delivery.",
     "heroVideo": "",
-    "tabs": [
-      "overview"
-    ],
+    "tabs": ["overview"],
     "tips": [
       {
         "title": "Brand everything",
@@ -17836,12 +17038,7 @@
         "name": "reportSchedule",
         "label": "Report Schedule",
         "type": "select",
-        "options": [
-          "Weekly (Monday)",
-          "Bi-Weekly",
-          "Monthly (1st)",
-          "Custom Schedule"
-        ]
+        "options": ["Weekly (Monday)", "Bi-Weekly", "Monthly (1st)", "Custom Schedule"]
       }
     ]
   },
@@ -17852,9 +17049,7 @@
     "badgeColor": "secondary",
     "description": "Optimize your Instagram bio for maximum profile visits, follows, and link clicks. AI analyzes top-performing bios in your niche to craft a compelling 150-character bio with strategic keywords, emojis, and CTA.",
     "heroVideo": "",
-    "tabs": [
-      "overview"
-    ],
+    "tabs": ["overview"],
     "tips": [
       {
         "title": "Front-load keywords",
@@ -17881,23 +17076,13 @@
         "name": "style",
         "label": "Bio Style",
         "type": "select",
-        "options": [
-          "Professional",
-          "Creative & Fun",
-          "Minimalist",
-          "Bold & Direct",
-          "Storytelling"
-        ]
+        "options": ["Professional", "Creative & Fun", "Minimalist", "Bold & Direct", "Storytelling"]
       },
       {
         "name": "includeEmoji",
         "label": "Include Emojis?",
         "type": "select",
-        "options": [
-          "Yes - Relevant emojis",
-          "Minimal - 1-2 emojis",
-          "No emojis"
-        ]
+        "options": ["Yes - Relevant emojis", "Minimal - 1-2 emojis", "No emojis"]
       }
     ]
   },
@@ -17908,9 +17093,7 @@
     "badgeColor": "secondary",
     "description": "Build a complete Instagram hashtag strategy with researched sets organized by size, niche relevance, and content type. Get 5 rotating hashtag groups to maximize reach without risking shadowban.",
     "heroVideo": "",
-    "tabs": [
-      "overview"
-    ],
+    "tabs": ["overview"],
     "tips": [
       {
         "title": "Use 20-25 hashtags",
@@ -17937,22 +17120,13 @@
         "name": "groupCount",
         "label": "Hashtag Groups",
         "type": "select",
-        "options": [
-          "3 rotating groups",
-          "5 rotating groups",
-          "7 rotating groups"
-        ]
+        "options": ["3 rotating groups", "5 rotating groups", "7 rotating groups"]
       },
       {
         "name": "hashtagsPerGroup",
         "label": "Hashtags Per Group",
         "type": "select",
-        "options": [
-          "15",
-          "20",
-          "25",
-          "30"
-        ]
+        "options": ["15", "20", "25", "30"]
       }
     ]
   },
@@ -17963,9 +17137,7 @@
     "badgeColor": "secondary",
     "description": "Analyze your Instagram competitors' strategies \u2014 their posting frequency, content types, engagement patterns, top-performing posts, hashtag usage, and growth rate to find opportunities they're missing.",
     "heroVideo": "",
-    "tabs": [
-      "overview"
-    ],
+    "tabs": ["overview"],
     "tips": [
       {
         "title": "Track 3-5 competitors",
@@ -17992,22 +17164,13 @@
         "name": "analysisDepth",
         "label": "Analysis Depth",
         "type": "select",
-        "options": [
-          "Quick Overview",
-          "Standard Analysis",
-          "Deep Dive (All Metrics)"
-        ]
+        "options": ["Quick Overview", "Standard Analysis", "Deep Dive (All Metrics)"]
       },
       {
         "name": "timeframe",
         "label": "Timeframe",
         "type": "select",
-        "options": [
-          "Last 30 days",
-          "Last 60 days",
-          "Last 90 days",
-          "Last 6 months"
-        ]
+        "options": ["Last 30 days", "Last 60 days", "Last 90 days", "Last 6 months"]
       }
     ]
   },
@@ -18018,9 +17181,7 @@
     "badgeColor": "secondary",
     "description": "Generate high-converting Instagram ad creatives with AI \u2014 Feed ads, Story ads, Reel ads, and Carousel ads designed specifically for Instagram's visual-first audience with scroll-stopping hooks and clear CTAs.",
     "heroVideo": "",
-    "tabs": [
-      "overview"
-    ],
+    "tabs": ["overview"],
     "tips": [
       {
         "title": "Design for mobile",
@@ -18047,11 +17208,7 @@
         "name": "adFormat",
         "label": "Ad Format",
         "type": "select",
-        "options": [
-          "Feed Image Ad",
-          "Carousel Ad",
-          "Collection Ad"
-        ]
+        "options": ["Feed Image Ad", "Carousel Ad", "Collection Ad"]
       },
       {
         "name": "style",
@@ -18075,9 +17232,7 @@
     "badgeColor": "secondary",
     "description": "Get a personalized Instagram growth strategy based on your niche, current metrics, and goals. AI analyzes your account and generates a 30/60/90 day action plan for followers, engagement, and monetization.",
     "heroVideo": "",
-    "tabs": [
-      "overview"
-    ],
+    "tabs": ["overview"],
     "tips": [
       {
         "title": "Consistency beats virality",
@@ -18104,14 +17259,7 @@
         "name": "currentFollowers",
         "label": "Current Followers",
         "type": "select",
-        "options": [
-          "0-1K",
-          "1K-5K",
-          "5K-10K",
-          "10K-50K",
-          "50K-100K",
-          "100K+"
-        ]
+        "options": ["0-1K", "1K-5K", "5K-10K", "10K-50K", "50K-100K", "100K+"]
       },
       {
         "name": "goal",
@@ -18134,9 +17282,7 @@
     "badgeColor": "secondary",
     "description": "Design high-performing Instagram carousel posts that drive saves and shares. AI generates slide-by-slide content outlines with hook, value, and CTA structure optimized for the carousel format's unique engagement pattern.",
     "heroVideo": "",
-    "tabs": [
-      "overview"
-    ],
+    "tabs": ["overview"],
     "tips": [
       {
         "title": "Strong first slide",
@@ -18163,11 +17309,7 @@
         "name": "slideCount",
         "label": "Number of Slides",
         "type": "select",
-        "options": [
-          "5 slides",
-          "7 slides",
-          "10 slides"
-        ]
+        "options": ["5 slides", "7 slides", "10 slides"]
       },
       {
         "name": "style",
