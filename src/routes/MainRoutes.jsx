@@ -22,7 +22,7 @@ const MetaAuditPage = Loadable(lazy(() => import("@/views/admin/meta-audit")));
 const AdLibraryPage = Loadable(lazy(() => import("@/views/admin/ad-library")));
 const AnalyticsStandalonePage = Loadable(lazy(() => import("@/views/admin/analytics")));
 const ReportsPage = Loadable(lazy(() => import("@/views/admin/reports")));
-const ChartPage = Loadable(lazy(() => import("@/views/components/chart")));
+const ChartPage = Loadable(lazy(() => import("@/views/admin/chart")));
 
 // Tools
 const ToolsCataloguePage = Loadable(lazy(() => import("@/views/admin/tools")));
