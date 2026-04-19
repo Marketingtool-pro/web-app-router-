@@ -25,8 +25,10 @@ import { AUTH_USER_KEY } from "@/config";
 import { AvatarSize } from "@/enum";
 
 // @assets
-import { IconBrandFacebook, IconBrandInstagram, IconCheck } from "@tabler/icons-react";
+import { IconCheck } from "@tabler/icons-react";
 import googleImg from "@/assets/images/social/google.svg";
+import facebookImg from "@/assets/images/social/facebook.svg";
+import instagramImg from "@/assets/images/social/instagram.svg";
 
 // OAuth config
 const FB_APP_ID = "1582682256320433";
@@ -272,11 +274,14 @@ export default function SettingServiceCard() {
         <ListItem sx={{ p: { xs: 2, sm: 3 }, flexWrap: "wrap", gap: 1 }}>
           <ListItemAvatar sx={{ mr: 1, minWidth: 48 }}>
             <Avatar
-              sx={{ bgcolor: "rgba(24,119,242,0.08)" }}
+              sx={(theme) => ({
+                bgcolor: "rgba(24,119,242,0.04)",
+                ...theme.applyStyles("dark", { bgcolor: "rgba(24,119,242,0.08)" }),
+              })}
               variant="rounded"
               size={AvatarSize.MD}
             >
-              <IconBrandFacebook size={24} color="#1877F2" />
+              <CardMedia component="img" src={facebookImg} alt="Facebook" sx={{ width: "auto" }} />
             </Avatar>
           </ListItemAvatar>
           <ListItemText
@@ -331,8 +336,20 @@ export default function SettingServiceCard() {
         {/* Instagram */}
         <ListItem sx={{ p: { xs: 2, sm: 3 }, flexWrap: "wrap", gap: 1 }}>
           <ListItemAvatar sx={{ mr: 1, minWidth: 48 }}>
-            <Avatar sx={{ bgcolor: "rgba(228,64,95,0.08)" }} variant="rounded" size={AvatarSize.MD}>
-              <IconBrandInstagram size={24} color="#E4405F" />
+            <Avatar
+              sx={(theme) => ({
+                bgcolor: "rgba(228,64,95,0.04)",
+                ...theme.applyStyles("dark", { bgcolor: "rgba(228,64,95,0.08)" }),
+              })}
+              variant="rounded"
+              size={AvatarSize.MD}
+            >
+              <CardMedia
+                component="img"
+                src={instagramImg}
+                alt="Instagram"
+                sx={{ width: "auto" }}
+              />
             </Avatar>
           </ListItemAvatar>
           <ListItemText
