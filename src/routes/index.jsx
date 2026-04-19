@@ -16,6 +16,7 @@ import NotFoundCatch from "@/components/NotFoundCatch";
 // Standalone pages (no AdminLayout)
 const FbAdsCallbackPage = Loadable(lazy(() => import("@/views/admin/fb-connect-callback")));
 const GoogleAdsCallbackPage = Loadable(lazy(() => import("@/views/admin/google-ads-callback")));
+const IgAdsCallbackPage = Loadable(lazy(() => import("@/views/admin/ig-connect-callback")));
 const LegalPage = Loadable(lazy(() => import("@/views/legal")));
 
 /***************************  ROUTING RENDER  ***************************/
@@ -28,6 +29,17 @@ const OnboardingRoutes = [
       <AuthProvider>
         <AuthGuard>
           <FbAdsCallbackPage />
+        </AuthGuard>
+      </AuthProvider>
+    ),
+  },
+  {
+    path: "/oauth/instagram-ads",
+    errorElement: <ErrorBoundary />,
+    element: (
+      <AuthProvider>
+        <AuthGuard>
+          <IgAdsCallbackPage />
         </AuthGuard>
       </AuthProvider>
     ),
