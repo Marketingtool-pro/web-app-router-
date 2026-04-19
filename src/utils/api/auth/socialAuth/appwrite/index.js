@@ -1,6 +1,6 @@
-import { OAuthProvider } from 'appwrite';
-import { appwriteAccount } from '@/utils/auth-client/appwrite';
-import { AUTH_USER_KEY } from '@/config';
+import { OAuthProvider } from "appwrite";
+import { appwriteAccount } from "@/utils/auth-client/appwrite";
+import { AUTH_USER_KEY } from "@/config";
 
 const SUCCESS_URL = `${window.location.origin}/social-auth-callback`;
 const FAILURE_URL = `${window.location.origin}/login`;
@@ -20,6 +20,13 @@ export async function loginWithFacebook() {
   return null;
 }
 
+/***************************  APPWRITE - INSTAGRAM LOGIN  ***************************/
+
+export async function loginWithInstagram() {
+  appwriteAccount.createOAuth2Session(OAuthProvider.Instagram, SUCCESS_URL, FAILURE_URL);
+  return null;
+}
+
 /***************************  APPWRITE - GET USER (after OAuth callback)  ***************************/
 
 export async function getUser() {
@@ -29,20 +36,23 @@ export async function getUser() {
   // Update localStorage with fresh JWT
   const stored = localStorage.getItem(AUTH_USER_KEY);
   const existing = stored ? JSON.parse(stored) : {};
-  localStorage.setItem(AUTH_USER_KEY, JSON.stringify({
-    ...existing,
-    id: user.$id,
-    email: user.email,
-    access_token: jwtResponse.jwt
-  }));
+  localStorage.setItem(
+    AUTH_USER_KEY,
+    JSON.stringify({
+      ...existing,
+      id: user.$id,
+      email: user.email,
+      access_token: jwtResponse.jwt,
+    }),
+  );
 
   return {
     id: user.$id,
     email: user.email,
     access_token: jwtResponse.jwt,
-    firstname: user.name?.split(' ')[0] || '',
-    lastname: user.name?.split(' ').slice(1).join(' ') || '',
-    role: user.labels?.includes('admin') ? 'admin' : 'user'
+    firstname: user.name?.split(" ")[0] || "",
+    lastname: user.name?.split(" ").slice(1).join(" ") || "",
+    role: user.labels?.includes("admin") ? "admin" : "user",
   };
 }
 
@@ -50,7 +60,7 @@ export async function getUser() {
 
 export async function signOut() {
   try {
-    await appwriteAccount.deleteSession('current');
+    await appwriteAccount.deleteSession("current");
   } catch {
     // Session may already be expired
   }
@@ -58,5 +68,11 @@ export async function signOut() {
   return { status: 200 };
 }
 
-const appwriteSocialAuth = { loginWithGoogle, loginWithFacebook, getUser, signOut };
+const appwriteSocialAuth = {
+  loginWithGoogle,
+  loginWithFacebook,
+  loginWithInstagram,
+  getUser,
+  signOut,
+};
 export default appwriteSocialAuth;

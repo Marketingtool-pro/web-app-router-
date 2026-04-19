@@ -1,15 +1,5 @@
 <svg width="100" height="100" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <rect width="100" height="100" rx="20" fill="url(#paint0_linear)"/>
-  <path d="M50 28C37.85 28 28 37.85 28 50C28 62.15 37.85 72 50 72C62.15 72 72 62.15 72 50C72 37.85 62.15 28 50 28ZM50 64C42.27 64 36 57.73 36 50C36 42.27 42.27 36 50 36C57.73 36 64 42.27 64 50C64 57.73 57.73 64 50 64Z" fill="white"/>
-  <path d="M50 40C44.48 40 40 44.48 40 50C40 55.52 44.48 60 50 60C55.52 60 60 55.52 60 50C60 44.48 55.52 40 50 40Z" fill="white"/>
-  <circle cx="66" cy="34" r="4" fill="white"/>
-  <defs>
-    <linearGradient id="paint0_linear" x1="14.6447" y1="85.3553" x2="85.3553" y2="14.6447" gradientUnits="userSpaceOnUse">
-      <stop stop-color="#FFD600"/>
-      <stop offset="0.25" stop-color="#FF7A00"/>
-      <stop offset="0.5" stop-color="#FF0069"/>
-      <stop offset="0.75" stop-color="#D300C5"/>
-      <stop offset="1" stop-color="#7638FA"/>
-    </linearGradient>
-  </defs>
+  <path d="M50 28C37.85 28 28 37.85 28 50C28 62.15 37.85 72 50 72C62.15 72 72 62.15 72 50C72 37.85 62.15 28 50 28ZM50 64C42.27 64 36 57.73 36 50C36 42.27 42.27 36 50 36C57.73 36 64 42.27 64 50C64 57.73 57.73 64 50 64Z" fill="#E4405F"/>
+  <path d="M50 40C44.48 40 40 44.48 40 50C40 55.52 44.48 60 50 60C55.52 60 60 55.52 60 50C60 44.48 55.52 40 50 40Z" fill="#E4405F"/>
+  <circle cx="66" cy="34" r="4" fill="#E4405F"/>
 </svg>

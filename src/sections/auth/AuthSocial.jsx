@@ -11,7 +11,7 @@ import Typography from "@mui/material/Typography";
 // @project
 import { APP_DEFAULT_PATH, AUTH_USER_KEY, SOCIAL_AUTH_PROVIDER } from "@/config";
 import { SocialTypes } from "@/enum";
-import { loginWithFacebook, loginWithGoogle } from "@/utils/api/auth";
+import { loginWithFacebook, loginWithGoogle, loginWithInstagram } from "@/utils/api/auth";
 import { authConfigManager } from "@/utils/authConfigManager";
 import GetImagePath from "@/utils/GetImagePath";
 import { useRouter } from "@/utils/navigation";
@@ -54,39 +54,19 @@ export default function AuthSocial({ type = SocialTypes.VERTICAL, buttonSx }) {
             return;
           }
           case "Instagram": {
-            // Instagram login - clean popup flow matching your requirements
-            const FB_APP_ID = "1582682256320433";
-            const IG_SCOPES =
-              "instagram_basic,instagram_manage_insights,instagram_content_publish,instagram_manage_comments,pages_read_engagement,pages_show_list,business_management";
-            const redirectUri = `${window.location.origin}/oauth/instagram-ads`;
-            const state = crypto.randomUUID();
-            sessionStorage.setItem("fb_ads_state", state);
+            // Instagram login - clean Appwrite flow matching your requirements
+            authConfigManager.setState({ socialProvider: "instagram" });
 
-            const url = `https://www.facebook.com/v21.0/dialog/oauth?client_id=${FB_APP_ID}&redirect_uri=${encodeURIComponent(redirectUri)}&scope=${encodeURIComponent(IG_SCOPES)}&state=${state}&response_type=token`;
+            const { data, error } = await loginWithInstagram();
+            if (error) {
+              setSocialError(error || "Something went wrong");
+              return;
+            }
 
-            // Open popup
-            const width = 600;
-            const height = 700;
-            const left = window.screenX + (window.outerWidth - width) / 2;
-            const top = window.screenY + (window.outerHeight - height) / 2;
-            const popup = window.open(
-              url,
-              "Instagram Login",
-              `width=${width},height=${height},left=${left},top=${top}`,
-            );
-
-            // Listen for callback from popup
-            window.addEventListener("message", async function handler(event) {
-              if (event.origin !== window.location.origin) return;
-              if (event.data?.type === "IG_AUTH_SUCCESS") {
-                window.removeEventListener("message", handler);
-                if (event.data.data) {
-                  // If login succeeded, redirect to dashboard
-                  localStorage.setItem(AUTH_USER_KEY, JSON.stringify(event.data.data));
-                  router.replace(APP_DEFAULT_PATH);
-                }
-              }
-            });
+            if (data) {
+              localStorage.setItem(AUTH_USER_KEY, JSON.stringify(data));
+              router.replace(APP_DEFAULT_PATH);
+            }
             return;
           }
           case "Facebook": {
