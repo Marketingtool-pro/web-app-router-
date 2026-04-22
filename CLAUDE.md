@@ -2,86 +2,86 @@
 
 ## THIS IS A CUSTOMER PORTAL, NOT ADMIN
 
-- Customers use this to manage their marketing
-- Phone app is SEPARATE (different codebase, different platform)
-- Web app is DESKTOP ONLY (1920px) — no mobile, no responsive
-- User tells which page to work on — work ONE page at a time
+- Customers use this to manage their marketing.
+- **Phone App is SEPARATE**: Appwrite + Firebase stack. Uses **Appwrite Functions** (`toolexecutor`, `chat-ai`).
+- **Web App is DESKTOP ONLY**: (1920px) — Uses **GCloud Agent Workers** for tool generation.
+- **Zero Trust Handover**: Per-page GCloud Agent → AI Router (VPS 1).
 
-## Architecture (LOCKED)
+## Architecture (LOCKED — page by page)
+
+### 1. Web App Workflow (Desktop 1920px)
 
 ```
-Web App → Appwrite (auth login + Stripe ONLY)
-              ↓
-       Windmill (JWT validation + logic) ← NEVER exposed
-              ↓
-       Supabase (Postgres database ONLY)
+Page → JS input (1920px desktop) → Bearer <Appwrite JWT>
+  ↓
+Nginx (VPS 2) → injects Windmill token server-side, only /jobs/run_wait_result/ allowed
+  ↓
+Per-page stack (one set per tool group on the page):
+  ├─ Engine   (Python — validates JWT, checks tier/credit, builds prompt)
+  ├─ Router   (routes to the right worker for that tool)
+  ├─ Worker   (calls Meta/Google/TikTok/any-API — RAW data only, cron jobs)
+  │     ↓ HANDOVER (worker gathers facts → never polishes)
+  └─ AI Router (ONE router, VPS 1 port 9000, 10 models always active)
+       ↓ rich 1920px result (image / video / text / download) → Supabase → Customer
 ```
 
-- Customer NEVER talks to Windmill or Supabase directly
-- Phone app uses Appwrite for EVERYTHING (separate from web app)
+**Page-by-page rule:**
+
+- Each page has its OWN engine + router + worker + optional cron job
+- 10 tools on a page ≈ 10 Python scripts ≈ average 1 engine + 1 router per tool group
+- JS input/output on the client, JWT validated server-side on every call
+- Workers pull RAW data from vendor APIs only — **they never produce polished customer output**
+- AI Router is the SINGLE polish step — rich 1920px results + download button on every page
+
+**GCloud Agent track (Ad Library / Google Ads only):**
+
+- GCloud Cloud Run `marketingtool-agent` works in the SAME pattern as a Windmill worker — per-page, raw data, then HANDOVER to the SAME AI Router. Not mixed with AI Router — it's a worker alongside the others.
+- Its polished output flows through AI Router for the rich customer result, exactly like any Windmill worker.
+
+**Rules:**
+
+- 10 AI models always active at the AI Router
+- Real results every time, no cheat, no mock data (Ad Library is the only intentional demo page)
+- Customer NEVER talks to Windmill, AI Router, Supabase, or any vendor API directly
+- Download option available on every page
+
+### 2. Phone App Workflow (Completely Separate Codebase)
+
+- Package: `pro.marketingtool.app` at `/Users/loken/Developer/AiMarketingtool-pro-fbaf2fad`
+- **Auth/OTP**: Firebase Authentication (phone → SMS OTP) + Appwrite OAuth for Google/Facebook/Apple
+- **SMS delivery**: MSG91 + MessageBird via Appwrite Function `msg91-proxy`
+- **Tool engine**: Appwrite Functions (`tool-executor`, `chat-ai`) + Firebase GenKit
+- **Firebase**: GenKit AI logic, chat functions, push notifications, analytics
+- **Database**: Appwrite DB (separate from web app's Supabase)
+- **Payment**: In-app IAP (Apple/Google) — direct integration, no external payment links (compliance rule)
+- **Isolation**: Phone app NEVER touches web app's Windmill, AI Router, GCloud agents, Supabase, or nginx VPS 2
+
+## Technical Specs
+
+- **Web Tool Engine**: GCloud Agent (Cloud Run).
+- **Phone Tool Engine**: Appwrite `toolexecutor` (Cloud Run).
+- **Mobile Auth**: Bird OTP via msg91 Appwrite proxy.
+- **AI Router Persistence**: 10 models always active on VPS 1.
+- **Worker Ratio**: 10 Tools ≈ 1 Engine + 1 Router.
+- **GCloud Services**: Cloud Run (Workers), Secret Manager (Keys), IAM (Service Accounts).
 
 ## Stack
 
-- React + Vite + MUI 7 (SaasAble template base)
-- Appwrite = Auth login ONLY (JWT, OAuth: Google/Facebook/Apple, Email/Password) + Stripe payment
-- Windmill = ALL backend logic (Python). Validates JWT, queries Supabase
-- AI Router = localhost:9000 on VPS 1. Engines pass prompt, AI Router picks model, returns result
-- Supabase = Postgres ONLY (28 tables, RLS on ALL 28). Auth DISABLED. Frontend NEVER queries
-- Dark theme only, DESKTOP ONLY (1920px)
-
-## How It Works (per tool)
-
-1. Customer picks tool, fills input (JS — src/utils/api/windmill/index.js)
-2. JS sends to Windmill engine (Python) with Appwrite JWT
-3. Engine validates JWT → checks subscription/credits → builds prompt
-4. Engine passes prompt to AI Router (localhost:9000) with task name
-5. AI Router picks model (Claude/Gemini/Llama/DALL-E/Qwen) → returns raw result
-6. Engine parses, scores, saves to Supabase (generations, credit_usage, billing_transactions)
-7. Customer sees rich formatted result on 1920px UI
+- React + Vite + MUI 9 (SaasAble template base)
+- Appwrite = Auth login ONLY (JWT, OAuth) + Stripe payment.
+- GCloud = Agent Workers for Web App (Cloud Run).
+- AI Router = VPS 1 port 9000 (10-model pipeline).
+- Supabase = Postgres ONLY (RLS on ALL 28 tables).
+- ALL services are small-to-small paid services (High Performance).
 
 ## Critical Rules
 
-- **DESKTOP ONLY** — no mobile responsive. Phone app is separate.
-- **Never touch .env or .env.qa** — contains secrets.
-- **Chat page ≠ Command Centre** — completely separate, never mix.
-- **Work ONE page at a time** — user tells which page.
-- **No tool count numbers** — never show "207+" or any tool count anywhere.
-- **No demo/fake data** — show zeros when no data.
-- **Read files before changing** — always.
-- **Template components are POLISHED** — inject real data, don't rewrite.
-- **NOT just Facebook** — ALL ad platforms (Google, Meta, TikTok, any).
-- Dev server: `npm run start -- --port 3001`
+- **PAYMENT POLICY**: No external payment links. Use direct integration for compliance.
+- **STRICT ISOLATION**: Web App (GCloud Agents) and Phone App (Appwrite Functions) never mix.
+- **DESKTOP ONLY**: Result UI and downloads are 1920px optimized.
+- **No Mock Data**: All results fetched via real API workers before AI handover.
 
-## Page Status
-
-### WORKING (Done + Tested)
-
-- `src/views/admin/dashboard/` — Dashboard (MUI 9 Pro)
-- `src/views/admin/chat/` — Chat page (36 AI tools, 3 engines)
-- `src/views/admin/command-centre/` — Command Centre (10 workflows)
-- `src/views/admin/settings/` — Settings (Google, Meta, Instagram connected)
-- `src/views/admin/analytics/` — Analytics (Rich Glass Morphism design)
-- `src/views/admin/reports/` — Reports (3-tab Rich Builder UI)
-- `src/views/admin/chart/` — Charts (Full Pro Gallery)
-
-### PENDING (Not started yet — user will tell when to work)
-
-- `src/views/admin/tools/` — Tools catalogue
-- `src/views/admin/campaigns/` — Campaigns
-- Meta Audit, Ad Library — not wired yet
-- Stripe billing integration
-- Platform page gating (7 platforms, 1 free tool each)
-
-### PUBLIC PAGES (No auth, for Google/legal compliance)
-
-- `src/views/legal/` — Privacy Policy, Terms, Cookie Policy, Trust & Verification, Delete Account
-
-## AI Router (FastAPI — VPS 1 port 9000, PM2: ai-router)
-
-**PM2, 10-model pipeline, server-side only, not exposed to internet**
-
-Windmill calls `POST http://localhost:9000/generate` with `{"task": "...", "prompt": "..."}`.
-Frozen task names — use these exactly in frontend, Windmill, API docs:
+## AI Router Tasks (Frozen)
 
 | Task            | Model              | Provider     | Use Case                                  |
 | --------------- | ------------------ | ------------ | ----------------------------------------- |
@@ -96,77 +96,21 @@ Frozen task names — use these exactly in frontend, Windmill, API docs:
 | automation      | Llama 3.3 70B      | Groq         | Bulk tagging, classification, cheap jobs  |
 | default         | Claude Sonnet 4    | Anthropic    | Everything else                           |
 
-- 10-model pipeline ensures optimal task allocation across providers
-- vision_analysis and ocr require `image_url` or `image_urls` field
-- Unknown tasks return 400 with valid task list
-- Provider errors return 502 with clean error message
-- AI Router is fully active and connected to engines server-side
+## Page Status
 
-## Windmill Scripts (VPS 1)
+### WORKING (Done + Tested)
 
-### Chat Page — 3 Routes, 3 Engines, 36 Tools
+- `src/views/admin/dashboard/` — Dashboard (MUI 9 Pro)
+- `src/views/admin/chat/` — Chat page (36 tools, 3 engines)
+- `src/views/admin/command-centre/` — Command Centre (10 workflows)
+- `src/views/admin/settings/` — Settings (Google/Meta connected)
+- `src/views/admin/analytics/` — Analytics (Rich Glass Morphism design)
+- `src/views/admin/reports/` — Reports (3-tab Rich Builder UI)
+- `src/views/admin/chart/` — Charts (Full Pro Gallery)
 
-| Route                | Engine Script               | Tools                                  | AI Router Task       |
-| -------------------- | --------------------------- | -------------------------------------- | -------------------- |
-| `/chat/create-email` | `f/tools/engine-creative`   | 12 creative tools (emails, ads, blogs) | `creative` → Claude  |
-| `/chat/automate`     | `f/tools/engine-automation` | 12 automation tools (campaigns, bids)  | `automation` → Llama |
-| `/chat/insights`     | `f/tools/engine-insight`    | 12 insight tools (KPIs, analytics)     | `research` → Gemini  |
-| Router               | `f/tools/ai-generate`       | Delegates to correct engine            | —                    |
-| Chat AI              | `f/mobile/chat_ai`          | AI conversation                        | `default` → Claude   |
+### PENDING (User will signal when to start)
 
-### Command Centre — 10 Workers (SEPARATE from chat)
-
-| Script                              | Purpose                                    |
-| ----------------------------------- | ------------------------------------------ |
-| f/tools/run-workflow-api            | CC router — creates run, dispatches worker |
-| f/tools/get-run-status              | Poll workflow run status                   |
-| f/tools/worker-launch-google        | Google Search campaign                     |
-| f/tools/worker-launch-meta          | Meta campaign                              |
-| f/tools/worker-ab-test              | A/B test generator                         |
-| f/tools/worker-bid-optimise         | Bid optimization                           |
-| f/tools/worker-creative-refresh     | Creative fatigue detector                  |
-| f/tools/worker-audience-expand      | Audience expansion                         |
-| f/tools/worker-scale-winners        | Top performer scaler                       |
-| f/tools/worker-kill-underperformers | Wasted spend killer                        |
-| f/tools/worker-retargeting          | Retargeting funnel                         |
-| f/tools/worker-cross-report         | Cross-platform report                      |
-
-## Project Structure
-
-- `src/views/admin/` — main app pages
-- `src/views/legal/` — public legal pages (no auth)
-- `src/sections/` — Reusable page sections (auth, billing, settings)
-- `src/layouts/AdminLayout/` — Main layout with sidebar
-- `src/menu/` — Sidebar navigation config
-- `src/themes/` — MUI theme (palette, typography, overrides)
-- `public/images/` — Media assets
-
-## Deploy
-
-- Build: `npm run build`
-- Upload: `sshpass -p 'Clothvastr@123' rsync -avz dist/ root@62.72.58.221:/root/web-app/dist/`
-- Domain: app.marketingtool.pro (VPS 2, nginx, SSL)
-
-## Key Patterns
-
-- MUI `sx` prop for styling
-- Glass morphism: `rgba(248,248,248,0.04)` bg with `blur(50px)`
-- Accent color: `#805AF5`
-- Git: https://github.com/Lokeninfinitypoint/rrecot-MUi-local-docker-.git
-
-## Pricing Plans
-
-| Plan         | Monthly | Yearly  |
-| ------------ | ------- | ------- |
-| Starter      | $49/mo  | $199/yr |
-| Professional | $99/mo  | $499/yr |
-| All Tools    | $150/mo | $999/yr |
-| Agency       | Custom  | Custom  |
-
-## Trial & Gating Logic
-
-- **7-day free trial**, **3 generations/day** during trial
-- **36 chat tools** visible to all, gated by daily limit
-- **Paid plans unlock**: unlimited generation, real data, automation
-- Windmill checks `subscriptions` + `credit_usage` tables before every generation
-- Tiers: `free`, `starter`, `pro`, `alltools`, `enterprise`/`agency`
+- `src/views/admin/tools/` — Tools catalogue
+- `src/views/admin/campaigns/` — Campaigns
+- Meta Audit, Ad Library — awaiting GCloud Agent handover logic
+- Stripe billing integration
