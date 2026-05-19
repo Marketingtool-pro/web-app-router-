@@ -3,7 +3,7 @@ import { getAnalytics } from "firebase/analytics";
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
-  apiKey: "AIzaSyCQwN_gERNC3Hhm4PqQWBXQ9m1v1rYveew",
+  apiKey: "AIzaSyCDxVv55xSNHnN7bydIViiIZxJf7yWmFvg",
   authDomain: "marketing-tool-484720.firebaseapp.com",
   projectId: "marketing-tool-484720",
   storageBucket: "marketing-tool-484720.firebasestorage.app",
