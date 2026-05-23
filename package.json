@@ -1,6 +1,9 @@
 {
-  "name": "my-app",
-  "private": true,
+  "name": "@marketingtool-pro/web-app-router",
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com",
+    "access": "restricted"
+  },
   "type": "module",
   "imports": {
     "#/*": "./src/*"
