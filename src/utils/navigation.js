@@ -1,5 +1,16 @@
 import { useNavigate, useLocation, useParams } from 'react-router-dom';
 
+const getSafeNavigationTarget = (path) => {
+  const appOrigin = window.location.origin;
+  const url = new URL(path, appOrigin);
+
+  if (url.protocol !== 'http:' && url.protocol !== 'https:') {
+    return null;
+  }
+
+  return { appOrigin, url };
+};
+
 export function useRouter() {
   const navigate = useNavigate();
   const location = useLocation();
@@ -7,34 +18,37 @@ export function useRouter() {
 
   const push = (path) => {
     try {
-      const appOrigin = window.location.origin;
-      const url = new URL(path, appOrigin);
+      const target = getSafeNavigationTarget(path);
+      if (!target) return;
+
+      const { appOrigin, url } = target;
 
       if (url.origin === appOrigin) {
         // Internal route: use SPA navigation
         navigate(url.pathname + url.search + url.hash);
       } else {
         // External URL: full page reload
-        window.location.href = path;
+        window.location.href = url.href;
       }
     } catch {
-      // Fallback: assume it's relative
-      navigate(path);
+      // Ignore invalid navigation targets
     }
   };
 
   const replace = (path) => {
     try {
-      const appOrigin = window.location.origin;
-      const url = new URL(path, appOrigin);
+      const target = getSafeNavigationTarget(path);
+      if (!target) return;
+
+      const { appOrigin, url } = target;
 
       if (url.origin === appOrigin) {
         navigate(url.pathname + url.search + url.hash, { replace: true });
       } else {
-        window.location.replace(path);
+        window.location.replace(url.href);
       }
     } catch {
-      navigate(path, { replace: true });
+      // Ignore invalid navigation targets
     }
   };
 

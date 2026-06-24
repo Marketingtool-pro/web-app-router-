@@ -3929,6 +3929,8 @@ export default function ToolInlineForm({ toolSlug, onBack }) {
   const [uploadedMedia, setUploadedMedia] = useState(null); // { url, type: 'image'|'video' }
   const [copied, setCopied] = useState(false);
   const [gateInfo, setGateInfo] = useState(null); // { remaining, trialDaysLeft, tier, blocked, reason, code }
+  const safeUploadedMediaUrl =
+    uploadedMedia?.url && uploadedMedia.url.startsWith("blob:") ? uploadedMedia.url : undefined;
 
   if (!tool) {
     return (
@@ -4433,7 +4435,7 @@ export default function ToolInlineForm({ toolSlug, onBack }) {
                   >
                     {uploadedMedia.type === "video" ? (
                       <video
-                        src={uploadedMedia.url}
+                        src={safeUploadedMediaUrl}
                         controls
                         style={{
                           width: "100%",
@@ -4446,7 +4448,7 @@ export default function ToolInlineForm({ toolSlug, onBack }) {
                     ) : (
                       <Box
                         component="img"
-                        src={uploadedMedia.url}
+                        src={safeUploadedMediaUrl}
                         alt="Uploaded"
                         sx={{ width: "100%", maxHeight: 200, objectFit: "cover", display: "block" }}
                       />
@@ -4504,9 +4506,24 @@ export default function ToolInlineForm({ toolSlug, onBack }) {
                       onChange={(e) => {
                         const file = e.target.files?.[0];
                         if (!file) return;
+
                         const isVideo = file.type.startsWith("video/");
+                        const isImage = file.type.startsWith("image/");
+                        if (!isVideo && !isImage) {
+                          setError("Only image or video files are allowed.");
+                          e.target.value = "";
+                          return;
+                        }
+
+                        const objectUrl = URL.createObjectURL(file);
+                        if (!objectUrl.startsWith("blob:")) {
+                          setError("Invalid media URL.");
+                          e.target.value = "";
+                          return;
+                        }
+
                         setUploadedMedia({
-                          url: URL.createObjectURL(file),
+                          url: objectUrl,
                           type: isVideo ? "video" : "image",
                         });
                         e.target.value = "";
