@@ -20,7 +20,7 @@ export default function Insights() {
   const { user } = useAuth();
   const inputRef = useRef(null);
   const [input, setInput] = useState('');
-  const [loading, setLoading] = useState(false);
+  const [loading] = useState(false);
   const [selectedTool, setSelectedTool] = useState(null);
 
   const section = SECTIONS.find((s) => s.id === 'insights');
