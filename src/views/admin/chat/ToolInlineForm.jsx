@@ -1210,10 +1210,12 @@ function BenchmarksSection({ benchmarks }) {
    PLATFORM AD PREVIEW MOCKUPS (Facebook, Instagram, LinkedIn)
    ═══════════════════════════════════════════════════════════════ */
 
-function PlatformPreviews({ variant, toolName, uploadedMedia }) {
+function PlatformPreviews({ variant, toolName, uploadedMedia, safeUploadedMediaUrl }) {
   const [activePlatform, setActivePlatform] = useState("facebook");
-  const imgSrc = uploadedMedia?.url || variant.image_url;
-  const isVideo = uploadedMedia?.type === "video";
+  const safeUploadedMedia =
+    safeUploadedMediaUrl && uploadedMedia ? { ...uploadedMedia, url: safeUploadedMediaUrl } : null;
+  const imgSrc = safeUploadedMedia?.url || variant.image_url;
+  const isVideo = safeUploadedMedia?.type === "video";
 
   const platforms = [
     { id: "facebook", label: "Facebook", icon: IconBrandFacebook, color: "#1877f2" },
@@ -1225,7 +1227,7 @@ function PlatformPreviews({ variant, toolName, uploadedMedia }) {
     if (isVideo)
       return (
         <video
-          src={uploadedMedia.url}
+          src={safeUploadedMedia?.url}
           muted
           loop
           autoPlay
@@ -2102,6 +2104,7 @@ function CreativeResults({
                       variant={activeDetail}
                       toolName={tool.name}
                       uploadedMedia={uploadedMedia}
+                      safeUploadedMediaUrl={safeUploadedMediaUrl}
                     />
                   </Box>
 
