@@ -40,7 +40,7 @@
     "@tanstack/react-start": "latest",
     "@tanstack/react-table": "^8.21.3",
     "@tanstack/router-plugin": "^1.132.0",
-    "amazon-cognito-identity-js": "^6.3.16",
+    "amazon-cognito-identity-js": "^6.3.18",
     "apexcharts": "^5.15.2",
     "appwrite": "^26.0.0",
     "axios": "^1.18.0",
