@@ -1608,13 +1608,14 @@ function CreativeResults({
   tool,
   gateInfo,
   uploadedMedia,
+  safeUploadedMediaUrl,
   isAdmin,
 }) {
   const d = response?.data || {};
   const variants = d.variants || [];
   const meta = response?.meta || {};
   const isPaid = isAdmin || ["pro", "alltools", "enterprise", "agency"].includes(gateInfo?.tier);
-  const hasUpload = uploadedMedia?.url;
+  const hasUpload = !!safeUploadedMediaUrl;
 
   if (!variants.length)
     return <Typography sx={{ color: "text.secondary" }}>No variants generated.</Typography>;
@@ -1796,7 +1797,7 @@ function CreativeResults({
                     if (isVid)
                       return (
                         <video
-                          src={uploadedMedia.url}
+                          src={safeUploadedMediaUrl}
                           muted
                           loop
                           autoPlay
@@ -4858,6 +4859,7 @@ export default function ToolInlineForm({ toolSlug, onBack }) {
                       tool={tool}
                       gateInfo={gateInfo}
                       uploadedMedia={uploadedMedia}
+                      safeUploadedMediaUrl={safeUploadedMediaUrl}
                       isAdmin={isAdmin}
                     />
                   )}
