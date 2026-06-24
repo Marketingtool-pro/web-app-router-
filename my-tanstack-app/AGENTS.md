@@ -172,12 +172,16 @@ Client-exposed values must be prefixed `VITE_` — none are required here.
 
 ## Known gotchas
 
-- **`tsc --noEmit` reports ~10 type errors in CLI-generated files** (`drizzle.config.ts`,
-  `src/router.tsx` unused imports, `src/lib/demo-store-devtools.tsx`, `src/routes/demo/api.ai.*`,
-  `src/routes/demo/ai-image.tsx`, `src/routes/demo/guitars/$guitarId.tsx`). These ship from
-  the scaffold; `pnpm build` (esbuild, no type-check) passes and the app runs. The 4
-  added demo routes (`db/hotkeys/pacer/virtual`) are type-clean. There is no `typecheck`
-  script by design.
+- **`tsc --noEmit` reports type errors in CLI-generated files** (it is not part of the
+  build). The trivial dead-code findings flagged by the repo's code-quality gate were
+  fixed (`src/router.tsx` unused imports, `src/routes/demo/ai-image.tsx` unused
+  `useEffect`, a redundant `todos &&` guard in `src/routes/demo/neon.tsx`). ~6 remain in
+  scaffold files (`drizzle.config.ts`, `src/lib/demo-store-devtools.tsx`,
+  `src/routes/demo/api.ai.chat.ts`, `src/routes/demo/api.ai.image.ts`,
+  `src/routes/demo/guitars/$guitarId.tsx`) — left as-is because fixing the AI-adapter ones
+  risks behavior changes. `pnpm build` (esbuild, no type-check) passes and the app runs.
+  The 4 added demo routes (`db/hotkeys/pacer/virtual`) are type-clean. There is no
+  `typecheck` script by design.
 - **Vite 8 peer warning:** `vite-plugin-neon-new` declares a peer of `vite@^6||^7` but the
   scaffold pins `vite@^8`. It is a warning only; build and dev both work.
 - **Deprecation warnings** in dev for `createServerFn().inputValidator()` in `neon.tsx` /

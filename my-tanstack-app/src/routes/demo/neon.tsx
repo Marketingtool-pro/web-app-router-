@@ -70,9 +70,8 @@ function App() {
             <h1 className="demo-title">Neon Demo</h1>
           </div>
         </header>
-        {todos && (
-          <>
-            <h2 className="demo-section-title mb-4">Todos</h2>
+        <>
+          <h2 className="demo-section-title mb-4">Todos</h2>
             <ul className="space-y-3 mb-6">
               {todos.map((todo: { id: number; title: string }) => (
                 <li key={todo.id} className="demo-list-item">
@@ -96,8 +95,7 @@ function App() {
                 Add Todo
               </button>
             </form>
-          </>
-        )}
+        </>
       </section>
     </main>
   )
