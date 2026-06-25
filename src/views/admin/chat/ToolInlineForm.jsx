@@ -3919,8 +3919,7 @@ function InsightResults({ response }) {
 export default function ToolInlineForm({ toolSlug, onBack }) {
   const theme = useTheme();
   const { user } = useAuth();
-  const isAdmin =
-    user?.email?.toLowerCase() === "help@marketingtool.pro" || user?.name === "testuser1";
+  const isAdmin = Boolean(user?.isAdmin) || user?.role === "admin" || user?.roles?.includes("admin");
   const downMD = useMediaQuery(theme.breakpoints.down("md"));
   const tool = useMemo(() => getToolBySlug(toolSlug), [toolSlug]);
   const relatedTools = useMemo(() => (tool ? getRelatedTools(toolSlug, 4) : []), [toolSlug, tool]);
