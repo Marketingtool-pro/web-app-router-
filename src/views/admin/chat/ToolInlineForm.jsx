@@ -21,6 +21,7 @@ import Alert from "@mui/material/Alert";
 import Checkbox from "@mui/material/Checkbox";
 import FormControlLabel from "@mui/material/FormControlLabel";
 import LinearProgress from "@mui/material/LinearProgress";
+import MainCard from "components/MainCard";
 
 // @assets
 import {
