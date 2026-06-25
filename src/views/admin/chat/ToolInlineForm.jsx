@@ -4520,11 +4520,6 @@ export default function ToolInlineForm({ toolSlug, onBack }) {
                         }
 
                         const objectUrl = URL.createObjectURL(file);
-                        if (!objectUrl.startsWith("blob:")) {
-                          setError("Invalid media URL.");
-                          e.target.value = "";
-                          return;
-                        }
 
                         setUploadedMedia({
                           url: objectUrl,
