@@ -20,6 +20,7 @@ import CircularProgress from "@mui/material/CircularProgress";
 import Alert from "@mui/material/Alert";
 import Checkbox from "@mui/material/Checkbox";
 import FormControlLabel from "@mui/material/FormControlLabel";
+import Switch from "@mui/material/Switch";
 import LinearProgress from "@mui/material/LinearProgress";
 import MainCard from "components/MainCard";
 
