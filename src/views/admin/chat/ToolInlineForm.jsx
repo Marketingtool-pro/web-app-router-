@@ -20,7 +20,9 @@ import CircularProgress from "@mui/material/CircularProgress";
 import Alert from "@mui/material/Alert";
 import Checkbox from "@mui/material/Checkbox";
 import FormControlLabel from "@mui/material/FormControlLabel";
+import Switch from "@mui/material/Switch";
 import LinearProgress from "@mui/material/LinearProgress";
+import MainCard from "components/MainCard";
 
 // @assets
 import {
@@ -3919,8 +3921,7 @@ function InsightResults({ response }) {
 export default function ToolInlineForm({ toolSlug, onBack }) {
   const theme = useTheme();
   const { user } = useAuth();
-  const isAdmin =
-    user?.email?.toLowerCase() === "help@marketingtool.pro" || user?.name === "testuser1";
+  const isAdmin = Boolean(user?.isAdmin) || user?.role === "admin" || user?.roles?.includes("admin");
   const downMD = useMediaQuery(theme.breakpoints.down("md"));
   const tool = useMemo(() => getToolBySlug(toolSlug), [toolSlug]);
   const relatedTools = useMemo(() => (tool ? getRelatedTools(toolSlug, 4) : []), [toolSlug, tool]);
@@ -4460,8 +4461,11 @@ export default function ToolInlineForm({ toolSlug, onBack }) {
                     <Button
                       size="small"
                       onClick={() => {
-                        URL.revokeObjectURL(uploadedMedia.url);
+                        const mediaUrl = uploadedMedia?.url;
                         setUploadedMedia(null);
+                        if (mediaUrl) {
+                          setTimeout(() => URL.revokeObjectURL(mediaUrl), 0);
+                        }
                       }}
                       sx={{
                         position: "absolute",
@@ -4520,11 +4524,6 @@ export default function ToolInlineForm({ toolSlug, onBack }) {
                         }
 
                         const objectUrl = URL.createObjectURL(file);
-                        if (!objectUrl.startsWith("blob:")) {
-                          setError("Invalid media URL.");
-                          e.target.value = "";
-                          return;
-                        }
 
                         setUploadedMedia({
                           url: objectUrl,
