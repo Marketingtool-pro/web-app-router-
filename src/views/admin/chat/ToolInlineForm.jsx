@@ -4460,8 +4460,11 @@ export default function ToolInlineForm({ toolSlug, onBack }) {
                     <Button
                       size="small"
                       onClick={() => {
-                        URL.revokeObjectURL(uploadedMedia.url);
+                        const mediaUrl = uploadedMedia?.url;
                         setUploadedMedia(null);
+                        if (mediaUrl) {
+                          setTimeout(() => URL.revokeObjectURL(mediaUrl), 0);
+                        }
                       }}
                       sx={{
                         position: "absolute",
