@@ -70,13 +70,12 @@ export function usePathname() {
 
 export function useSearchParams() {
   const location = useLocation();
-  const searchParams = new URLSearchParams(location.search);
   const navigate = useNavigate();
 
   return {
-    get: (key) => searchParams.get(key),
+    get: (key) => new URLSearchParams(location.search).get(key),
     set: (key, value) => {
-      const newParams = new URLSearchParams(searchParams);
+      const newParams = new URLSearchParams(location.search);
       newParams.set(key, value);
       navigate(`${location.pathname}?${newParams.toString()}`);
     }
