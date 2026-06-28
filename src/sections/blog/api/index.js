@@ -261,7 +261,7 @@ export async function savePublish(formData) {
       url: await getBase64(bannerFile)
     };
   } else if (typeof bannerFile === 'string' && bannerFile) {
-    banner = banner; // keep existing
+    // keep existing
   }
 
   const blog = {
