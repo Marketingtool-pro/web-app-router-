@@ -14,7 +14,7 @@
     "build": "vite build",
     "preview": "vite preview",
     "test": "vitest run",
-    "prepare": "husky"
+    "prepare": "husky || true"
   },
   "dependencies": {
     "@emotion/cache": "^11.14.0",
