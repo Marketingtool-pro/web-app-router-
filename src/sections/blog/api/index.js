@@ -46,8 +46,9 @@ function getBlogList(allBlogs) {
   const blogMap = new Map();
 
   for (const blog of allBlogs) {
-    if (blog.isDraft && blog.refferenceId) {
-      blogMap.set(blog.refferenceId, {
+    const referenceId = blog.referenceId ?? blog.refferenceId;
+    if (blog.isDraft && referenceId) {
+      blogMap.set(referenceId, {
         ...blog,
         visits: blog.visits ?? 0,
         isArchived: true
@@ -66,8 +67,9 @@ function getBlogList(allBlogs) {
   }
 
   const finalList = Array.from(blogMap.values()).map((blog) => {
-    if (blog.isDraft && blog.refferenceId) {
-      const published = allBlogs.find((b) => b.id === blog.refferenceId && !b.isDraft);
+    const referenceId = blog.referenceId ?? blog.refferenceId;
+    if (blog.isDraft && referenceId) {
+      const published = allBlogs.find((b) => b.id === referenceId && !b.isDraft);
       if (published) {
         return {
           ...blog,
