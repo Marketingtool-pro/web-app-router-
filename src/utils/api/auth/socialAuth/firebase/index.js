@@ -18,12 +18,12 @@ export function loginWithGoogle() {
       signInWithPopup(firebaseAuth, googleProvider)
         .then((result) => {
           const credential = GoogleAuthProvider.credentialFromResult(result);
-
+          resolve({
           resolve({
             id: result.user.uid,
             email: result.user.email || '',
             access_token: credential?.accessToken || ''
-          });
+    } catch {
         })
         .catch((error) => {
           reject(new Error(error.message));
@@ -31,8 +31,6 @@ export function loginWithGoogle() {
     } catch {
       reject(new Error('Server error'));
     }
-  });
-}
 
 /***************************  SOCIAL AUTH FIREBASE - LOGIN WITH FACEBOOK  ***************************/
 
@@ -40,14 +38,16 @@ export function loginWithFacebook() {
   return new Promise((resolve, reject) => {
     try {
       signInWithPopup(firebaseAuth, facebookProvider)
+    try {
+      signInWithPopup(firebaseAuth, facebookProvider)
         .then((result) => {
           const credential = FacebookAuthProvider.credentialFromResult(result);
-
+            email: result.user.email || '',
           resolve({
             id: result.user.uid,
             email: result.user.email || '',
             access_token: credential?.accessToken || ''
-          });
+    }
         })
         .catch((error) => {
           reject(new Error(error.message));
@@ -55,13 +55,13 @@ export function loginWithFacebook() {
     } catch {
       reject(new Error('Server error'));
     }
-  });
-}
-
-/***************************  SOCIAL AUTH FIREBASE - GET USER  ***************************/
 
 export function getUser() {
   return new Promise((resolve, reject) => {
+    try {
+      onAuthStateChanged(firebaseAuth, (user) => {
+        if (user) {
+          resolve({
     try {
       onAuthStateChanged(firebaseAuth, (user) => {
         if (user) {
@@ -81,13 +81,13 @@ export function getUser() {
     } catch {
       reject(new Error('Server error'));
     }
-  });
-}
-
-/***************************  SOCIAL AUTH FIREBASE - SIGN OUT  ***************************/
-
-export function signOut() {
   return new Promise((resolve, reject) => {
+    try {
+      firebaseAuth
+        .signOut()
+        .then(() => {
+          resolve({ status: 200 });
+        })
     try {
       firebaseAuth
         .signOut()
@@ -100,8 +100,6 @@ export function signOut() {
     } catch {
       reject(new Error('Server error'));
     }
-  });
-}
 
 // Export as a single object for easy import
 const socialFirebaseAuth = { loginWithGoogle, loginWithFacebook, getUser, signOut };
