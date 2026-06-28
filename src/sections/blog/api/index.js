@@ -153,14 +153,14 @@ export async function saveDraft(formData) {
   const existingDraft = currentList.find((b) => b.id === blogId && b.isDraft);
 
   let finalId = blogId;
-  let finalRefferenceId = getField('refferenceId') || undefined;
+  let finalReferenceId = getField('refferenceId') || undefined;
 
   if (existingPublished && !existingDraft) {
-    finalRefferenceId = existingPublished.id;
+    finalReferenceId = existingPublished.id;
     finalId = generateId().toString();
   }
 
-  const referencedPublished = finalRefferenceId ? currentList.find((b) => b.id === finalRefferenceId && !b.isDraft) : undefined;
+  const referencedPublished = finalReferenceId ? currentList.find((b) => b.id === finalReferenceId && !b.isDraft) : undefined;
 
   const createdDate = referencedPublished?.createdDate ?? existingDraft?.createdDate ?? new Date();
   const profile = referencedPublished?.profile ?? existingDraft?.profile ?? profiles[0];
@@ -179,7 +179,7 @@ export async function saveDraft(formData) {
 
   const payload = {
     id: finalId,
-    refferenceId: finalRefferenceId,
+    refferenceId: finalReferenceId,
     title: getField('title'),
     caption: getField('caption'),
     content: getField('content'),
