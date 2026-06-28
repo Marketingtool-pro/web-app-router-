@@ -30,8 +30,8 @@ export function useRouter() {
         // External URL: full page reload
         window.location.href = url.href;
       }
-    } catch {
-      // Ignore invalid navigation targets
+    } catch (error) {
+      console.error('Navigation push failed for target:', path, error);
     }
   };
 
@@ -47,8 +47,8 @@ export function useRouter() {
       } else {
         window.location.replace(url.href);
       }
-    } catch {
-      // Ignore invalid navigation targets
+    } catch (error) {
+      console.error('Navigation replace failed for target:', path, error);
     }
   };
 
