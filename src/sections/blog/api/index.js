@@ -46,8 +46,9 @@ function getBlogList(allBlogs) {
   const blogMap = new Map();
 
   for (const blog of allBlogs) {
-    if (blog.isDraft && blog.refferenceId) {
-      blogMap.set(blog.refferenceId, {
+    const referenceId = blog.referenceId ?? blog.refferenceId;
+    if (blog.isDraft && referenceId) {
+      blogMap.set(referenceId, {
         ...blog,
         visits: blog.visits ?? 0,
         isArchived: true
@@ -66,8 +67,9 @@ function getBlogList(allBlogs) {
   }
 
   const finalList = Array.from(blogMap.values()).map((blog) => {
-    if (blog.isDraft && blog.refferenceId) {
-      const published = allBlogs.find((b) => b.id === blog.refferenceId && !b.isDraft);
+    const referenceId = blog.referenceId ?? blog.refferenceId;
+    if (blog.isDraft && referenceId) {
+      const published = allBlogs.find((b) => b.id === referenceId && !b.isDraft);
       if (published) {
         return {
           ...blog,
@@ -153,14 +155,14 @@ export async function saveDraft(formData) {
   const existingDraft = currentList.find((b) => b.id === blogId && b.isDraft);
 
   let finalId = blogId;
-  let finalRefferenceId = getField('refferenceId') || undefined;
+  let finalReferenceId = getField('refferenceId') || undefined;
 
   if (existingPublished && !existingDraft) {
-    finalRefferenceId = existingPublished.id;
+    finalReferenceId = existingPublished.id;
     finalId = generateId().toString();
   }
 
-  const referencedPublished = finalRefferenceId ? currentList.find((b) => b.id === finalRefferenceId && !b.isDraft) : undefined;
+  const referencedPublished = finalReferenceId ? currentList.find((b) => b.id === finalReferenceId && !b.isDraft) : undefined;
 
   const createdDate = referencedPublished?.createdDate ?? existingDraft?.createdDate ?? new Date();
   const profile = referencedPublished?.profile ?? existingDraft?.profile ?? profiles[0];
@@ -179,7 +181,7 @@ export async function saveDraft(formData) {
 
   const payload = {
     id: finalId,
-    refferenceId: finalRefferenceId,
+    refferenceId: finalReferenceId,
     title: getField('title'),
     caption: getField('caption'),
     content: getField('content'),
