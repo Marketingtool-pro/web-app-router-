@@ -10,5 +10,16 @@ updates:
         patterns: ["*"]
     open-pull-requests-limit: 5
 
+  # TanStack Start app (pnpm) — managed under the "npm" ecosystem
+  - package-ecosystem: "npm"
+    directory: "/my-tanstack-app"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    groups:
+      dependencies:
+        patterns: ["*"]
+    open-pull-requests-limit: 5
+
   # github-actions pinned to commit SHAs manually — Dependabot disabled to prevent spam
   # - package-ecosystem: "github-actions"

@@ -20,7 +20,9 @@ import CircularProgress from "@mui/material/CircularProgress";
 import Alert from "@mui/material/Alert";
 import Checkbox from "@mui/material/Checkbox";
 import FormControlLabel from "@mui/material/FormControlLabel";
+import Switch from "@mui/material/Switch";
 import LinearProgress from "@mui/material/LinearProgress";
+import MainCard from "@/components/MainCard";
 
 // @assets
 import {
@@ -1210,10 +1212,12 @@ function BenchmarksSection({ benchmarks }) {
    PLATFORM AD PREVIEW MOCKUPS (Facebook, Instagram, LinkedIn)
    ═══════════════════════════════════════════════════════════════ */
 
-function PlatformPreviews({ variant, toolName, uploadedMedia }) {
+function PlatformPreviews({ variant, toolName, uploadedMedia, safeUploadedMediaUrl }) {
   const [activePlatform, setActivePlatform] = useState("facebook");
-  const imgSrc = uploadedMedia?.url || variant.image_url;
-  const isVideo = uploadedMedia?.type === "video";
+  const safeUploadedMedia =
+    safeUploadedMediaUrl && uploadedMedia ? { ...uploadedMedia, url: safeUploadedMediaUrl } : null;
+  const imgSrc = safeUploadedMedia?.url || variant.image_url;
+  const isVideo = safeUploadedMedia?.type === "video";
 
   const platforms = [
     { id: "facebook", label: "Facebook", icon: IconBrandFacebook, color: "#1877f2" },
@@ -1225,7 +1229,7 @@ function PlatformPreviews({ variant, toolName, uploadedMedia }) {
     if (isVideo)
       return (
         <video
-          src={uploadedMedia.url}
+          src={safeUploadedMedia?.url}
           muted
           loop
           autoPlay
@@ -2102,6 +2106,7 @@ function CreativeResults({
                       variant={activeDetail}
                       toolName={tool.name}
                       uploadedMedia={uploadedMedia}
+                      safeUploadedMediaUrl={safeUploadedMediaUrl}
                     />
                   </Box>
 
@@ -3916,8 +3921,7 @@ function InsightResults({ response }) {
 export default function ToolInlineForm({ toolSlug, onBack }) {
   const theme = useTheme();
   const { user } = useAuth();
-  const isAdmin =
-    user?.email?.toLowerCase() === "help@marketingtool.pro" || user?.name === "testuser1";
+  const isAdmin = Boolean(user?.isAdmin) || user?.role === "admin" || user?.roles?.includes("admin");
   const downMD = useMediaQuery(theme.breakpoints.down("md"));
   const tool = useMemo(() => getToolBySlug(toolSlug), [toolSlug]);
   const relatedTools = useMemo(() => (tool ? getRelatedTools(toolSlug, 4) : []), [toolSlug, tool]);
@@ -4457,8 +4461,11 @@ export default function ToolInlineForm({ toolSlug, onBack }) {
                     <Button
                       size="small"
                       onClick={() => {
-                        URL.revokeObjectURL(uploadedMedia.url);
+                        const mediaUrl = uploadedMedia?.url;
                         setUploadedMedia(null);
+                        if (mediaUrl) {
+                          setTimeout(() => URL.revokeObjectURL(mediaUrl), 0);
+                        }
                       }}
                       sx={{
                         position: "absolute",
@@ -4517,11 +4524,6 @@ export default function ToolInlineForm({ toolSlug, onBack }) {
                         }
 
                         const objectUrl = URL.createObjectURL(file);
-                        if (!objectUrl.startsWith("blob:")) {
-                          setError("Invalid media URL.");
-                          e.target.value = "";
-                          return;
-                        }
 
                         setUploadedMedia({
                           url: objectUrl,

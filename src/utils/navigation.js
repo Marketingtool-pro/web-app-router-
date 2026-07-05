@@ -30,8 +30,8 @@ export function useRouter() {
         // External URL: full page reload
         window.location.href = url.href;
       }
-    } catch {
-      // Ignore invalid navigation targets
+    } catch (error) {
+      console.error('Navigation push failed for target:', path, error);
     }
   };
 
@@ -47,8 +47,8 @@ export function useRouter() {
       } else {
         window.location.replace(url.href);
       }
-    } catch {
-      // Ignore invalid navigation targets
+    } catch (error) {
+      console.error('Navigation replace failed for target:', path, error);
     }
   };
 
@@ -70,13 +70,12 @@ export function usePathname() {
 
 export function useSearchParams() {
   const location = useLocation();
-  const searchParams = new URLSearchParams(location.search);
   const navigate = useNavigate();
 
   return {
-    get: (key) => searchParams.get(key),
+    get: (key) => new URLSearchParams(location.search).get(key),
     set: (key, value) => {
-      const newParams = new URLSearchParams(searchParams);
+      const newParams = new URLSearchParams(location.search);
       newParams.set(key, value);
       navigate(`${location.pathname}?${newParams.toString()}`);
     }
