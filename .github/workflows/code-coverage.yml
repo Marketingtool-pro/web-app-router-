@@ -1,0 +1,239 @@
+Skip to content
+Marketingtool-pro
+web-app-router-
+Repository navigation
+Code
+Issues
+Pull requests
+Discussions
+Actions
+Projects
+Models
+Security and quality
+6
+ (6)
+Insights
+Settings
+Your current bill for usage on GitHub is overdue for payment. Please make a payment by July 18, 2026 to continue to use paid services with your GitHub account.
+You can always contact support with any questions, or check out the docs for the latest information.
+Files
+Go to file
+t
+T
+.claude
+.firebase
+.github
+.husky
+.vscode
+.yarn
+my-tanstack-app
+public
+site
+src
+.CLAUDE.md.swp
+.cta.json
+.env.qa
+.gitignore
+.prettierrc
+.yarnrc.yml
+CLAUDE.md
+README.md
+SECURITY.md
+TANSTACK-START-APP.md
+WEB-APP-COMPLETE-GUIDE.md
+app.json
+eslint.config.mjs
+firebase.json
+index.html
+jsconfig.json
+jsconfig.node.json
+marketingtool-playground.html
+my-app.code-workspace
+package-lock.json
+package.json
+tsconfig.json
+vite.config.mjs
+vite.config.ts
+web-app-router-/.github/workflows
+/
+codeql.yml
+in
+main
+
+Edit
+
+Preview
+Indent mode
+
+Spaces
+Indent size
+
+2
+Line wrap mode
+
+No wrap
+Editing codeql.yml file contents
+ 29
+ 30
+ 31
+ 32
+ 33
+ 34
+ 35
+ 36
+ 37
+ 38
+ 39
+ 40
+ 41
+ 42
+ 43
+ 44
+ 45
+ 46
+ 47
+ 48
+ 49
+ 50
+ 51
+ 52
+ 53
+ 54
+ 55
+ 56
+ 57
+ 58
+ 59
+ 60
+ 61
+ 62
+ 63
+ 64
+ 65
+ 66
+ 67
+ 68
+ 69
+ 70
+ 71
+ 72
+ 73
+ 74
+ 75
+ 76
+ 77
+ 78
+ 79
+ 80
+ 81
+ 82
+ 83
+ 84
+ 85
+ 86
+ 87
+ 88
+ 89
+ 90
+ 91
+ 92
+ 93
+ 94
+ 95
+ 96
+ 97
+ 98
+ 99
+100
+101
+102
+# For most projects, this workflow file will not need changing; you simply need
+    # Consider using larger runners or machines with greater resources for possible analysis time improvements.
+    runs-on: ${{ (matrix.language == 'swift' && 'macos-latest') || 'ubuntu-latest' }}
+    permissions:
+      # required for all workflows
+      security-events: write
+
+      # required to fetch internal or private CodeQL packs
+      packages: read
+
+      # only required for workflows in private repositories
+      actions: read
+      contents: read
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+        - language: actions
+          build-mode: none
+        - language: javascript-typescript
+          build-mode: none
+        # CodeQL supports the following values keywords for 'language': 'actions', 'c-cpp', 'csharp', 'go', 'java-kotlin', 'javascript-typescript', 'python', 'ruby', 'rust', 'swift'
+        # Use `c-cpp` to analyze code written in C, C++ or both
+        # Use 'java-kotlin' to analyze code written in Java, Kotlin or both
+        # Use 'javascript-typescript' to analyze code written in JavaScript, TypeScript or both
+        # To learn more about changing the languages that are analyzed or customizing the build mode for your analysis,
+        # see https://docs.github.com/en/code-security/code-scanning/creating-an-advanced-setup-for-code-scanning/customizing-your-advanced-setup-for-code-scanning.
+        # If you are analyzing a compiled language, you can modify the 'build-mode' for that language to customize how
+        # your codebase is analyzed, see https://docs.github.com/en/code-security/code-scanning/creating-an-advanced-setup-for-code-scanning/codeql-code-scanning-for-compiled-languages
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    # Add any setup steps before running the `github/codeql-action/init` action.
+    # This includes steps like installing compilers or runtimes (`actions/setup-node`
+    # or others). This is typically only required for manual builds.
+    # - name: Setup runtime (example)
+    #   uses: actions/setup-example@v1
+
+    # Initializes the CodeQL tools for scanning.
+    - name: Initialize CodeQL
+      uses: github/codeql-action/init@v4
+      with:
+        languages: ${{ matrix.language }}
+        build-mode: ${{ matrix.build-mode }}
+        # If you wish to specify custom queries, you can do so here or in a config file.
+        # By default, queries listed here will override any specified in a config file.
+        # Prefix the list here with "+" to use these queries and those in the config file.
+
+        # For more details on CodeQL's query packs, refer to: https://docs.github.com/en/code-security/code-scanning/automatically-scanning-your-code-for-vulnerabilities-and-errors/configuring-code-scanning#using-queries-in-ql-packs
+        # queries: security-extended,security-and-quality
+
+    # If the analyze step fails for one of the languages you are analyzing with
+    # "We were unable to automatically build your code", modify the matrix above
+    # to set the build mode to "manual" for that language. Then modify this step
+    # to build your code.
+    # ℹ️ Command-line programs to run using the OS shell.
+    # 📚 See https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#jobsjob_idstepsrun
+    - name: Run manual build steps
+      if: matrix.build-mode == 'manual'
+      shell: bash
+      run: |
+        echo 'If you are using a "manual" build mode for one or more of the' \
+          'languages you are analyzing, replace this with the commands to build' \
+          'your code, for example:'
+        echo '  make bootstrap'
+        echo '  make release'
+        exit 1
+
+    - name: Perform CodeQL Analysis
+      uses: github/codeql-action/analyze@v4
+      with:
+        category: "/language:${{matrix.language}}"
+
+Use Control + Shift + m to toggle the tab key moving focus. Alternatively, use esc then tab to move to the next interactive element on the page.
+Use Control + Space or Option + Space to trigger autocomplete in most situations.
+Help panel navigation
+Marketplace
+Documentation
+Search Marketplace for Actions
+Featured actions
+Featured categories
+Code quality
+Continuous integration
+Deployment
+Monitoring
+Project management
+Testing
+Browse all actions on the GitHub Marketplace
