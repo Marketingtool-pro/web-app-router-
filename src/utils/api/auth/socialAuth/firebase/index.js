@@ -12,56 +12,42 @@ facebookProvider.addScope('email');
 
 /***************************  SOCIAL AUTH FIREBASE - LOGIN WITH GOOGLE  ***************************/
 
-export function loginWithGoogle() {
-  return new Promise((resolve, reject) => {
-    try {
-      signInWithPopup(firebaseAuth, googleProvider)
-        .then((result) => {
-          const credential = GoogleAuthProvider.credentialFromResult(result);
-          resolve({
-          resolve({
-            id: result.user.uid,
-            email: result.user.email || '',
-            access_token: credential?.accessToken || ''
-    } catch {
-        })
-        .catch((error) => {
-          reject(new Error(error.message));
-        });
-    } catch {
-      reject(new Error('Server error'));
-    }
+export async function loginWithGoogle() {
+  try {
+    const result = await signInWithPopup(firebaseAuth, googleProvider);
+    const credential = GoogleAuthProvider.credentialFromResult(result);
+
+    return {
+      id: result.user.uid,
+      email: result.user.email || '',
+      access_token: credential?.accessToken || ''
+    };
+  } catch (error) {
+    throw new Error(error?.message || 'Server error');
+  }
+}
 
 /***************************  SOCIAL AUTH FIREBASE - LOGIN WITH FACEBOOK  ***************************/
 
-export function loginWithFacebook() {
-  return new Promise((resolve, reject) => {
-    try {
-      signInWithPopup(firebaseAuth, facebookProvider)
-    try {
-      signInWithPopup(firebaseAuth, facebookProvider)
-        .then((result) => {
-          const credential = FacebookAuthProvider.credentialFromResult(result);
-            email: result.user.email || '',
-          resolve({
-            id: result.user.uid,
-            email: result.user.email || '',
-            access_token: credential?.accessToken || ''
-    }
-        })
-        .catch((error) => {
-          reject(new Error(error.message));
-        });
-    } catch {
-      reject(new Error('Server error'));
-    }
+export async function loginWithFacebook() {
+  try {
+    const result = await signInWithPopup(firebaseAuth, facebookProvider);
+    const credential = FacebookAuthProvider.credentialFromResult(result);
+
+    return {
+      id: result.user.uid,
+      email: result.user.email || '',
+      access_token: credential?.accessToken || ''
+    };
+  } catch (error) {
+    throw new Error(error?.message || 'Server error');
+  }
+}
+
+/***************************  SOCIAL AUTH FIREBASE - GET USER  ***************************/
 
 export function getUser() {
   return new Promise((resolve, reject) => {
-    try {
-      onAuthStateChanged(firebaseAuth, (user) => {
-        if (user) {
-          resolve({
     try {
       onAuthStateChanged(firebaseAuth, (user) => {
         if (user) {
@@ -81,25 +67,19 @@ export function getUser() {
     } catch {
       reject(new Error('Server error'));
     }
-  return new Promise((resolve, reject) => {
-    try {
-      firebaseAuth
-        .signOut()
-        .then(() => {
-          resolve({ status: 200 });
-        })
-    try {
-      firebaseAuth
-        .signOut()
-        .then(() => {
-          resolve({ status: 200 });
-        })
-        .catch(() => {
-          reject(new Error('Server error'));
-        });
-    } catch {
-      reject(new Error('Server error'));
-    }
+  });
+}
+
+/***************************  SOCIAL AUTH FIREBASE - SIGN OUT  ***************************/
+
+export async function signOut() {
+  try {
+    await firebaseAuth.signOut();
+    return { status: 200 };
+  } catch {
+    throw new Error('Server error');
+  }
+}
 
 // Export as a single object for easy import
 const socialFirebaseAuth = { loginWithGoogle, loginWithFacebook, getUser, signOut };

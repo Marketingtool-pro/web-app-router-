@@ -29,6 +29,12 @@ export default defineConfig(({ mode }) => {
       environment: "jsdom",
       setupFiles: "./src/setupTests.js",
       css: true,
+      exclude: [
+        "**/node_modules/**",
+        "**/dist/**",
+        "website/**",
+        "vcpkg/**",
+      ],
     },
   };
 });
