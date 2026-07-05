@@ -4,3 +4,4 @@ allowBuilds:
   '@firebase/util': true
   protobufjs: true
   '@mui/x-telemetry': false
+minimumReleaseAge: 1440
