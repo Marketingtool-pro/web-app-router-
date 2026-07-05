@@ -74,7 +74,7 @@ export default function AuthSocial({ type = SocialTypes.VERTICAL, buttonSx }) {
 
             const { data: facebookData, error: facebookError } = await loginWithFacebook();
             if (facebookError) {
-              setSocialError(facebookError || "Something went wrong");
+              setSocialError(facebookError);
               return;
             }
 
