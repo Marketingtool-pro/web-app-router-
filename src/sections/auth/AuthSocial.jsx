@@ -42,7 +42,8 @@ export default function AuthSocial({ type = SocialTypes.VERTICAL, buttonSx }) {
 
             const { data, error } = await loginWithGoogle();
             if (error) {
-              setSocialError(error || "Something went wrong");
+              const errorMessage = typeof error === "string" ? error : error?.message || "Something went wrong";
+              setSocialError(errorMessage);
               return;
             }
 
@@ -59,7 +60,8 @@ export default function AuthSocial({ type = SocialTypes.VERTICAL, buttonSx }) {
 
             const { data, error } = await loginWithInstagram();
             if (error) {
-              setSocialError(error || "Something went wrong");
+              const errorMessage = typeof error === "string" ? error : error?.message || "Something went wrong";
+              setSocialError(errorMessage);
               return;
             }
 
