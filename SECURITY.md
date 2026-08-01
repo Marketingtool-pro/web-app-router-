@@ -14,7 +14,7 @@ currently being supported with security updates.
 
 ## Reporting a Vulnerability
 
-Please report suspected vulnerabilities privately to **security@example.com**.
+Please report suspected vulnerabilities privately to **help@marketingtool.pro**.
 Do **not** open public issues for security reports.
 
 Include the following details where possible:
