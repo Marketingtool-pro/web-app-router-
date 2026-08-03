@@ -1625,7 +1625,7 @@ function CreativeResults({
     return <Typography sx={{ color: "text.secondary" }}>No variants generated.</Typography>;
 
   const sorted = [...variants].sort(
-    (a, b) => (a.performanceScore || 0) - (b.performanceScore || 0),
+    (a, b) => (b.performanceScore || 0) - (a.performanceScore || 0),
   );
 
   const bentoSizes = [
@@ -3918,10 +3918,14 @@ function InsightResults({ response }) {
    TOOL INLINE FORM — Main Component
    ═══════════════════════════════════════════════════════════════ */
 
+function isUserAdmin(user) {
+  return Boolean(user?.isAdmin) || user?.role === "admin" || user?.roles?.includes("admin");
+}
+
 export default function ToolInlineForm({ toolSlug, onBack }) {
   const theme = useTheme();
   const { user } = useAuth();
-  const isAdmin = Boolean(user?.isAdmin) || user?.role === "admin" || user?.roles?.includes("admin");
+  const isAdmin = isUserAdmin(user);
   const downMD = useMediaQuery(theme.breakpoints.down("md"));
   const tool = useMemo(() => getToolBySlug(toolSlug), [toolSlug]);
   const relatedTools = useMemo(() => (tool ? getRelatedTools(toolSlug, 4) : []), [toolSlug, tool]);
@@ -4464,7 +4468,7 @@ export default function ToolInlineForm({ toolSlug, onBack }) {
                         const mediaUrl = uploadedMedia?.url;
                         setUploadedMedia(null);
                         if (mediaUrl) {
-                          setTimeout(() => URL.revokeObjectURL(mediaUrl), 0);
+                          URL.revokeObjectURL(mediaUrl);
                         }
                       }}
                       sx={{
