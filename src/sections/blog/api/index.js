@@ -42,11 +42,16 @@ function getFormDataArray(formData, keyPrefix) {
   return result;
 }
 
+// compatibility helper: prefer correct spelling, fallback to legacy misspelling
+function getReferenceId(blog) {
+  return blog.referenceId ?? blog.refferenceId ?? null;
+}
+
 function getBlogList(allBlogs) {
   const blogMap = new Map();
 
   for (const blog of allBlogs) {
-    const referenceId = blog.referenceId ?? blog.refferenceId;
+    const referenceId = getReferenceId(blog);
     if (blog.isDraft && referenceId) {
       blogMap.set(referenceId, {
         ...blog,
@@ -67,7 +72,7 @@ function getBlogList(allBlogs) {
   }
 
   const finalList = Array.from(blogMap.values()).map((blog) => {
-    const referenceId = blog.referenceId ?? blog.refferenceId;
+    const referenceId = getReferenceId(blog);
     if (blog.isDraft && referenceId) {
       const published = allBlogs.find((b) => b.id === referenceId && !b.isDraft);
       if (published) {
@@ -155,7 +160,7 @@ export async function saveDraft(formData) {
   const existingDraft = currentList.find((b) => b.id === blogId && b.isDraft);
 
   let finalId = blogId;
-  let finalReferenceId = getField('refferenceId') || undefined;
+  let finalReferenceId = getField('referenceId') || getField('refferenceId') || undefined;
 
   if (existingPublished && !existingDraft) {
     finalReferenceId = existingPublished.id;
@@ -181,7 +186,7 @@ export async function saveDraft(formData) {
 
   const payload = {
     id: finalId,
-    refferenceId: finalReferenceId,
+    referenceId: finalReferenceId,
     title: getField('title'),
     caption: getField('caption'),
     content: getField('content'),
@@ -246,10 +251,15 @@ export async function savePublish(formData) {
   const currentList = cached?.data ?? [];
 
   const existingBlog = currentList.find((b) => b.id === blogId);
-  const refferenceId = existingBlog?.refferenceId || getField('refferenceId') || undefined;
+  const referenceId =
+    existingBlog?.referenceId ||
+    existingBlog?.refferenceId ||
+    getField('referenceId') ||
+    getField('refferenceId') ||
+    undefined;
 
-  const isPublishingDraftWithRef = existingBlog?.isDraft && !!refferenceId;
-  const targetId = isPublishingDraftWithRef ? refferenceId : blogId;
+  const isPublishingDraftWithRef = existingBlog?.isDraft && !!referenceId;
+  const targetId = isPublishingDraftWithRef ? referenceId : blogId;
   const targetPublished = currentList.find((b) => b.id === targetId && !b.isDraft);
 
   let banner = existingBlog?.isDraft
@@ -330,7 +340,7 @@ export async function deleteBlog(id) {
       (currentBlogs = []) => {
         if (!Array.isArray(currentBlogs)) return [];
 
-        return currentBlogs.filter((blog) => blog.id !== id && blog.refferenceId !== id);
+        return currentBlogs.filter((blog) => blog.id !== id && getReferenceId(blog) !== id);
       },
       false
     )
