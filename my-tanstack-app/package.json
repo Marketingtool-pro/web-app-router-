@@ -87,6 +87,7 @@
       "lightningcss"
     ],
     "overrides": {
+      "nanoid@<3.3.18": ">=3.3.18",
       "esbuild@<0.25.0": ">=0.25.0"
     }
   }
