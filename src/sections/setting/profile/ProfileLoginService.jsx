@@ -20,7 +20,7 @@ import { enqueueSnackbar } from "notistack";
 // @project
 import SettingCard from "@/components/cards/SettingCard";
 import { useAuth } from "@/contexts/AuthContext";
-import { fetchConnectedAccounts } from "@/utils/api/windmill";
+import { fetchConnectedAccounts, getAppwriteJwt } from "@/utils/api/windmill";
 import { AUTH_USER_KEY } from "@/config";
 import { AvatarSize } from "@/enum";
 
@@ -37,8 +37,10 @@ const FB_SCOPES =
 const IG_SCOPES =
   "instagram_basic,instagram_manage_insights,instagram_content_publish,instagram_manage_comments,pages_read_engagement,pages_show_list,business_management";
 const GOOGLE_CLIENT_ID = "911925145433-lnqjvdu44j1krdoq95eqpf3rjo4sf6vv.apps.googleusercontent.com";
+// Keep this list minimal: Google OAuth verification rejects any scope we cannot
+// point at a shipped feature. Read-only wherever reading is all we do.
 const GOOGLE_SCOPES =
-  "https://www.googleapis.com/auth/adwords https://www.googleapis.com/auth/adsense https://www.googleapis.com/auth/adsense.readonly https://www.googleapis.com/auth/analytics.manage.users https://www.googleapis.com/auth/adsdartsearch https://www.googleapis.com/auth/doubleclicksearch https://www.googleapis.com/auth/adsdatahub https://www.googleapis.com/auth/realtime-bidding https://www.googleapis.com/auth/service.management email profile";
+  "https://www.googleapis.com/auth/adwords https://www.googleapis.com/auth/adsense.readonly https://www.googleapis.com/auth/analytics.readonly https://www.googleapis.com/auth/adsdartsearch https://www.googleapis.com/auth/doubleclicksearch email profile";
 
 // Load Google Identity Services script
 function loadGoogleScript() {
@@ -108,9 +110,8 @@ export default function SettingServiceCard() {
 
           // Send auth code to Windmill for token exchange
           try {
-            const API_BASE = import.meta.env.VITE_WINDMILL_URL || "http://localhost:8000";
-            const API_WORKSPACE = import.meta.env.VITE_WINDMILL_WORKSPACE || "marketingtool";
-            const WINDMILL_TOKEN = import.meta.env.VITE_WINDMILL_TOKEN || "";
+            const API_BASE = import.meta.env.VITE_WINDMILL_URL || 'https://app.marketingtool.pro';
+            const API_WORKSPACE = import.meta.env.VITE_WINDMILL_WORKSPACE || 'marketingtool-pro';
 
             await fetch(
               `${API_BASE}/api/w/${API_WORKSPACE}/jobs/run_wait_result/p/f/tools/google-ads-connect`,
@@ -118,7 +119,7 @@ export default function SettingServiceCard() {
                 method: "POST",
                 headers: {
                   "Content-Type": "application/json",
-                  Authorization: `Bearer ${WINDMILL_TOKEN}`,
+                  Authorization: `Bearer ${getAppwriteJwt()}`,
                 },
                 body: JSON.stringify({
                   code: response.code,

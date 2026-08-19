@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
+import { getAppwriteJwt } from '@/utils/api/windmill';
+
 // @mui
 import Box from '@mui/material/Box';
 import Stack from '@mui/material/Stack';
@@ -64,9 +66,8 @@ export default function GoogleAdsCallback() {
 
       // Send auth code to Windmill for token exchange (non-blocking)
       try {
-        const API_BASE = import.meta.env.VITE_WINDMILL_URL || 'http://localhost:8000';
-        const API_WORKSPACE = import.meta.env.VITE_WINDMILL_WORKSPACE || 'marketingtool';
-        const WINDMILL_TOKEN = import.meta.env.VITE_WINDMILL_TOKEN || '';
+        const API_BASE = import.meta.env.VITE_WINDMILL_URL || 'https://app.marketingtool.pro';
+        const API_WORKSPACE = import.meta.env.VITE_WINDMILL_WORKSPACE || 'marketingtool-pro';
         const appwriteJwt = userData?.access_token || '';
         const redirectUri = `${window.location.origin}/oauth/google-ads`;
 
@@ -74,7 +75,7 @@ export default function GoogleAdsCallback() {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            Authorization: `Bearer ${WINDMILL_TOKEN}`
+            Authorization: `Bearer ${getAppwriteJwt()}`
           },
           body: JSON.stringify({ code, redirectUri, userId, appwriteJwt })
         }).catch(() => {});

@@ -26,13 +26,16 @@ import {
 
 // @project
 import { logout } from '@/utils/api/auth';
+import { getAppwriteJwt } from '@/utils/api/windmill';
 import { AUTH_USER_KEY } from '@/config';
 
 const FB_APP_ID = '1582682256320433';
 const FB_SCOPES = 'ads_read,ads_management,business_management,pages_read_engagement,pages_manage_ads,pages_show_list,pages_manage_metadata,instagram_basic,instagram_manage_insights,instagram_content_publish,instagram_manage_comments,read_insights,catalog_management,leads_retrieval,email';
 
 const GOOGLE_CLIENT_ID = '911925145433-lnqjvdu44j1krdoq95eqpf3rjo4sf6vv.apps.googleusercontent.com';
-const GOOGLE_SCOPES = 'https://www.googleapis.com/auth/adwords https://www.googleapis.com/auth/adsense https://www.googleapis.com/auth/adsense.readonly https://www.googleapis.com/auth/analytics.manage.users https://www.googleapis.com/auth/adsdartsearch https://www.googleapis.com/auth/doubleclicksearch https://www.googleapis.com/auth/adsdatahub https://www.googleapis.com/auth/realtime-bidding https://www.googleapis.com/auth/service.management email profile';
+// Keep this list minimal: Google OAuth verification rejects any scope we cannot
+// point at a shipped feature. Read-only wherever reading is all we do.
+const GOOGLE_SCOPES = 'https://www.googleapis.com/auth/adwords https://www.googleapis.com/auth/adsense.readonly https://www.googleapis.com/auth/analytics.readonly https://www.googleapis.com/auth/adsdartsearch https://www.googleapis.com/auth/doubleclicksearch email profile';
 
 // Load Google Identity Services script
 function loadGoogleScript() {
@@ -102,13 +105,12 @@ export default function ConnectAdsModal() {
 
           // Send auth code to Windmill for token exchange
           try {
-            const API_BASE = import.meta.env.VITE_WINDMILL_URL || 'http://localhost:8000';
-            const API_WORKSPACE = import.meta.env.VITE_WINDMILL_WORKSPACE || 'marketingtool';
-            const WINDMILL_TOKEN = import.meta.env.VITE_WINDMILL_TOKEN || '';
+            const API_BASE = import.meta.env.VITE_WINDMILL_URL || 'https://app.marketingtool.pro';
+            const API_WORKSPACE = import.meta.env.VITE_WINDMILL_WORKSPACE || 'marketingtool-pro';
 
             await fetch(`${API_BASE}/api/w/${API_WORKSPACE}/jobs/run_wait_result/p/f/tools/google-ads-connect`, {
               method: 'POST',
-              headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${WINDMILL_TOKEN}` },
+              headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${getAppwriteJwt()}` },
               body: JSON.stringify({ code: response.code, redirectUri: 'postmessage', userId, appwriteJwt: userData?.access_token || '' })
             });
           } catch { /* Windmill sync non-blocking */ }

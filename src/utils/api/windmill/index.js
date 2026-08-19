@@ -2,12 +2,16 @@
 
 import { AUTH_USER_KEY } from '@/config';
 
-const API_BASE = import.meta.env.VITE_WINDMILL_URL || 'http://localhost:8000';
-const API_WORKSPACE = import.meta.env.VITE_WINDMILL_WORKSPACE || 'marketingtool';
-const WINDMILL_TOKEN = import.meta.env.VITE_WINDMILL_TOKEN || '';
+// ZERO TRUST: always route through the VPS 2 nginx proxy, never straight to Windmill.
+// The proxy injects the Windmill token server-side and 403s every non-execution path.
+// The frontend holds NO secrets — it sends only the customer's Appwrite JWT.
+const API_BASE = import.meta.env.VITE_WINDMILL_URL || 'https://app.marketingtool.pro';
+const API_WORKSPACE = import.meta.env.VITE_WINDMILL_WORKSPACE || 'marketingtool-pro';
 
-// Get Appwrite JWT to pass to Windmill scripts for validation
-function getAppwriteJwt() {
+// Get Appwrite JWT to pass to Windmill scripts for validation.
+// Exported so the few components that call Windmill directly use the same source
+// of truth and never reach for a Windmill token.
+export function getAppwriteJwt() {
   try {
     const stored = localStorage.getItem(AUTH_USER_KEY);
     if (stored) {
@@ -39,7 +43,9 @@ async function apiFetch(path, options = {}) {
       signal: controller.signal,
       headers: {
         'Content-Type': 'application/json',
-        Authorization: `Bearer ${WINDMILL_TOKEN}`,
+        // Appwrite JWT only. Nginx forwards this as X-Appwrite-JWT and replaces
+        // Authorization with the Windmill token server-side.
+        Authorization: `Bearer ${getAppwriteJwt()}`,
         ...options.headers
       }
     });
