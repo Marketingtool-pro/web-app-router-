@@ -1,14 +1,9 @@
 {
   "applinks": {
     "apps": [],
-    "details": [
-      {
-        "appID": "TEAM_ID.pro.marketingtool.app",
-        "paths": ["/app/*", "/*"]
-      }
-    ]
+    "details": []
   },
   "webcredentials": {
-    "apps": ["TEAM_ID.pro.marketingtool.app"]
+    "apps": ["N465W7879Z.pro.marketingtool.app"]
   }
 }
