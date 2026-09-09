@@ -10,6 +10,10 @@ on:
     - cron: '44 22 * * *'
   workflow_dispatch:
 
+# Default to read-only for anything not explicitly granted at job level.
+permissions:
+  contents: read
+
 jobs:
   stale:
     runs-on: ubuntu-latest
