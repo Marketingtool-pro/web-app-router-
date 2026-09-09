@@ -20,7 +20,7 @@ jobs:
         run: |
           for d in . my-tanstack-app; do
             echo "== $d"
-            (cd "$d" && pnpm install --lockfile-only --ignore-scripts)
+            (cd "$d" && pnpm install --lockfile-only --no-frozen-lockfile --ignore-scripts)
           done
       - name: Push lockfiles to a new branch
         run: |
