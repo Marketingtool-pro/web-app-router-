@@ -1,4 +1,9 @@
 {
+  "pnpm": {
+    "overrides": {
+      "qs": "^6.16.0"
+    }
+  },
   "name": "@marketingtool-pro/web-app-router",
   "version": "1.0.0",
   "publishConfig": {
