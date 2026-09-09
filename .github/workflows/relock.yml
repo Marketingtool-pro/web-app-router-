@@ -1,34 +1,50 @@
 name: Relock
+
 on:
-  workflow_dispatch:
   push:
     branches:
       - 'relock/**'
+  workflow_dispatch:
+
 permissions:
   contents: write
+
 jobs:
   relock:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-      - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v4.0.2
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+
+      # Same toolchain sequence as node.js.yml / code-quality.yml:
+      # pnpm first so that setup-node cache: pnpm can find the store.
+      - uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86  # v6.0.10
+
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020  # v7.0.0
         with:
-          node-version: '22'
-      - name: Install pnpm
-        run: npm i -g pnpm@11.22.0
-      - name: Regenerate pnpm lockfiles
+          node-version-file: '.nvmrc'
+          cache: 'pnpm'
+
+      - name: Regenerate lockfiles
         run: |
           for d in . my-tanstack-app; do
-            echo "== $d"
+            echo "::group::relock $d"
             (cd "$d" && pnpm install --lockfile-only --no-frozen-lockfile --ignore-scripts)
+            echo "::endgroup::"
           done
+
       - name: Push lockfiles to a new branch
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          BR="lockfix/${GITHUB_SHA::7}"
+          # Run id + attempt keep re-runs of the same commit from colliding
+          # with an existing remote branch.
+          BR="lockfix/${GITHUB_SHA::7}-${GITHUB_RUN_ID}.${GITHUB_RUN_ATTEMPT}"
           git checkout -b "$BR"
           git add -A
-          git commit -m "chore(deps): regenerate pnpm lockfiles" || { echo "no changes"; exit 0; }
+          if git diff --cached --quiet; then
+            echo "lockfiles already up to date"
+            exit 0
+          fi
+          git commit -m "chore(deps): regenerate pnpm lockfiles"
           git push origin "$BR"
           echo "pushed $BR" >> "$GITHUB_STEP_SUMMARY"
