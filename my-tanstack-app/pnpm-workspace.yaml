@@ -2,6 +2,10 @@ overrides:
   js-yaml: ^4.3.2
   browserslist: ^4.28.7
   baseline-browser-mapping: ^2.11.0
+  # drizzle-kit -> @esbuild-kit/esm-loader -> @esbuild-kit/core-utils pins esbuild 0.18.x
+  # which is vulnerable (GHSA-67mh-4wv8-2f99). Force the whole tree to a patched esbuild.
+  'esbuild@<0.25.0': '>=0.25.0'
+  'nanoid@<3.3.18': '>=3.3.18'
 allowBuilds:
   esbuild: true
   lightningcss: true
