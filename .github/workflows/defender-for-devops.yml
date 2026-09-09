@@ -20,6 +20,10 @@ on:
   schedule:
     - cron: '19 16 * * 5'
 
+# Default to read-only for anything not explicitly granted at job level.
+permissions:
+  contents: read
+
 # Only the newest scan per branch / pull request needs to finish.
 concurrency:
   group: msdo-${{ github.workflow }}-${{ github.ref }}
