@@ -1,0 +1,34 @@
+name: Relock
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - 'relock/**'
+permissions:
+  contents: write
+jobs:
+  relock:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v4.0.2
+        with:
+          node-version: '22'
+      - name: Install pnpm
+        run: npm i -g pnpm@11.22.0
+      - name: Regenerate pnpm lockfiles
+        run: |
+          for d in . my-tanstack-app; do
+            echo "== $d"
+            (cd "$d" && pnpm install --lockfile-only --no-frozen-lockfile --ignore-scripts)
+          done
+      - name: Push lockfiles to a new branch
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          BR="lockfix/${GITHUB_SHA::7}"
+          git checkout -b "$BR"
+          git add -A
+          git commit -m "chore(deps): regenerate pnpm lockfiles" || { echo "no changes"; exit 0; }
+          git push origin "$BR"
+          echo "pushed $BR" >> "$GITHUB_STEP_SUMMARY"
