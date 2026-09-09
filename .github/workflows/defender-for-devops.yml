@@ -27,8 +27,9 @@ concurrency:
 
 jobs:
   MSDO:
-    # The action only supports Windows and Linux runners (not macOS).
-    runs-on: windows-latest
+    # The action supports Windows and Linux runners (not macOS). Linux is used
+    # because some image files in this repo exceed the Windows path length limit.
+    runs-on: ubuntu-latest
     permissions:
       contents: read
       actions: read
