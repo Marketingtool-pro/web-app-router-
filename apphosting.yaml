@@ -1,0 +1,36 @@
+# Firebase App Hosting configuration for the MarketingTool web app.
+#
+# The default Node buildpack already does the right thing here: install,
+# then `npm run build` (vite build -> dist/), then `npm start`. `npm start`
+# is now `node server.js`, a real HTTP server that binds $PORT, so the
+# Cloud Run revision can pass its health check.
+#
+# Deliberately no `scripts:` block. Overriding buildCommand/runCommand is
+# what kept the other backend failing; the defaults are correct.
+
+runConfig:
+  cpu: 1
+  memoryMiB: 512
+  minInstances: 0
+  maxInstances: 5
+  concurrency: 80
+
+env:
+  - variable: NODE_ENV
+    value: production
+    availability:
+      - BUILD
+      - RUNTIME
+
+  # Public client configuration. Both values are already visible in the
+  # shipped browser bundle; they are identifiers, not secrets. Vite inlines
+  # VITE_* at build time, so they are only needed for BUILD.
+  - variable: VITE_APPWRITE_ENDPOINT
+    value: https://api.marketingtool.pro/v1
+    availability:
+      - BUILD
+
+  - variable: VITE_APPWRITE_PROJECT_ID
+    value: 6952c8a0002d3365625d
+    availability:
+      - BUILD
