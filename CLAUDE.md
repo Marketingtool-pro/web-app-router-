@@ -299,12 +299,36 @@ non-empty**. With the config file missing, both are empty, the call never runs, 
 Pro chart, grid and date picker renders the "Missing license key" watermark with a console
 error. That is customer-visible across roughly 37 files.
 
-The owner holds a valid MUI X Pro annual licence (access to releases and support through
-18 Mar 2027). The key itself is deliberately not recorded in this file.
+Enforcement confirmed by reading the installed `@mui/x-license@9.8.0`: it ships a
+`Watermark` component whose rendered strings include "MUI X Missing license key",
+"MUI X Expired package version" and "MUI X License key plan mismatch", plus the console
+error "MUI X: Missing license key." Installed versions are all v9 (`x-charts-pro` 9.11.1,
+`x-date-pickers-pro` 9.11.0).
 
-**Tailwind is declared but its Vite plugin is commented out** in `vite.config.mjs`
-("enable only if actually used"), while `src/index.css` and `src/styles.css` reference it.
-Verify whether any Tailwind class actually renders before relying on one.
+The owner holds two MUI X Pro annual licence keys, both valid to 18 Mar 2027. Their encoded
+payloads carry the **same** plan, term and package-version fields; they differ only in order
+id and expiry timestamp. So either will license this v9 install — an earlier note here
+claiming only one would work was wrong. The keys themselves are deliberately not recorded
+in this file.
+
+### Tailwind is installed and produces NOTHING — verified in the built CSS
+
+`@tailwindcss/vite@4.3.3` is installed, and both `src/index.css` and `src/styles.css` open
+with `@import "tailwindcss"` (plus `@plugin "@tailwindcss/typography"` in styles.css). But
+the plugin is **commented out** in `vite.config.mjs` ("enable only if actually used"), and
+there is **no `postcss.config.*` and no `tailwind.config.*`** in the repo. In Tailwind 4 the
+Vite plugin is what compiles that import, so nothing compiles it.
+
+Proven against a real build of `dist/assets/index-*.css` (100 KB total):
+
+| check | result |
+|---|---|
+| Tailwind runtime variables (`--tw-`) present | **0 files** |
+| unresolved `tailwindcss` import left behind | 0 files |
+
+So **every Tailwind class written in a component is inert.** Either enable the plugin in
+`vite.config.mjs` or drop Tailwind and the two `@import` lines. Do not write Tailwind
+classes expecting them to work today.
 
 **`src/utils/auth-client/supabase.js` creates a Supabase client with the anon key.** It is
 SaasAble template scaffolding for a provider this project does not use — `AUTH_PROVIDER` is
