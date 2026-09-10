@@ -438,6 +438,53 @@ the returned `$id` against the claimed `userId`. **546 of 908** tools scripts ca
 check; 362 do not. The weakness is inside the check — it builds an SSL context with
 `check_hostname = False` and `verify_mode = CERT_NONE`, so that hop trusts any certificate.
 
+## DASHBOARD — CROSS-TENANT DATA LEAK (found 2026-09-11, fix committed, NOT yet pushed)
+
+The dashboard is the first page a customer sees, and it shows **every customer's data**.
+
+`f/tools/dashboard-summary` accepts `userId` and then never uses it. All four Supabase
+reads run unfiltered under the **service_role** key, which bypasses RLS:
+
+```python
+_q("ad_accounts",      "order=created_at.desc&limit=20")
+_q("campaigns",        "status=neq.archived&order=created_at.desc&limit=50")
+_q("campaign_metrics", "order=date.desc&limit=100")
+_q("daily_summary",    "order=date.desc&limit=30")
+```
+
+A grep for `user_id=eq` in that script returns **0**. Measured impact: `ad_accounts` holds
+**114 rows across 7 distinct customers**, so each customer's dashboard renders a blend of
+all seven. It also does **no JWT validation**.
+
+Corrected script committed at `windmill/f/tools/dashboard-summary.py`: validates the
+Appwrite JWT first, derives the id from the token rather than the caller-supplied `userId`,
+and scopes all four reads with `user_id=eq.`. Push it through the Windmill UI.
+
+**Still open in that script:** `call_meta_api` uses the global variables
+`f/tools/fb_ads_access_token` and `f/tools/fb_ads_app_secret`, so the live Meta figures come
+from one shared account rather than each customer's stored `ad_accounts.access_token`.
+Fixing that is a design change, not a one-line patch.
+
+### The dashboard also refuses to load for most customers
+
+`src/hooks/useDashboardData.js` only calls the API when `localStorage.fb_ads_connected ===
+'true'`, and only `src/views/admin/fb-connect-callback.jsx` ever sets that flag. So:
+
+- a customer who connected on another browser or device sees an empty dashboard
+- a Google-Ads-only customer never sets the flag, so the dashboard never loads at all
+- clearing site data re-triggers the connect popup forever
+
+`src/layouts/AdminLayout/index.jsx` gates the hard connect-ads popup on the same flag.
+Both should ask the server whether this user has `ad_accounts` rows, not the browser.
+
+### Dashboard routes — the URLs
+
+The live routes are `/dashboard/analytics/:tab`, where tab is `overview`, `user-behavior`
+or `performance`. `/dashboard` redirects to `analytics/overview`. **`/dashboard/overview`
+is not a route** and falls through to the `path: "*"` catch-all in `src/routes/index.jsx`,
+rendering `NotFoundCatch`. The tab labels are Overview, Campaign Performance and
+Finance & Revenue, fed from `data.overview`, `data.campaigns` and `data.finance`.
+
 ## THE CHAT PAGE BUG — two scripts point at the wrong host
 
 **Symptom:** the chat UI replies *"AI is temporarily busy, please try again."*
