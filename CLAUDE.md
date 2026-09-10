@@ -256,6 +256,62 @@ still serves 200. Previous config backed up under `/root/nginx-backups/`.
 **Still open:** VPS 1 `:3002` is directly reachable from the internet, so the proxy stays
 bypassable until that port is firewalled.
 
+## The real frontend stack (verified in source 2026-09-11)
+
+Declared versions, not guesses: React 19, react-router-dom 7, Vite 8, MUI Material 9,
+MUI X date-pickers 9, Tailwind 4, Appwrite SDK 26, Firebase 12. 52 dependencies and
+26 dev dependencies.
+
+**Two routers are installed. Only one runs.**
+
+| package | files importing it | verdict |
+|---|---|---|
+| `react-router-dom` | 26 | the real router — `src/routes/MainRoutes.jsx` |
+| `@tanstack/react-table` | 17 | genuinely used, keep |
+| `@tanstack/react-router` | 4 | **dead** |
+| `@tanstack/react-start` | 0 | **dead** |
+
+The entry point is `index.html` → `/src/main.jsx` → `App.jsx` → react-router-dom. **Nothing
+imports `src/router.tsx`**, so the whole TanStack Start scaffold is unreachable:
+`src/router.tsx`, `src/routes/index.tsx`, `src/routes/about.tsx`, `src/components/Header.tsx`,
+plus a second `vite.config.ts` that never wins over `vite.config.mjs`.
+
+That scaffold is why the stack looks confusing. It is a starter template that landed in the
+repo and was never removed. Safe to delete along with `@tanstack/react-start`,
+`@tanstack/router-plugin`, `@tanstack/react-router-ssr-query`, `@tanstack/react-router-devtools`
+and `@tanstack/devtools-vite`. Keep `@tanstack/react-table` — 17 files depend on it.
+
+### MUI X Pro is required, and the key is currently unset
+
+This is not optional MUI X. The project imports the **Pro** packages, which watermark
+themselves without a licence:
+
+| package | files importing it |
+|---|---|
+| `@mui/x-charts-pro` | 19 |
+| `@mui/x-date-pickers-pro` | 18 |
+| `@mui/x-date-pickers` (community) | 10 |
+| `@mui/x-data-grid-pro` | declared |
+
+`src/config/muiLicense.js` reads `VITE_MUI_X_LICENSE_KEY`, falls back to
+`VITE_APP_MUI_X_LICENSE_KEY`, and calls `LicenseInfo.setLicenseKey` **only if one is
+non-empty**. With the config file missing, both are empty, the call never runs, and every
+Pro chart, grid and date picker renders the "Missing license key" watermark with a console
+error. That is customer-visible across roughly 37 files.
+
+The owner holds a valid MUI X Pro annual licence (access to releases and support through
+18 Mar 2027). The key itself is deliberately not recorded in this file.
+
+**Tailwind is declared but its Vite plugin is commented out** in `vite.config.mjs`
+("enable only if actually used"), while `src/index.css` and `src/styles.css` reference it.
+Verify whether any Tailwind class actually renders before relying on one.
+
+**`src/utils/auth-client/supabase.js` creates a Supabase client with the anon key.** It is
+SaasAble template scaffolding for a provider this project does not use — `AUTH_PROVIDER` is
+`AuthType.APPWRITE`. It does not query tables, but it would put the anon key in the bundle
+if that variable were set. The rule "frontend never queries Supabase" still holds in
+practice; this file is the only thing that could break it.
+
 ## Component roles
 
 - **React Web App** — UI only. Desktop 1920px. Holds no secrets (verified in source).
