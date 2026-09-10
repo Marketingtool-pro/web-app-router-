@@ -47,22 +47,39 @@ exception without logging, so every failure is invisible and answers arrive as
 
 Verified by live call on 2026-09-11:
 
-| task | intended provider | state | evidence |
-|---|---|---|---|
-| creative | Anthropic | **BROKEN → gpt-4o-mini** | Anthropic: credit balance too low |
-| coding | Anthropic | **BROKEN → gpt-4o-mini** | Anthropic: credit balance too low |
-| default | Anthropic | **BROKEN → gpt-4o-mini** | Anthropic: credit balance too low |
-| research | Google | **BROKEN → gpt-4o-mini** | Gemini: "API key not valid" |
-| automation | Groq | **BROKEN → gpt-4o-mini** | Groq: 401 "Invalid API Key" |
-| image_gen | OpenAI | OK | key authenticates (rejected on prompt length) |
-| stable_image | Stability | OK | key authenticates (rejected on prompt length) |
-| video_gen | FAL | OK | key authenticates (rejected on prompt length) |
-| vision_analysis | OpenRouter | **OK, full output verified** | returned a correct description of a real image |
-| ocr | OpenRouter | **OK, full output verified** | returned correct text from a real image |
+All ten task names were executed individually and the real response inspected. Not
+inferred from imports or auth checks — actually run.
 
-Five task names are healthy on their own providers; five are down because of **three
-accounts**: Anthropic billing, and two invalid keys. Nothing else is wrong — the routing
-code is correct and the other providers are untouched.
+| task | intended | what answered | state |
+|---|---|---|---|
+| creative | Claude | `gpt-4o-mini` | **BROKEN** — Anthropic credit balance too low |
+| coding | Claude | `gpt-4o-mini` | **BROKEN** — same |
+| default | Claude | `gpt-4o-mini` | **BROKEN** — same |
+| research | Gemini | `gpt-4o-mini` | **BROKEN** — Gemini "API key not valid" |
+| automation | Llama / Groq | `gpt-4o-mini` | **BROKEN** — Groq 401 invalid key |
+| image_gen | DALL-E 3 | falls to Stability | **BROKEN** — OpenAI 429 "no credits remaining" |
+| stable_image | sd3.5-large | Stable Diffusion 3.5 | **WORKS** — returned a real PNG |
+| video_gen | Kling / FAL | FAL.ai Video (Kling) | **WORKS** — returned a real MP4 URL |
+| vision_analysis | `openai/gpt-4o` | GPT-4o Vision | **WORKS** — correct description of a real image |
+| ocr | `qwen/qwen-2.5-vl-72b` | Qwen2.5-VL-72B | **WORKS** — correct text from a real image |
+
+**4 of 10 work. 6 are down, and they need exactly 4 account fixes:**
+
+| fix | tasks it restores |
+|---|---|
+| add credit to Anthropic | creative, coding, default |
+| valid Gemini key | research |
+| valid Groq key | automation |
+| add credit to OpenAI | image_gen |
+
+The routing code is correct and needs no change. Every failure is an account state, not a
+bug. OpenAI's key is still valid — it authenticates and rejects on prompt length — it has
+simply run out of credit, so `image_gen` silently serves Stability instead of DALL-E 3.
+
+**Timeout constraint:** `video_gen` took **over 3 minutes** to return. `call_ai_router` in
+the engines defaults to a 30-second timeout, and the parallel fan-outs use 25-40 seconds.
+No script calls `video_gen` today (verified: 0 scripts reference it), but any engine that
+adds it at those timeouts will always fail. Give video its own long timeout.
 
 **Do NOT "fix" this by routing Claude/Gemini/Llama through OpenRouter.** The task table is
 frozen: each task uses its own provider. Rerouting would recreate exactly the failure this
