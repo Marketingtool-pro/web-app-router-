@@ -1,0 +1,27 @@
+[oci]
+from        = "debian:bookworm-slim"  # base image ref
+tag         = "ghcr.io/me/devenv:v1"  # default tag for the built image
+workdir     = "/workspace"             # WORKDIR
+entrypoint  = ["bash", "-l"]           # ENTRYPOINT
+cmd         = []                        # CMD
+user        = "nonroot"                # USER
+user_id     = 1000                      # tar layer entry UID (file ownership)
+group_id    = 1000                      # tar layer entry GID (defaults to user_id)
+mount_point = "/mise"                  # where tools install in the image
+
+[[oci.copy]]
+host  = "dist/my-app"
+image = "/usr/local/bin/my-app"
+
+[[oci.copy]]
+host  = "assets"
+image = "/srv/app/assets"
+
+# Extra env baked into the image config (image-only 
+ won't shadow MISE_*).
+[oci.env]
+NODE_ENV = "production"
+
+# Labels baked into the image config.
+[oci.labels]
+"org.opencontainers.image.source" = "https://github.com/me/my-app"

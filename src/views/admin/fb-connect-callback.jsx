@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
+import { getAppwriteJwt } from '@/utils/api/windmill';
+
 // @mui
 import Box from '@mui/material/Box';
 import Stack from '@mui/material/Stack';
@@ -59,16 +61,15 @@ export default function FbConnectCallback() {
 
       // Try to sync with Windmill (non-blocking — if it fails, we still proceed)
       try {
-        const API_BASE = import.meta.env.VITE_WINDMILL_URL || 'http://localhost:8000';
-        const API_WORKSPACE = import.meta.env.VITE_WINDMILL_WORKSPACE || 'marketingtool';
-        const WINDMILL_TOKEN = import.meta.env.VITE_WINDMILL_TOKEN || '';
+        const API_BASE = import.meta.env.VITE_WINDMILL_URL || 'https://app.marketingtool.pro';
+        const API_WORKSPACE = import.meta.env.VITE_WINDMILL_WORKSPACE || 'marketingtool-pro';
         const appwriteJwt = userData?.access_token || '';
 
         fetch(`${API_BASE}/api/w/${API_WORKSPACE}/jobs/run_wait_result/p/f/tools/fb-ads-connect`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            Authorization: `Bearer ${WINDMILL_TOKEN}`
+            Authorization: `Bearer ${getAppwriteJwt()}`
           },
           body: JSON.stringify({ fbAccessToken: accessToken, userId, appwriteJwt })
         }).catch(() => {});

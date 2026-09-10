@@ -5,6 +5,7 @@ import { enqueueSnackbar } from "notistack";
 // @project
 import { useAuth } from "@/contexts/AuthContext";
 import Loader from "@/components/Loader";
+import { getAppwriteJwt } from "@/utils/api/windmill";
 
 export default function IgConnectCallback() {
   const navigate = useNavigate();
@@ -29,9 +30,8 @@ export default function IgConnectCallback() {
 
         // Sync with Windmill
         try {
-          const API_BASE = import.meta.env.VITE_WINDMILL_URL || "https://wm.marketingtool.pro";
+          const API_BASE = import.meta.env.VITE_WINDMILL_URL || "https://app.marketingtool.pro";
           const API_WORKSPACE = import.meta.env.VITE_WINDMILL_WORKSPACE || "marketingtool-pro";
-          const WINDMILL_TOKEN = import.meta.env.VITE_WINDMILL_TOKEN || "";
 
           await fetch(
             `${API_BASE}/api/w/${API_WORKSPACE}/jobs/run_wait_result/p/f/tools/instagram-connect`,
@@ -39,7 +39,7 @@ export default function IgConnectCallback() {
               method: "POST",
               headers: {
                 "Content-Type": "application/json",
-                Authorization: `Bearer ${WINDMILL_TOKEN}`,
+                Authorization: `Bearer ${getAppwriteJwt()}`,
               },
               body: JSON.stringify({ accessToken, userId: user?.id, platform: "instagram" }),
             },
