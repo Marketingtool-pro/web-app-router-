@@ -298,6 +298,69 @@ the returned `$id` against the claimed `userId`. **546 of 908** tools scripts ca
 check; 362 do not. The weakness is inside the check — it builds an SSL context with
 `check_hostname = False` and `verify_mode = CERT_NONE`, so that hop trusts any certificate.
 
+## THE CHAT PAGE BUG — two scripts point at the wrong host
+
+**Symptom:** the chat UI replies *"AI is temporarily busy, please try again."*
+
+**Cause:** Windmill workers run in Docker. Inside a worker container `localhost` is the
+container, and nothing listens on `:9000` there. The AI Router runs on the VPS 1 **host**,
+reachable from a container as `172.17.0.1:9000`. Proven from inside `windmill-worker`:
+
+| target from inside the worker | result |
+|---|---|
+| `http://localhost:9000/` | unreachable |
+| `http://172.17.0.1:9000/` | 200 |
+
+Exactly **two** live scripts get this wrong, and they are the worst two to lose:
+
+- `f/tools/engine-creative` — backs all 12 Creative tools on the chat page
+- `f/tools/ai-generate` — the fallback for any slug missing from `SLUG_TO_ENGINE`
+
+The other **510** scripts referencing the router already use `172.17.0.1`. So this is a
+two-line fix, not a refactor. In each script replace
+
+```python
+AI_ROUTER_URL = "http://localhost:9000/generate"
+```
+
+with the pattern the working engines use:
+
+```python
+try:
+    _BASE = wmill.get_variable("f/tools/ai_router_url") or "http://172.17.0.1:9000"
+except Exception:
+    _BASE = "http://172.17.0.1:9000"
+AI_ROUTER_URL = _BASE.rstrip("/") + "/generate"
+```
+
+Note `f/tools/engine-creative` and `f/tools/ai-generate` are near-identical 107-line
+scripts. Do not try to reproduce them from a `psql` text dump — the export mangles the
+escaped quotes inside the f-string prompt and the result will not compile. Edit the one
+line in the Windmill UI.
+
+## The three chat engines (verified 2026-09-11)
+
+`/chat`, `/chat/create-email`, `/chat/automate` and `/chat/insights` all render from the
+same `SECTIONS` list, and each tool's slug maps through `SLUG_TO_ENGINE` to one of three
+engines. `executeGeneration` then POSTs to `/jobs/run_wait_result/p/<engine>`.
+
+| engine | lines | AI Router tasks it fires | real vendor data | state |
+|---|---|---|---|---|
+| `f/tools/engine-automation` | 550 | 6 in parallel: automation, creative, research, coding, image_gen, vision_analysis | yes, live Meta insights + campaigns | works, but 4 of its 6 tasks are downgraded |
+| `f/tools/engine-insight` | 561 | 8: adds default and ocr | yes | same |
+| `f/tools/engine-creative` | 107 | 1 (creative) | none | **cannot reach the router at all** |
+
+All three validate the Appwrite JWT. The automation and insight engines also check credits,
+load the customer's connected accounts, metrics and daily numbers, call the Meta Marketing
+API for real insights and campaigns, then save to `generations` and `credit_usage`.
+
+`_build_tool_prompts` does **not** branch per slug: every tool in a section gets the same
+prompt shape with the tool name and user input interpolated.
+
+Because the automation and insight engines fan out across many tasks at once, the three
+broken provider accounts hit them hard — a single Post Scheduler run makes four calls that
+currently answer as `gpt-4o-mini`.
+
 ## The signup → ads-connect flow (verified 2026-09-11)
 
 ```
