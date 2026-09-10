@@ -124,18 +124,45 @@ Actual today:
   is commented out, and `src/` contains **zero** references to it or any `run.app` host.
 - The frontend calls Windmill `f/tools/*` through the VPS 2 proxy.
 
-### Source is fixed; production is not
+### WARNING: `origin/main` still contains the vulnerable client
+
+Verified 2026-09-11: `origin/main`'s `src/utils/api/windmill/index.js` still reads
+`VITE_WINDMILL_TOKEN`, defaults `API_BASE` to `http://localhost:8000` and defaults the
+workspace to the wrong `marketingtool`. **The Zero Trust fix exists only in the local
+`main` checkout and was never pushed.** It is now also on the branch
+`worktree-claude-md-refresh`, so it is no longer one disk failure from being lost.
+Merge that branch before doing any fresh clone or CI build, or you will rebuild the
+vulnerable bundle.
+
+### Source is fixed; production is not (RESOLVED — deployed 2026-09-11)
 
 `src/utils/api/windmill/index.js` defaults to `https://app.marketingtool.pro`, holds **no**
 Windmill token, and sends only the Appwrite JWT. All five call sites use that same default.
 `grep -rn WINDMILL_TOKEN src/` returns nothing.
 
-**The deployed bundle predates that fix.** `/root/web-app/dist` on VPS 2 is dated
-**12 Apr 2026** and the repo is **272 commits ahead** of it. The April bundle still points
-at `wm.marketingtool.pro` and still carries the Windmill token in five JS chunks.
-Deploying the current build closes both the token exposure and the proxy bypass with no
-code to write. There is **no deploy script on the box** — dist copies are manual, and the
-stale ones plus two 1.6 GB tarballs account for 9.1 GB under `/root/web-app`.
+The bundle that had been live since **12 Apr 2026** carried the Windmill token in five JS
+chunks and called `wm.marketingtool.pro` directly, bypassing the proxy.
+
+**Redeployed 2026-09-11.** Built from the local `main` source, verified before upload
+(zero token occurrences, no `wm.` reference, correct Appwrite endpoint), then rsynced to
+VPS 2. Verified live afterwards: the served bundle contains **0** occurrences of the token
+and **0** references to `wm.marketingtool.pro`, all chunks and sampled images return 200,
+and the app serves 200.
+
+There is **no deploy script on the box** — dist copies are manual. The deploy procedure
+that worked:
+
+```
+npm run build
+rsync -az --delete dist/assets/ root@62.72.58.221:/root/web-app/dist/assets/
+rsync -az dist/index.html dist/manifest.json dist/robots.txt dist/favicon.* \
+      dist/logo192.png dist/logo512.png root@62.72.58.221:/root/web-app/dist/
+```
+
+Only `assets/` plus the root files need shipping (~11 MB); `images/` and `videos/` are
+static media already on the server. The pre-deploy snapshot is at
+`/root/web-app/dist-backup-predeploy-20260910-195358`. Three stale 1.6 GB tarballs were
+removed during this deploy, taking the box from 42 GB to 37 GB used.
 
 ### Proxy allowlist — gap found and FIXED 2026-09-11
 
@@ -203,8 +230,9 @@ check; 362 do not. The weakness is inside the check — it builds an SSL context
 - **Five of ten AI Router tasks silently downgrade to gpt-4o-mini** (see table above).
 - **`marketingtool-agent` Cloud Run service does not exist** — the web app's designated
   tool engine per the spec has never been deployed.
-- **Production runs a 12 Apr 2026 build, 272 commits behind**, with the Windmill token in
-  the public bundle.
+- ~~Production runs a 12 Apr 2026 build with the Windmill token in the public bundle~~ —
+  **REDEPLOYED 2026-09-11**, verified token-free live.
+- **`origin/main` still holds the vulnerable client** — the fix is unmerged. See above.
 - ~~`scripts` missing from the proxy 403 list~~ — **FIXED 2026-09-11**, verified 403.
 - **`/api/tools/`** on VPS 2 proxies to VPS 1 `:3001` — nothing listens there. Returns
   **504** (connection timeout), not 502.
