@@ -154,29 +154,75 @@ vulnerable bundle.
 Windmill token, and sends only the Appwrite JWT. All five call sites use that same default.
 `grep -rn WINDMILL_TOKEN src/` returns nothing.
 
-The bundle that had been live since **12 Apr 2026** carried the Windmill token in five JS
-chunks and called `wm.marketingtool.pro` directly, bypassing the proxy.
+The bundle live since **12 Apr 2026** carries the Windmill token in five JS chunks and
+calls `wm.marketingtool.pro` directly, bypassing the proxy. **It is still what production
+serves**, because the redeploy attempted on 2026-09-11 had to be rolled back.
 
-**Redeployed 2026-09-11.** Built from the local `main` source, verified before upload
-(zero token occurrences, no `wm.` reference, correct Appwrite endpoint), then rsynced to
-VPS 2. Verified live afterwards: the served bundle contains **0** occurrences of the token
-and **0** references to `wm.marketingtool.pro`, all chunks and sampled images return 200,
-and the app serves 200.
+### YOU CANNOT REBUILD THIS APP RIGHT NOW — `.env` IS MISSING
 
-There is **no deploy script on the box** — dist copies are manual. The deploy procedure
-that worked:
+`test -f .env` in the repo root returns false. The file does not exist in the working copy.
+Vite therefore falls back on every variable, and the resulting bundle **cannot log anyone
+in**: the Appwrite client falls back to `http://localhost/v1` with an empty project id, so
+the Google OAuth URL becomes
 
 ```
+http://localhost/v1/account/sessions/oauth2/google?...&project=
+```
+
+which the browser refuses. Firebase, Supabase and the MUI X Pro licence are lost the same
+way. Restore `.env` before any build. The variables the source reads (names only, 24 of
+them; note there is **no** `VITE_WINDMILL_TOKEN` — the source is token-free):
+
+```
+VITE_APPWRITE_ENDPOINT              VITE_APPWRITE_PROJECT_ID
+VITE_WINDMILL_URL                   VITE_WINDMILL_WORKSPACE
+VITE_APP_SUPABASE_URL               VITE_APP_SUPABASE_ANON_KEY
+VITE_APP_FIREBASE_API_KEY           VITE_APP_FIREBASE_APP_ID
+VITE_APP_FIREBASE_AUTH_DOMAIN       VITE_APP_FIREBASE_PROJECT_ID
+VITE_APP_FIREBASE_STORAGE_BUCKET    VITE_APP_FIREBASE_MESSAGING_SENDER_ID
+VITE_APP_FIREBASE_MEASUREMENT_ID    VITE_APP_MUI_X_LICENSE_KEY
+VITE_MUI_X_LICENSE_KEY              VITE_APP_BASE_URL
+VITE_APP_API_HOST                   VITE_APP_VERSION
+VITE_APP_ANALYTICS_ID               VITE_APP_CLARITY_ID
+VITE_APP_NOTIFY_ID                  VITE_APP_AWS_REGION
+VITE_APP_AWS_USER_POOL_ID           VITE_APP_AWS_USER_POOL_WEB_CLIENT_ID
+```
+
+Known public values: the Appwrite endpoint is `https://api.marketingtool.pro/v1` and the
+Appwrite project id is `6952c8a0002d3365625d` (project name "MarketingTool", read from the
+Appwrite database). `VITE_WINDMILL_URL` must be `https://app.marketingtool.pro` so the
+proxy is used.
+
+### Deploy procedure, and the check that must not be skipped
+
+```
+cd <repo root, WITH .env present>     # not `npm --prefix` — Vite reads .env from cwd
 npm run build
+# VERIFY BEFORE UPLOAD — absence checks alone are not enough:
+grep -l "api.marketingtool.pro/v1" dist/assets/*.js   # MUST match something
+grep -l "localhost/v1"             dist/assets/*.js   # MUST match nothing
+grep -l "wm.marketingtool.pro"     dist/assets/*.js   # MUST match nothing
 rsync -az --delete dist/assets/ root@62.72.58.221:/root/web-app/dist/assets/
 rsync -az dist/index.html dist/manifest.json dist/robots.txt dist/favicon.* \
       dist/logo192.png dist/logo512.png root@62.72.58.221:/root/web-app/dist/
 ```
 
 Only `assets/` plus the root files need shipping (~11 MB); `images/` and `videos/` are
-static media already on the server. The pre-deploy snapshot is at
-`/root/web-app/dist-backup-predeploy-20260910-195358`. Three stale 1.6 GB tarballs were
-removed during this deploy, taking the box from 42 GB to 37 GB used.
+static media already on the server.
+
+### Incident 2026-09-11 — deploy broke login, rolled back
+
+A rebuild was deployed and it took Google OAuth down, because the build ran via
+`npm --prefix <dir>`, which leaves the working directory elsewhere, and because `.env` was
+missing anyway. The pre-deploy verification only checked that the Windmill token was
+**absent** and never checked that the Appwrite endpoint was **present**, so a bundle that
+could not authenticate passed as clean.
+
+Rolled back from `/root/web-app/dist-backup-predeploy-20260910-195358`; login restored and
+verified (the `appwrite-*.js` chunk again carries the real endpoint and no localhost
+fallback). **Lesson: every deploy check needs a MUST-BE-PRESENT list, not just a
+MUST-BE-ABSENT list.** Three stale 1.6 GB tarballs were removed during the attempt, taking
+the box from 42 GB to 37 GB used.
 
 ### Proxy allowlist — gap found and FIXED 2026-09-11
 
@@ -268,8 +314,10 @@ Two real defects in the flow the customer actually walks:
 - **Five of ten AI Router tasks silently downgrade to gpt-4o-mini** (see table above).
 - **`marketingtool-agent` Cloud Run service does not exist** — the web app's designated
   tool engine per the spec has never been deployed.
-- ~~Production runs a 12 Apr 2026 build with the Windmill token in the public bundle~~ —
-  **REDEPLOYED 2026-09-11**, verified token-free live.
+- **Production still runs the 12 Apr 2026 build with the Windmill token in the public
+  bundle.** A redeploy on 2026-09-11 broke login and was rolled back. It cannot be retried
+  until `.env` is restored — see the deploy section.
+- **`.env` is missing from the working copy**, so nobody can build a working bundle today.
 - **`origin/main` still holds the vulnerable client** — the fix is unmerged. See above.
 - ~~`scripts` missing from the proxy 403 list~~ — **FIXED 2026-09-11**, verified 403.
 - **`/api/tools/`** on VPS 2 proxies to VPS 1 `:3001` — nothing listens there. Returns
