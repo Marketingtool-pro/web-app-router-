@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 
 /***************************  MENU COLLAPSED - RECURSIVE FUNCTION  ***************************/
 
@@ -42,21 +42,29 @@ function setParentOpenedMenu(items, pathname, menuId, setSelected, setOpen) {
  */
 
 export default function useMenuCollapse(menu, pathname, miniMenuOpened, setSelected, setOpen, setAnchorEl) {
+  // The state setters and the mini-menu flag are read through a ref so that the effect
+  // below can declare an exhaustive dependency list (route / menu shape only) without
+  // re-running on every parent render. This keeps the original behaviour and removes the
+  // stale `eslint-disable react-hooks/exhaustive-deps` comment, which the ESLint scanner
+  // reported as an unknown rule.
+  const latest = useRef({ miniMenuOpened, setSelected, setOpen, setAnchorEl });
+  latest.current = { miniMenuOpened, setSelected, setOpen, setAnchorEl };
+
   useEffect(() => {
-    setOpen(false); // Close the menu initially
+    const { miniMenuOpened: isMiniOpen, setSelected: select, setOpen: open, setAnchorEl: setAnchor } = latest.current;
+
+    open(false); // Close the menu initially
 
     // Reset selection based on menu state
-    if (!miniMenuOpened) {
-      setSelected(null);
-    } else {
-      if (setAnchorEl) setAnchorEl(null);
+    if (!isMiniOpen) {
+      select(null);
+    } else if (setAnchor) {
+      setAnchor(null);
     }
 
     // If menu has children, determine which should be opened
     if (menu.children?.length) {
-      setParentOpenedMenu(menu.children, pathname, menu.id, setSelected, setOpen);
+      setParentOpenedMenu(menu.children, pathname, menu.id, select, open);
     }
-
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [pathname, menu.children]);
+  }, [pathname, menu.children, menu.id]);
 }
