@@ -374,6 +374,11 @@ reply to the Trust and Safety email.
 - One page at a time — the user says which.
 - Never display a tool count anywhere in the product.
 - No demo or fake data. Show zeros when there is no data.
+  **The single exception is `/ad-library`.** It is the one intentional demo page: script
+  based, sample ads, no vendor API. `src/views/admin/ad-library/index.jsx` imports
+  `searchAdLibrary` but falls back to sample ads with the notice "Ad Library search is not
+  configured yet. Showing sample ads below." That is by design. Do **not** report it as
+  fake data, and do not "fix" it by wiring a live API unless the owner asks.
 - Read files before changing them.
 - Template components are polished — inject real data, do not rewrite them.
 - No external payment links — direct integration only, for compliance.
