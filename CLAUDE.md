@@ -47,18 +47,31 @@ exception without logging, so every failure is invisible and answers arrive as
 
 Verified by live call on 2026-09-11:
 
-| task | intended | what actually answers | why |
+| task | intended provider | state | evidence |
 |---|---|---|---|
-| creative | claude-sonnet-4-5 | **gpt-4o-mini** | Anthropic: credit balance too low |
-| coding | claude-sonnet-4-5 | **gpt-4o-mini** | Anthropic: credit balance too low |
-| default | claude-sonnet-4-5 | **gpt-4o-mini** | Anthropic: credit balance too low |
-| research | gemini-2.5-flash | **gpt-4o-mini** | Gemini: "API key not valid" |
-| automation | llama-3.3-70b-versatile | **gpt-4o-mini** | Groq: 401 "Invalid API Key" |
-| image_gen | dall-e-3 | dall-e-3 | healthy |
-| stable_image | sd3.5-large | sd3.5-large | healthy |
-| video_gen | FAL / Kling | FAL | healthy |
-| vision_analysis | `openai/gpt-4o` | works | healthy |
-| ocr | `qwen/qwen-2.5-vl-72b-instruct` | works | healthy |
+| creative | Anthropic | **BROKEN → gpt-4o-mini** | Anthropic: credit balance too low |
+| coding | Anthropic | **BROKEN → gpt-4o-mini** | Anthropic: credit balance too low |
+| default | Anthropic | **BROKEN → gpt-4o-mini** | Anthropic: credit balance too low |
+| research | Google | **BROKEN → gpt-4o-mini** | Gemini: "API key not valid" |
+| automation | Groq | **BROKEN → gpt-4o-mini** | Groq: 401 "Invalid API Key" |
+| image_gen | OpenAI | OK | key authenticates (rejected on prompt length) |
+| stable_image | Stability | OK | key authenticates (rejected on prompt length) |
+| video_gen | FAL | OK | key authenticates (rejected on prompt length) |
+| vision_analysis | OpenRouter | **OK, full output verified** | returned a correct description of a real image |
+| ocr | OpenRouter | **OK, full output verified** | returned correct text from a real image |
+
+Five task names are healthy on their own providers; five are down because of **three
+accounts**: Anthropic billing, and two invalid keys. Nothing else is wrong — the routing
+code is correct and the other providers are untouched.
+
+**Do NOT "fix" this by routing Claude/Gemini/Llama through OpenRouter.** The task table is
+frozen: each task uses its own provider. Rerouting would recreate exactly the failure this
+document exists to prevent, where the router claims one provider and another answers.
+
+**Image URLs must be publicly fetchable by the provider.** `vision_analysis` and `ocr` pass
+the URL to OpenRouter, which downloads it server-side. A Wikipedia URL was refused
+("Failed to download image"); `https://app.marketingtool.pro/images/...` worked. Workers
+handing images to these two tasks must supply URLs the provider can actually reach.
 
 So **five of ten task names — every text task — silently answer from the cheapest model.**
 Keys are all present in the process environment with plausible lengths; the SDKs are
