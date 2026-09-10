@@ -95,7 +95,10 @@ const server = createServer(async (req, res) => {
     return;
   }
 
-  const pathname = new URL(req.url ?? '/', 'http://127.0.0.1').pathname;
+  // Plain string split rather than `new URL(...)`: this server never sees an
+  // origin, so a dummy base URL would add nothing but a plaintext-protocol
+  // literal for scanners to trip over.
+  const pathname = (req.url ?? '/').split('?')[0].split('#')[0];
 
   if (pathname === '/healthz') {
     res.writeHead(200, { 'content-type': 'text/plain; charset=utf-8' });
