@@ -276,10 +276,33 @@ imports `src/router.tsx`**, so the whole TanStack Start scaffold is unreachable:
 `src/router.tsx`, `src/routes/index.tsx`, `src/routes/about.tsx`, `src/components/Header.tsx`,
 plus a second `vite.config.ts` that never wins over `vite.config.mjs`.
 
+Proven against a real build, not inferred:
+
+| grepped in `dist/assets/*.js` | files |
+|---|---|
+| `createFileRoute` / `createRootRoute` / `TanStackRouterDevtools` | **0** |
+| `useReactTable` / `getCoreRowModel` | 3 |
+| `createBrowserRouter` / `RouterProvider` / `useNavigate` | 1 |
+
+`src/routeTree.gen.*` does not exist either, so the TanStack router plugin has **never
+run**. TanStack Router and Start ship nothing. TanStack Table really does ship.
+
+**The TanStack API keys in the owner's account are unused by this repo.** Nothing in `src/`
+references a TanStack key, there is no such environment variable, and the only file
+mentioning TanStack devtools is the dead `vite.config.ts`. One key dates from 8 Apr 2026,
+the same period as the scaffold.
+
 That scaffold is why the stack looks confusing. It is a starter template that landed in the
 repo and was never removed. Safe to delete along with `@tanstack/react-start`,
 `@tanstack/router-plugin`, `@tanstack/react-router-ssr-query`, `@tanstack/react-router-devtools`
 and `@tanstack/devtools-vite`. Keep `@tanstack/react-table` — 17 files depend on it.
+
+### Licences: SaasAble needs no key, MUI X Pro does
+
+`src/config/muiLicense.js` is the **only** runtime licence gate in the entire app. A grep
+for any SaasAble licence check across `src/` returns nothing. SaasAble is a one-time
+template purchase that ships source; there is no key to install and nothing watermarks.
+MUI X Pro is the opposite: a runtime key, checked on every render.
 
 ### MUI X Pro is required, and the key is currently unset
 
