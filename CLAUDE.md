@@ -77,6 +77,20 @@ The `/` endpoint still prints three **stale labels** — "Claude Sonnet 4" (it i
 "Stable Diffusion 3" (3.5-large), "Qwen3 VL 8B" (Qwen2.5-VL-72B). Cosmetic, but it is what
 callers are told.
 
+### Provider failures are now LOGGED (patched 2026-09-11)
+
+`_first_ok()` used to catch every provider exception into a string and only surface it if
+*all* candidates failed. Since OpenRouter always succeeded, primary-provider failures were
+completely invisible. It now prints each failure before falling through:
+
+```
+[AI-ROUTER] provider FAILED name=claude (primary) err=...
+```
+
+Check with `pm2 logs ai-router --nostream | grep AI-ROUTER`. Backup of the previous file is
+at `/root/app.py.bak-*`. This is how the Anthropic message was confirmed verbatim:
+*"Your credit balance is too low to access the Anthropic API."*
+
 ### THERE ARE TWO SEPARATE KEY STORES — THIS IS THE TRAP
 
 Fixing an API key in **Appwrite does not reach the AI Router.** They are different stores
@@ -224,6 +238,30 @@ Real, not decorative: scripts call Appwrite `/account` with the customer's JWT a
 the returned `$id` against the claimed `userId`. **546 of 908** tools scripts carry that
 check; 362 do not. The weakness is inside the check — it builds an SSL context with
 `check_hostname = False` and `verify_mode = CERT_NONE`, so that hop trusts any certificate.
+
+## The signup → ads-connect flow (verified 2026-09-11)
+
+```
+marketingtool.pro  →  "Get Started"  →  app.marketingtool.pro/login and /register
+                   →  Appwrite auth  →  web app  →  ads-connect popup  →  full app
+```
+
+The apex links are correct: both `/login` and `/register` on the app domain. The popup calls
+three Windmill scripts. Their live state:
+
+| script called by the UI | exists in Windmill | validates the Appwrite JWT |
+|---|---|---|
+| `f/tools/google-ads-connect` | yes | **yes** |
+| `f/tools/fb-ads-connect` | yes | **NO** |
+| `f/tools/instagram-connect` | **NO — does not exist at all** | n/a |
+
+Two real defects in the flow the customer actually walks:
+
+1. **Instagram connect is dead.** `src/views/admin/ig-connect-callback.jsx` calls
+   `f/tools/instagram-connect`, and no script by that name exists, archived or not. Every
+   other `instagram-*` script in the workspace is archived.
+2. **`f/tools/fb-ads-connect` does no JWT validation**, unlike its Google counterpart. It
+   accepts whatever user id it is handed.
 
 ## Known broken — do not assume these work
 
