@@ -1,108 +1,226 @@
 # MarketingTool — Web App (Customer Portal)
 
-> Every fact here was verified live on 2026-08-10 by SSH into both VPS, live HTTP probes,
-> and direct Postgres queries. Where reality differs from the old design docs, reality wins
-> and the gap is called out. Do not "correct" this file back to the aspirational version.
+> Every fact here was verified live on **2026-09-11** by SSH into both VPS, live HTTP
+> probes, direct Postgres/MariaDB queries, and live calls to the AI Router. Where reality
+> differs from the design docs, reality wins and the gap is called out. Do not "correct"
+> this file back to the aspirational version.
+>
+> The design intent lives in the owner's architecture spec. This file records what is
+> **actually running**. When the two disagree, that disagreement is the point of this file.
 
 ## THIS IS A CUSTOMER PORTAL, NOT ADMIN
 
 - Web App = desktop only (1920px), dark theme. React + Vite + MUI 9 (paid SaasAble template).
-- Phone App = separate repo, separate stack. `/Users/loken/ai-marketingtool-llc/AiMarketingtool-pro-fbaf2fad`
+- Phone App = separate repo, separate stack (Appwrite + Firebase). Not this project.
+  `/Users/loken/ai-marketingtool-llc/AiMarketingtool-pro-fbaf2fad`
+- Everything here is being moved to **real API** work. No mock data anywhere.
 
-## Real infrastructure (verified)
+## Real infrastructure (verified 2026-09-11)
 
 | | VPS 1 | VPS 2 |
 |---|---|---|
 | IP | `31.220.107.19` | `62.72.58.221` |
 | Hostinger | `srv1073584`, KVM 8 — 8 vCPU / 32 GB / 400 GB | `srv1350977`, KVM 2 — 2 vCPU / 8 GB / 100 GB |
-| Runs | Appwrite (25 containers), Windmill (5), AI Router (PM2), nginx, MariaDB | Web app dist, Supabase (13 containers), nginx |
+| Disk | 88G / 387G used (23%) | 42G / 96G used (44%) |
+| Containers | 33 total: Appwrite (25), Windmill (5), NPM, openruntimes-executor, root-server-admin | 15 total: Supabase (13) + 2 unrelated |
+| Also runs | AI Router under PM2, MariaDB (shared with a NocoDB install) | web app dist, nginx 1.24 |
 | DNS | `marketingtool.pro`, `auth.`, `wm.`, `api.`, `media.` | `app.marketingtool.pro` |
 
-There is **no Hostinger cloud firewall** on either box. VPS 1 has no UFW; protection is
-hand-written iptables rules that DROP `:9000` externally and allow it from localhost +
-Docker nets. Everything else bound to `0.0.0.0` is publicly reachable.
+`media.marketingtool.pro` resolves to VPS 1 but **has no proxy host defined**, so it fails
+the TLS handshake with `unrecognized name`. Only three proxy hosts exist: apex+www,
+api+auth, and wm.
 
-## Request path — INTENDED vs ACTUAL
+VPS 1 `nginx.service` is **failed but enabled** — nginx-proxy-manager owns 80/443/81, so
+everything in `/etc/nginx/sites-enabled/` there is inert. The apex is **not a static
+docroot**: `/var/www/aiwave/` is a Django app on SQLite.
 
-Intended (and VPS 2's nginx really does implement it):
+## AI Router — READ THIS FIRST, HALF OF IT IS SILENTLY DOWNGRADED
+
+The router is up (PM2 `ai-router`, uvicorn on `:9000`) and **correctly firewalled** —
+iptables accepts 9000 only from localhost and Docker nets and DROPs the rest. Verified
+refused from the public internet.
+
+The routing **code is correct**: each task tries its own model first and treats OpenRouter
+as an error path. But three provider accounts are failing, and `_first_ok()` swallows the
+exception without logging, so every failure is invisible and answers arrive as
+`gpt-4o-mini`.
+
+Verified by live call on 2026-09-11:
+
+| task | intended | what actually answers | why |
+|---|---|---|---|
+| creative | claude-sonnet-4-5 | **gpt-4o-mini** | Anthropic: credit balance too low |
+| coding | claude-sonnet-4-5 | **gpt-4o-mini** | Anthropic: credit balance too low |
+| default | claude-sonnet-4-5 | **gpt-4o-mini** | Anthropic: credit balance too low |
+| research | gemini-2.5-flash | **gpt-4o-mini** | Gemini: "API key not valid" |
+| automation | llama-3.3-70b-versatile | **gpt-4o-mini** | Groq: 401 "Invalid API Key" |
+| image_gen | dall-e-3 | dall-e-3 | healthy |
+| stable_image | sd3.5-large | sd3.5-large | healthy |
+| video_gen | FAL / Kling | FAL | healthy |
+| vision_analysis | `openai/gpt-4o` | works | healthy |
+| ocr | `qwen/qwen-2.5-vl-72b-instruct` | works | healthy |
+
+So **five of ten task names — every text task — silently answer from the cheapest model.**
+Keys are all present in the process environment with plausible lengths; the SDKs are
+current (anthropic 0.84.0, google-genai 1.66.0, openai 2.26.0); all provider hosts are
+reachable from the box. The failures are account-side: one billing, two bad keys.
+
+To see a swallowed provider error without adding logging, force both providers to fail by
+sending an over-long prompt — the 502 then contains both error strings:
 
 ```
-Browser → app.marketingtool.pro (VPS 2 nginx)
-            ├ 403 on variables|users|workers|workspaces|groups|resources|schedules|settings|configs|oidc
-            ├ injects Windmill token server-side
-            └ forwards customer JWT as X-Appwrite-JWT
-          → 31.220.107.19:3002 (Windmill) → AI Router 127.0.0.1:9000 → Supabase
+curl -s -X POST http://127.0.0.1:9000/generate -H 'Content-Type: application/json' \
+  -d "{\"task\":\"creative\",\"prompt\":\"$(python3 -c 'print("x"*900000)')\"}"
 ```
 
-Actual, today:
+The `/` endpoint still prints three **stale labels** — "Claude Sonnet 4" (it is 4.5),
+"Stable Diffusion 3" (3.5-large), "Qwen3 VL 8B" (Qwen2.5-VL-72B). Cosmetic, but it is what
+callers are told.
 
-```
-Browser → wm.marketingtool.pro (VPS 1) → 127.0.0.1:3002
-          no path allowlist, no token injection
-          browser sends the Windmill token itself, compiled into the public JS bundle
-```
+### THERE ARE TWO SEPARATE KEY STORES — THIS IS THE TRAP
 
-`VITE_WINDMILL_URL` points at `wm.marketingtool.pro`, so the VPS 2 proxy is never in the
-path. To close this: set `VITE_WINDMILL_URL=https://app.marketingtool.pro`, remove
-`VITE_WINDMILL_TOKEN` from the build, rebuild. Also note `scripts` is missing from the
-403 list, and VPS 1 `:3002` is directly reachable so the proxy stays bypassable until
-that port is firewalled.
+Fixing an API key in **Appwrite does not reach the AI Router.** They are different stores
+serving different paths:
 
-## Component roles
-
-- **React Web App** — UI only. Desktop 1920px. Must hold no secrets.
-- **Appwrite** (VPS 1) — auth only: JWT, OAuth Google/Facebook/Apple, email+password. Plus Stripe.
-- **Supabase** (VPS 2) — Postgres only. **29 tables, RLS verified ON for all 29.** Supabase Auth disabled. Frontend never queries it directly; only Windmill does, with the service_role key.
-- **Windmill** (VPS 1) — all backend logic in Python. Validates the Appwrite JWT, resolves user/tenant, queries Supabase, calls the AI Router. Workspace is **`marketingtool-pro`** (the code's fallback string `marketingtool` is wrong and would 404 if the env var is ever unset).
-- **AI Router** (VPS 1) — FastAPI under PM2 as `ai-router`, uvicorn on `:9000`, reached at `127.0.0.1:9000` or `172.17.0.1:9000` from Docker. Never exposed.
-
-## AI Router — 10 tasks, 8 distinct models
-
-Both "10 models" and "8 models" appear in old docs. Both were right about different
-things: there are **10 task names** mapping to **8 distinct models**, because creative,
-coding and default all route to Claude.
-
-| task | model actually called | provider |
+| store | who reads it | holds |
 |---|---|---|
-| creative · coding · default | `claude-sonnet-4-5` | Anthropic |
-| research | `gemini-2.5-flash` | Google |
-| image_gen | `dall-e-3` | OpenAI |
-| stable_image | `sd3.5-large` | Stability |
-| video_gen | Kling video | FAL.ai |
-| vision_analysis | `openai/gpt-4o` | OpenRouter |
-| ocr | `qwen/qwen-2.5-vl-72b-instruct` | OpenRouter |
-| automation | `llama-3.3-70b-versatile` | Groq |
+| Appwrite project variables | Appwrite Functions (`tool-executor`, `chat-ai`, phone path) | `ANTHROPIC_API_KEY`, `GEMINI_API_KEY`, `FB_APP_ID`, `FB_ADS_APP_ID`, `STRIPE_*`, `MSG91_*`, `BIRD_*`, `WINDMILL_TOKEN` |
+| VPS 1 root env files + PM2 saved env | the AI Router process on `:9000` | its own copy of every provider key |
 
-`TASK_MAP` in `/root/app.py` still shows three stale labels — "Claude Sonnet 4" (it's 4.5),
-"Stable Diffusion 3" (it's 3.5-large), "Qwen3 VL 8B" (it's Qwen2.5-VL-72B). Cosmetic, but
-the `/` endpoint reports them to callers.
+Verified 2026-09-11: the Appwrite variable list was updated and the router still returned
+the **identical** three errors, because the router never reads Appwrite. Note also that
+**`GROQ_API_KEY` does not exist in Appwrite at all.**
 
-Contract: Windmill POSTs `{"task": "...", "prompt": "..."}` to `http://localhost:9000/generate`.
-`vision_analysis` and `ocr` also need `image_url` or `image_urls`. Unknown task → 400 with
-the valid list. Provider failure → 502 with a clean message.
-
-### Key loading — READ THIS BEFORE DEBUGGING THE ROUTER
-
-`/root/.ai-api-env` looks like the config file but **`start-ai-router.sh` never sources it**.
-Editing that file alone does nothing. Keys reach the process either from the inline `export`
-in `start-ai-router.sh`, from GCloud Secret Manager via `get_secret(...)`, or from the PM2
-saved environment. Current live env is correct and persisted in `/root/.pm2/dump.pm2`, with
-`pm2-root` enabled at boot. To add a key durably:
+Fixing the router is a VPS 1 operation, not an Appwrite one:
 
 ```
 set -a; . /root/.ai-api-env; set +a; pm2 restart ai-router --update-env; pm2 save
 ```
 
+And the Anthropic failure is **billing, not a key** — no key change will clear
+"credit balance too low". That needs credit on the Anthropic account.
+
+### Key loading — corrected
+
+`start-ai-router.sh` **does** source `/root/.ai-api-env` (line 5, inside `set -a`), and
+sources `/root/ai-router-keys.env` after it. An older note in this file said it never
+sources that file; that was wrong. GCloud Secret Manager access from the box currently
+fails, so `get_secret()` falls back to the environment. To add a key durably:
+
+```
+set -a; . /root/.ai-api-env; set +a; pm2 restart ai-router --update-env; pm2 save
+```
+
+## Request path — INTENDED vs ACTUAL
+
+Intended (owner's spec): browser → VPS 2 nginx (injects Windmill token, allows only
+`/jobs/run_wait_result/`) → per-page GCloud Agent Worker on Cloud Run → AI Router.
+
+Actual today:
+
+- **The GCloud Agent Worker track does not exist.** `marketingtool-agent` is not deployed
+  in project `marketing-tool-484720`; the only Cloud Run services are
+  `aimarketingtool-pro-fbaf2fad-git` and `phone`, both phone-side. Its nginx route on VPS 2
+  is commented out, and `src/` contains **zero** references to it or any `run.app` host.
+- The frontend calls Windmill `f/tools/*` through the VPS 2 proxy.
+
+### Source is fixed; production is not
+
+`src/utils/api/windmill/index.js` defaults to `https://app.marketingtool.pro`, holds **no**
+Windmill token, and sends only the Appwrite JWT. All five call sites use that same default.
+`grep -rn WINDMILL_TOKEN src/` returns nothing.
+
+**The deployed bundle predates that fix.** `/root/web-app/dist` on VPS 2 is dated
+**12 Apr 2026** and the repo is **272 commits ahead** of it. The April bundle still points
+at `wm.marketingtool.pro` and still carries the Windmill token in five JS chunks.
+Deploying the current build closes both the token exposure and the proxy bypass with no
+code to write. There is **no deploy script on the box** — dist copies are manual, and the
+stale ones plus two 1.6 GB tarballs account for 9.1 GB under `/root/web-app`.
+
+### Proxy allowlist gap
+
+The spec says only the job-run path is allowed. It is not. `scripts` is **missing** from
+the 403 list, so this returns 200 and the real script inventory with no credentials:
+
+```
+curl https://app.marketingtool.pro/api/w/marketingtool-pro/scripts/list
+```
+
+Blocked today: variables, users, workers, workspaces, groups, resources, schedules,
+settings, configs, oidc. Add `scripts`. VPS 1 `:3002` is also directly reachable, so the
+proxy stays bypassable until that port is firewalled.
+
+## Component roles
+
+- **React Web App** — UI only. Desktop 1920px. Holds no secrets (verified in source).
+- **Appwrite** (VPS 1) — auth only: JWT, OAuth Google/Facebook/Apple, email+password, plus
+  Stripe. **212 registered users**, 179 sessions, 102 OAuth identities, 16,665 function
+  executions. Six functions, all enabled, all node-16.0 v5: `tool-executor`, `chat-ai`,
+  `Stripe Checkout`, `Phone Session`, `delete-account`, `image-generator`.
+  Appwrite's own database (`database_1`) holds live collections with the **same names** as
+  the Supabase tables — `generations`, `credit_usage`, `subscriptions`, `tool_runs`,
+  `tool_results`, `users`, `chat_sessions` and more. That is where real rows exist today.
+- **Supabase** (VPS 2) — Postgres only. **29 tables** (the spec says 28), RLS enabled on all
+  29, but **12 carry zero policies** — which is deny-all for ordinary roles, safe rather
+  than broken, and reachable only by the service role Windmill uses.
+  **Every one of the 29 tables has zero rows.**
+- **Windmill** (VPS 1) — all backend logic in Python. Workspace `marketingtool-pro`. The
+  old warning about a wrong `marketingtool` fallback string is **stale** — all three call
+  sites now default to `marketingtool-pro`, verified 2026-09-11.
+- **AI Router** (VPS 1) — FastAPI under PM2, uvicorn `:9000`, never exposed. See above.
+
+### Windmill inventory — most of it has never run
+
+| | count |
+|---|---|
+| scripts under `f/tools/` | 908 |
+| of those, ever executed | **9** |
+| distinct `f/tools/*` referenced by the frontend | 424 |
+| scripts under `f/mobile/` | 2 |
+| scripts under `f/admin/` | 12 |
+| jobs all time | 286,333 |
+
+Job volume is dominated by something that is not a customer feature:
+`u/admin/github_webhook_handler_final` accounts for **207,377** of those jobs and fired
+34,723 times on 9 Sep alone. With `f/tools/fetch-connected-accounts` at 60,250, those two
+are ~93% of all Windmill work ever done here. Real tool runs are in single digits.
+
+### JWT validation
+
+Real, not decorative: scripts call Appwrite `/account` with the customer's JWT and compare
+the returned `$id` against the claimed `userId`. **546 of 908** tools scripts carry that
+check; 362 do not. The weakness is inside the check — it builds an SSL context with
+`check_hostname = False` and `verify_mode = CERT_NONE`, so that hop trusts any certificate.
+
 ## Known broken — do not assume these work
 
-- **VPS 1 public ports**: `3002` Windmill, `8081` Appwrite Console, `81` nginx-proxy-manager admin, `8080`, `8082`, `8443`, `25`. Only `9000` is firewalled.
-- **Windmill token ships in the public bundle** at `/assets/index-*.js`.
-- **`/api/tools/`** on VPS 2 proxies to VPS 1 `:3001` — nothing listens there. Always 502.
+- **Five of ten AI Router tasks silently downgrade to gpt-4o-mini** (see table above).
+- **`marketingtool-agent` Cloud Run service does not exist** — the web app's designated
+  tool engine per the spec has never been deployed.
+- **Production runs a 12 Apr 2026 build, 272 commits behind**, with the Windmill token in
+  the public bundle.
+- **`scripts` missing from the proxy 403 list** — unauthenticated inventory enumeration.
+- **`/api/tools/`** on VPS 2 proxies to VPS 1 `:3001` — nothing listens there. Returns
+  **504** (connection timeout), not 502.
 - **Google Ads Agent proxy** (`/api/google/` → Cloud Run) is commented out in the nginx config.
-- **`web-app.bak`** is still in `sites-enabled`, so nginx warns about a conflicting `app.marketingtool.pro` server name on :80 and :443.
-- **`f/tools/meta-webhook`** writes to a `webhook_logs` table that does not exist (0 rows in `pg_tables`); `except: pass` hides the 404 and it returns `success: true`. It also does no `X-Hub-Signature-256` verification, and posts the service_role key over plaintext HTTP to `62.72.58.221:8000`.
-- **Facebook App ID `1582682256320433`** is hardcoded in `ProfileLoginService.jsx`, `connect-ads/index.jsx`, `ConnectAdsModal.jsx` and shipped in the bundle, but it is neither of the two apps in the Meta account (`925198393533156` Live, `1414526646867223` In development).
-- **Google Ads developer token is TEST ACCESS ONLY** — Basic Access still pending, so the `adwords` scope cannot touch real accounts regardless of OAuth verification.
+- **`media.marketingtool.pro`** has no proxy host — TLS `unrecognized name`.
+- **VPS 1 public ports**: `3002` Windmill and `81` nginx-proxy-manager admin both answer
+  publicly; `8080`/`8081`/`8082` redirect, `8443` 404s. Only `9000` is firewalled.
+- **VPS 2 public ports**: Supabase Kong on `8000`/`8443` is bound to all interfaces (401s,
+  so the key gate holds). Two unrelated containers serve publicly on `32768` (Harness CI)
+  and `32769` (Super Productivity).
+- **`f/tools/meta-webhook`** writes to a `webhook_logs` table that does not exist; `except:
+  pass` hides the 404 and it returns `success: true`. No `X-Hub-Signature-256` verification.
+- **Facebook App ID `1582682256320433`** is hardcoded in `ProfileLoginService.jsx`,
+  `connect-ads/index.jsx` and `ConnectAdsModal.jsx` (verified 2026-09-11) and ships in the
+  bundle, but it matches **neither** app in the Meta account. The two real apps, read live
+  from the Meta developer API on 2026-09-11, are `2246709019441842` ("marketingtool") and
+  `1830149205008066` ("marketingtool pro"), both admin-role and active.
+  The prior file named `925198393533156` and `1414526646867223` — those were also wrong.
+- **Google Ads developer token now has BASIC ACCESS** (owner-confirmed 2026-09-11). The
+  prior "test access only" note is obsolete. The token value is held with the other
+  credentials and is deliberately not recorded in this file.
+- **`reports/` and `chart/` views contain no backend call** despite being listed as done.
 
 ## Google OAuth verification status
 
@@ -110,8 +228,10 @@ Requested scopes were trimmed from 9 to 5 in `ProfileLoginService.jsx` and
 `ConnectAdsModal.jsx`: `adwords`, `adsense.readonly`, `analytics.readonly`,
 `adsdartsearch`, `doubleclicksearch`, plus `email profile`. Removed: `adsense` (write),
 `analytics.manage.users`, `adsdatahub`, `realtime-bidding`, `service.management`.
-The Google Cloud console Data Access page still lists ~27 scopes and must be trimmed to
-match. Console edits do not restart review — you must reply to the Trust and Safety email.
+The five scopes were re-verified in source on 2026-09-11. The claim that the Google Cloud
+console Data Access page still lists ~27 scopes is **carried from the prior file and NOT
+re-verified** — it needs a console check. Console edits do not restart review — you must
+reply to the Trust and Safety email.
 
 ## Critical rules
 
@@ -119,15 +239,19 @@ match. Console edits do not restart review — you must reply to the Trust and S
 - Never touch `.env` or `.env.qa`.
 - Chat page and Command Centre are separate. Never mix.
 - One page at a time — the user says which.
-- Never display a tool count anywhere.
+- Never display a tool count anywhere in the product.
 - No demo or fake data. Show zeros when there is no data.
 - Read files before changing them.
 - Template components are polished — inject real data, do not rewrite them.
-- **Both apps use Windmill and the AI Router.** They are separated by folder, not by
-  instance. Confirmed by the owner and verified in the database:
-  - Phone app → Appwrite Functions (`tool-executor`, `chat-ai`) → `f/mobile/*` → AI Router
-  - Web app → `/jobs/run_wait_result/` → `f/tools/*` → AI Router
-  One Windmill workspace: `marketingtool-pro`. Appwrite is the login for both.
-  Do NOT write "strict isolation, never mix" — that phrasing was wrong and causes
-  false bug reports. The real rule is: **stay in your own folder.** A web feature must
-  call `f/tools/*`, never `f/mobile/*`, and vice versa.
+- No external payment links — direct integration only, for compliance.
+- **Both apps use Windmill and the AI Router**, separated **by folder, not by instance**.
+  One workspace: `marketingtool-pro`. A web feature calls `f/tools/*`, a mobile feature
+  calls `f/mobile/*`. Never cross. Do NOT write "strict isolation, never mix" — that
+  phrasing caused false bug reports. The real rule is: **stay in your own folder.**
+
+## Verify, never trust a config
+
+Every wrong answer in this project came from trusting a file instead of the running system.
+Before claiming anything works: `curl` the live URL, `ssh` the box, query the database, or
+call the router. A green config proves nothing. Being told you are wrong is not evidence
+that you are — go re-check.
