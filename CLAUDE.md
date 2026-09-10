@@ -605,6 +605,47 @@ Two real defects in the flow the customer actually walks:
   credentials and is deliberately not recorded in this file.
 - **`reports/` and `chart/` views contain no backend call** despite being listed as done.
 
+## META APP REVIEW — NOTHING WAS EVER SUBMITTED (read live 2026-09-11)
+
+The owner believed Meta App Review had been pending for nine months. It has not. Read
+straight from the Meta developer API:
+
+| app | id | submission | privileges held |
+|---|---|---|---|
+| marketingtool | `2246709019441842` | **NO_SUBMISSION / UNSUBMITTED** — a draft exists (`2246714072774670`), `submitted_time` is null | openid, public_profile, email |
+| marketingtool pro | `1830149205008066` | **NO_SUBMISSION**, never submitted | **none at all** |
+
+Nothing sits in a review queue. `is_pending` is `false` on both.
+
+**Compliance is clean** on the main app: `overall_status: compliant`, zero required actions,
+zero open violations. So nothing is blocking a submission either. It simply was not sent.
+
+### The ads permissions were never requested
+
+This is the deeper problem. The main app holds only **login-level** permissions. There is
+no `ads_read`, no `ads_management`, no `business_management`, no `pages_show_list`.
+
+`f/tools/fb-ads-connect` calls `GET /me/adaccounts`, which requires `ads_read` or
+`ads_management`. With only `public_profile`, `email` and `openid`, that call cannot return
+a customer's ad accounts. **The Meta ads connect flow cannot work on either of these apps
+as configured**, regardless of the code being correct.
+
+Three privileges are rejected on the main app: `gaming_profile`, `gaming_user_picture`, and
+`instagram_business_manage_messages`. The last one is the only item in the draft submission,
+so the one submission being prepared is for an Instagram messaging permission that has
+already been rejected — not for ads at all.
+
+### And the hardcoded App ID is a third app
+
+`ProfileLoginService.jsx`, `connect-ads/index.jsx` and `ConnectAdsModal.jsx` hardcode
+`1582682256320433`, which is **neither** app above. Whatever that ID is, it is not in the
+set this account grants, so it cannot be inspected or reviewed from here.
+
+**Order of work to make Meta ads real:** decide which app is the product, point the
+frontend at that ID, request `ads_read` plus `ads_management` (and `business_management`
+for account discovery), complete Data Use Checkup, then actually submit. Until submission
+happens, waiting achieves nothing.
+
 ## Google OAuth verification status
 
 Requested scopes were trimmed from 9 to 5 in `ProfileLoginService.jsx` and
