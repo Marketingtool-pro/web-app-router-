@@ -265,11 +265,48 @@ bypassable until that port is firewalled.
   `Stripe Checkout`, `Phone Session`, `delete-account`, `image-generator`.
   Appwrite's own database (`database_1`) holds live collections with the **same names** as
   the Supabase tables — `generations`, `credit_usage`, `subscriptions`, `tool_runs`,
-  `tool_results`, `users`, `chat_sessions` and more. That is where real rows exist today.
+  `tool_results`, `users`, `chat_sessions` and more. **Both stores hold real rows** — the
+  phone path writes here, the web path writes to Supabase. They are parallel, not a
+  duplicate waiting to be filled.
 - **Supabase** (VPS 2) — Postgres only. **29 tables** (the spec says 28), RLS enabled on all
-  29, but **12 carry zero policies** — which is deny-all for ordinary roles, safe rather
-  than broken, and reachable only by the service role Windmill uses.
-  **Every one of the 29 tables has zero rows.**
+  29. **15 carry zero policies**, which is deny-all for ordinary roles: safe rather than
+  broken, and reachable only by the service role Windmill uses.
+
+### Row counts — COUNT THEM PROPERLY (exact, 2026-09-11)
+
+> **Never use `pg_stat_user_tables.n_live_tup` for this.** It is a statistics estimate and
+> reads **0** for every table when the stats collector has been reset, which is what a
+> recent container restart does. An earlier pass in this project did exactly that and
+> reported "all 29 tables are empty", which was false and led to wrong conclusions about
+> the product being unused. Use `count(*)`.
+
+| table | rows | policies |
+|---|---|---|
+| campaign_metrics | 282 | 1 |
+| daily_summary | 142 | 1 |
+| tool_registry | 128 | 0 |
+| ad_accounts | 114 | 1 |
+| generations | 66 | 0 |
+| billing_transactions | 65 | 0 |
+| credit_usage | 65 | 0 |
+| workflow_runs | 47 | 2 |
+| campaigns | 34 | 0 |
+| subscriptions | 8 | 0 |
+| tenants | 1 | 1 |
+
+The other 18 tables are genuinely empty: accounts, ai_decision_memory, ai_router_logs,
+automation_logs, campaigns_v2, chat_messages, chat_sessions, engine_performance,
+execution_logs, favorites, insights, integrations, kpi_snapshots, mt_users,
+performance_daily, ratings, shares, sync_logs.
+
+**This product has real usage.** Customers have connected 114 ad accounts, 282 campaign
+metric rows and 142 daily summaries have synced from the platforms, and 66 AI generations
+with 65 credit-usage and 65 billing rows have been recorded against 8 subscriptions.
+Compared with the March 2026 reference snapshot, ad_accounts grew 43 → 114, campaigns
+31 → 34 and workflow_runs 46 → 47, so the pipeline is live and still moving.
+
+Note `mt_users` is empty while `ad_accounts` holds 114 rows, so accounts are keyed by the
+Appwrite user id directly rather than through a local users table.
 - **Windmill** (VPS 1) — all backend logic in Python. Workspace `marketingtool-pro`. The
   old warning about a wrong `marketingtool` fallback string is **stale** — all three call
   sites now default to `marketingtool-pro`, verified 2026-09-11.
