@@ -137,18 +137,24 @@ Deploying the current build closes both the token exposure and the proxy bypass 
 code to write. There is **no deploy script on the box** — dist copies are manual, and the
 stale ones plus two 1.6 GB tarballs account for 9.1 GB under `/root/web-app`.
 
-### Proxy allowlist gap
+### Proxy allowlist — gap found and FIXED 2026-09-11
 
-The spec says only the job-run path is allowed. It is not. `scripts` is **missing** from
-the 403 list, so this returns 200 and the real script inventory with no credentials:
+`scripts` was missing from the 403 list, so an unauthenticated request returned 200 and the
+full script inventory (nginx attaches its own admin token, so the caller needed nothing).
+
+Fixed on VPS 2 and verified live. The block list is now:
 
 ```
-curl https://app.marketingtool.pro/api/w/marketingtool-pro/scripts/list
+variables|users|workers|workspaces|groups|resources|schedules|settings|configs|oidc|
+scripts|flows|apps|folders|audit|acls|capture|http_triggers|websocket_triggers
 ```
 
-Blocked today: variables, users, workers, workspaces, groups, resources, schedules,
-settings, configs, oidc. Add `scripts`. VPS 1 `:3002` is also directly reachable, so the
-proxy stays bypassable until that port is firewalled.
+Verified after reload: scripts/flows/apps/folders all return 403, the execution path
+`jobs/run_wait_result` still works (404 for a nonexistent script, unchanged), and the app
+still serves 200. Previous config backed up under `/root/nginx-backups/`.
+
+**Still open:** VPS 1 `:3002` is directly reachable from the internet, so the proxy stays
+bypassable until that port is firewalled.
 
 ## Component roles
 
@@ -199,7 +205,7 @@ check; 362 do not. The weakness is inside the check — it builds an SSL context
   tool engine per the spec has never been deployed.
 - **Production runs a 12 Apr 2026 build, 272 commits behind**, with the Windmill token in
   the public bundle.
-- **`scripts` missing from the proxy 403 list** — unauthenticated inventory enumeration.
+- ~~`scripts` missing from the proxy 403 list~~ — **FIXED 2026-09-11**, verified 403.
 - **`/api/tools/`** on VPS 2 proxies to VPS 1 `:3001` — nothing listens there. Returns
   **504** (connection timeout), not 502.
 - **Google Ads Agent proxy** (`/api/google/` → Cloud Run) is commented out in the nginx config.
