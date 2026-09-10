@@ -7,21 +7,37 @@ name: Mark stale issues and pull requests
 
 on:
   schedule:
-  - cron: '44 22 * * *'
+    - cron: '44 22 * * *'
+  workflow_dispatch:
+
+# Default to read-only for anything not explicitly granted at job level.
+permissions:
+  contents: read
 
 jobs:
   stale:
-
     runs-on: ubuntu-latest
     permissions:
       issues: write
       pull-requests: write
 
     steps:
-    - uses: actions/stale@v5
-      with:
-        repo-token: ${{ secrets.GITHUB_TOKEN }}
-        stale-issue-message: 'Stale issue message'
-        stale-pr-message: 'Stale pull request message'
-        stale-issue-label: 'no-issue-activity'
-        stale-pr-label: 'no-pr-activity'
+      - uses: actions/stale@4391f3da665fdf50b6810c1a66712fb9ba21aa93  # v11.0.0
+        with:
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          days-before-stale: 60
+          days-before-close: 14
+          stale-issue-message: >-
+            This issue has had no activity for 60 days, so it has been marked stale.
+            It will be closed in 14 days unless there is new activity. Add a comment to keep it open.
+          stale-pr-message: >-
+            This pull request has had no activity for 60 days, so it has been marked stale.
+            It will be closed in 14 days unless there is new activity. Comment or push to keep it open.
+          close-issue-message: >-
+            Closing this issue because it has been stale for 14 days. Reopen it at any time.
+          close-pr-message: >-
+            Closing this pull request because it has been stale for 14 days. Reopen it at any time.
+          stale-issue-label: no-issue-activity
+          stale-pr-label: no-pr-activity
+          exempt-issue-labels: pinned,security,dependencies
+          exempt-pr-labels: pinned,security,dependencies
