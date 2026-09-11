@@ -31,7 +31,7 @@ import facebookImg from "@/assets/images/social/facebook.svg";
 import instagramImg from "@/assets/images/social/instagram.svg";
 
 // OAuth config
-const FB_APP_ID = "1582682256320433";
+const FB_APP_ID = "REPLACE_WITH_ACTIVE_META_APP_ID";
 const FB_SCOPES =
   "ads_read,ads_management,business_management,pages_read_engagement,pages_manage_ads,pages_show_list,pages_manage_metadata,instagram_basic,instagram_manage_insights,instagram_content_publish,instagram_manage_comments,read_insights,catalog_management,leads_retrieval,email";
 const IG_SCOPES =
