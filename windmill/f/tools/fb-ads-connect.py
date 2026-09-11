@@ -5,7 +5,6 @@ import hashlib
 import requests
 import urllib.request
 import urllib.error
-import ssl
 from datetime import datetime
 
 
@@ -20,14 +19,11 @@ def _validate_jwt(jwt_token, expected_uid=""):
     if not jwt_token:
         return None, "Authentication required"
     try:
-        _ctx = ssl.create_default_context()
-        _ctx.check_hostname = False
-        _ctx.verify_mode = ssl.CERT_NONE
         _req = urllib.request.Request(
             f"{_AW_ENDPOINT}/account",
             headers={"X-Appwrite-Project": _AW_PROJECT, "X-Appwrite-JWT": jwt_token},
         )
-        _resp = urllib.request.urlopen(_req, timeout=5, context=_ctx)
+        _resp = urllib.request.urlopen(_req, timeout=5)
         user = json.loads(_resp.read().decode())
         if expected_uid and user.get("$id") != expected_uid:
             return None, "User ID mismatch"
@@ -48,7 +44,7 @@ def main(fbAccessToken: str = "", userId: str = "", appwriteJwt: str = ""):
     if not fbAccessToken or not userId:
         return {"success": False, "error": "fbAccessToken and userId required"}
 
-    SUPABASE_URL = "http://62.72.58.221:8000"
+    SUPABASE_URL = "https://62.72.58.221:8000"
     sb_key = wmill.get_variable("f/tools/supabase_service_key")
     try:
         app_secret = wmill.get_variable("f/tools/fb_ads_app_secret")
@@ -94,16 +90,20 @@ def main(fbAccessToken: str = "", userId: str = "", appwriteJwt: str = ""):
         ad_params["appsecret_proof"] = proof
 
     accounts = []
+    adaccounts_fetch_ok = False
     try:
         r = requests.get("https://graph.facebook.com/v21.0/me/adaccounts", params=ad_params, timeout=15)
         if r.status_code == 200:
             accounts = r.json().get("data", [])
+            adaccounts_fetch_ok = True
         else:
             # A 200 with an empty list vs a 403 here is the difference between
             # "no ad accounts" and "this app lacks ads_read / ads_management".
             print(f"[fb-ads-connect] /me/adaccounts returned {r.status_code}: {r.text[:300]}")
+            return {"ok": False, "error": f"Meta ad accounts request failed with status {r.status_code}"}
     except Exception as e:
         print(f"[fb-ads-connect] /me/adaccounts call failed: {e}")
+        return {"ok": False, "error": "Meta ad accounts request failed"}
 
     saved = 0
     for acct in accounts:
