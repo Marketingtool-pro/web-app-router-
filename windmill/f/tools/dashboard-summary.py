@@ -3,7 +3,7 @@ import json
 import requests
 from datetime import datetime
 
-SUPABASE_URL = "http://62.72.58.221:8000"
+SUPABASE_URL = "https://62.72.58.221:8000"
 
 def _sb():
     key = wmill.get_variable("f/tools/supabase_service_key")
@@ -54,8 +54,6 @@ def _validate_jwt(jwt_token, expected_uid=""):
         return None, "Authentication required"
     try:
         _ctx = ssl.create_default_context()
-        _ctx.check_hostname = False
-        _ctx.verify_mode = ssl.CERT_NONE
         _req = urllib.request.Request(
             f"{_AW_ENDPOINT}/account",
             headers={"X-Appwrite-Project": _AW_PROJECT, "X-Appwrite-JWT": jwt_token},
@@ -251,6 +249,8 @@ def _run(userId):
             },
         },
     }
+
+    today = datetime.utcnow().strftime("%Y-%m-%d")
 
     return {
         "hasData": len(accounts) > 0 or len(campaigns) > 0 or meta_spend_total > 0,
