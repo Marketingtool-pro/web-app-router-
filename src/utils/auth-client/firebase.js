@@ -1,6 +1,6 @@
 // @third-party
-import { initializeApp, getApps, getApp } from 'firebase/app';
-import { getAuth } from 'firebase/auth';
+import { initializeApp, getApps, getApp } from "firebase/app";
+import { getAuth } from "firebase/auth";
 
 /***************************  AUTH CLIENT - FIREBASE  ***************************/
 
@@ -17,12 +17,12 @@ export function createFirebaseClient() {
     storageBucket: import.meta.env.VITE_APP_FIREBASE_STORAGE_BUCKET,
     messagingSenderId: import.meta.env.VITE_APP_FIREBASE_MESSAGING_SENDER_ID,
     appId: import.meta.env.VITE_APP_FIREBASE_APP_ID,
-    measurementId: import.meta.env.VITE_APP_FIREBASE_MEASUREMENT_ID
+    measurementId: import.meta.env.VITE_APP_FIREBASE_MEASUREMENT_ID,
   };
 
   // Validate required config
   if (!config.apiKey || !config.authDomain || !config.projectId || !config.appId) {
-    console.log('[Firebase Client] Missing required configuration variables.');
+    console.log("[Firebase Client] Missing required configuration variables.");
     return {};
   }
 

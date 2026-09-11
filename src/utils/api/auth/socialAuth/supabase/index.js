@@ -1,13 +1,13 @@
-import { createSupabaseClient } from '@/utils/auth-client/supabase';
+import { createSupabaseClient } from "@/utils/auth-client/supabase";
 
 const supabase = createSupabaseClient();
 
 export async function loginWithGoogle() {
   const { data, error } = await supabase.auth.signInWithOAuth({
-    provider: 'google',
+    provider: "google",
     options: {
-      redirectTo: `${window.location.origin}/oauth-callback`
-    }
+      redirectTo: `${window.location.origin}/oauth-callback`,
+    },
   });
 
   if (error) throw error;
@@ -16,10 +16,10 @@ export async function loginWithGoogle() {
 
 export async function loginWithFacebook() {
   const { data, error } = await supabase.auth.signInWithOAuth({
-    provider: 'facebook',
+    provider: "facebook",
     options: {
-      redirectTo: `${window.location.origin}/oauth-callback`
-    }
+      redirectTo: `${window.location.origin}/oauth-callback`,
+    },
   });
 
   if (error) throw error;
@@ -34,8 +34,8 @@ export async function getUser() {
   return {
     id: data.user.id,
     email: data.user.email,
-    firstname: data.user.user_metadata?.firstname || '',
-    lastname: data.user.user_metadata?.lastname || ''
+    firstname: data.user.user_metadata?.firstname || "",
+    lastname: data.user.user_metadata?.lastname || "",
   };
 }
 

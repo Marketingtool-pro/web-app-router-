@@ -1,17 +1,17 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect } from "react";
 
 // @mui
-import Box from '@mui/material/Box';
-import Grid from '@mui/material/Grid';
-import Typography from '@mui/material/Typography';
-import Card from '@mui/material/Card';
-import CardContent from '@mui/material/CardContent';
-import Stack from '@mui/material/Stack';
-import Tabs from '@mui/material/Tabs';
-import Tab from '@mui/material/Tab';
-import Skeleton from '@mui/material/Skeleton';
-import Chip from '@mui/material/Chip';
-import LinearProgress from '@mui/material/LinearProgress';
+import Box from "@mui/material/Box";
+import Grid from "@mui/material/Grid";
+import Typography from "@mui/material/Typography";
+import Card from "@mui/material/Card";
+import CardContent from "@mui/material/CardContent";
+import Stack from "@mui/material/Stack";
+import Tabs from "@mui/material/Tabs";
+import Tab from "@mui/material/Tab";
+import Skeleton from "@mui/material/Skeleton";
+import Chip from "@mui/material/Chip";
+import LinearProgress from "@mui/material/LinearProgress";
 
 // @assets
 import {
@@ -23,30 +23,30 @@ import {
   IconBrandFacebook,
   IconDeviceDesktop,
   IconArrowUpRight,
-  IconArrowDownRight
-} from '@tabler/icons-react';
+  IconArrowDownRight,
+} from "@tabler/icons-react";
 
 // @project
-import { fetchDashboardSummary } from '@/utils/api/windmill';
+import { fetchDashboardSummary } from "@/utils/api/windmill";
 
 /***************************  KPI CARD  ***************************/
 
 function KpiCard({ title, value, change, changeType, icon: Icon, color }) {
-  const isPositive = changeType === 'up';
+  const isPositive = changeType === "up";
   return (
     <Card>
       <CardContent>
-        <Stack direction="row" sx={{ justifyContent: 'space-between', mb: 1.5 }}>
+        <Stack direction="row" sx={{ justifyContent: "space-between", mb: 1.5 }}>
           <Box
             sx={{
               width: 44,
               height: 44,
               borderRadius: 2,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
               bgcolor: `${color}18`,
-              color: color
+              color: color,
             }}
           >
             <Icon size={24} />
@@ -57,12 +57,12 @@ function KpiCard({ title, value, change, changeType, icon: Icon, color }) {
               label={change}
               size="small"
               sx={{
-                bgcolor: isPositive ? 'success.lighter' : 'error.lighter',
-                color: isPositive ? 'success.main' : 'error.main',
+                bgcolor: isPositive ? "success.lighter" : "error.lighter",
+                color: isPositive ? "success.main" : "error.main",
                 fontWeight: 600,
                 fontSize: 12,
                 height: 24,
-                '& .MuiChip-icon': { color: 'inherit' }
+                "& .MuiChip-icon": { color: "inherit" },
               }}
             />
           )}
@@ -83,8 +83,11 @@ function KpiCard({ title, value, change, changeType, icon: Icon, color }) {
 function PlatformRow({ name, icon: Icon, spend, revenue, roas, progress, color }) {
   return (
     <Box sx={{ py: 1.5 }}>
-      <Stack direction="row" sx={{ alignItems: 'center', justifyContent: 'space-between', mb: 0.75 }}>
-        <Stack direction="row" sx={{ alignItems: 'center', gap: 1 }}>
+      <Stack
+        direction="row"
+        sx={{ alignItems: "center", justifyContent: "space-between", mb: 0.75 }}
+      >
+        <Stack direction="row" sx={{ alignItems: "center", gap: 1 }}>
           <Icon size={18} color={color} />
           <Typography variant="subtitle2">{name}</Typography>
         </Stack>
@@ -95,12 +98,16 @@ function PlatformRow({ name, icon: Icon, spend, revenue, roas, progress, color }
           <Typography variant="caption" color="text.secondary">
             Revenue: ${revenue}
           </Typography>
-          <Typography variant="caption" sx={{ fontWeight: 600, color: 'success.main' }}>
+          <Typography variant="caption" sx={{ fontWeight: 600, color: "success.main" }}>
             {roas}x ROAS
           </Typography>
         </Stack>
       </Stack>
-      <LinearProgress variant="determinate" value={progress} sx={{ height: 4, borderRadius: 2, bgcolor: 'grey.200' }} />
+      <LinearProgress
+        variant="determinate"
+        value={progress}
+        sx={{ height: 4, borderRadius: 2, bgcolor: "grey.200" }}
+      />
     </Box>
   );
 }
@@ -127,10 +134,10 @@ export default function DashboardPage() {
   }, []);
 
   const kpis = data?.kpis || {
-    totalSpend: '$0',
-    revenue: '$0',
-    roas: '0.0x',
-    conversions: '0'
+    totalSpend: "$0",
+    revenue: "$0",
+    roas: "0.0x",
+    conversions: "0",
   };
 
   const platforms = data?.platforms || [];
@@ -172,7 +179,14 @@ export default function DashboardPage() {
           {loading ? (
             <Skeleton variant="rounded" height={130} />
           ) : (
-            <KpiCard title="Revenue" value={kpis.revenue} change="+18.2%" changeType="up" icon={IconTrendingUp} color="#3EB75E" />
+            <KpiCard
+              title="Revenue"
+              value={kpis.revenue}
+              change="+18.2%"
+              changeType="up"
+              icon={IconTrendingUp}
+              color="#3EB75E"
+            />
           )}
         </Grid>
         <Grid size={{ xs: 12, sm: 6, md: 3 }}>
@@ -258,20 +272,20 @@ export default function DashboardPage() {
               </Typography>
               <Stack spacing={1}>
                 {[
-                  { label: 'Launch Campaign', href: '/command-centre' },
-                  { label: 'Generate Ad Copy', href: '/tools/ad-copy-analyzer' },
-                  { label: 'Run Meta Audit', href: '/meta-audit' },
-                  { label: 'View Reports', href: '/reports' },
-                  { label: 'Browse All Tools', href: '/tools' }
+                  { label: "Launch Campaign", href: "/command-centre" },
+                  { label: "Generate Ad Copy", href: "/tools/ad-copy-analyzer" },
+                  { label: "Run Meta Audit", href: "/meta-audit" },
+                  { label: "View Reports", href: "/reports" },
+                  { label: "Browse All Tools", href: "/tools" },
                 ].map((action) => (
                   <Card key={action.label} variant="outlined">
                     <CardContent
                       sx={{
                         py: 1.5,
                         px: 2,
-                        '&:last-child': { pb: 1.5 },
-                        cursor: 'pointer',
-                        '&:hover': { bgcolor: 'action.hover' }
+                        "&:last-child": { pb: 1.5 },
+                        cursor: "pointer",
+                        "&:hover": { bgcolor: "action.hover" },
                       }}
                       onClick={() => (window.location.href = action.href)}
                     >

@@ -1,7 +1,7 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState } from "react";
 
 // @project
-import { useRouter } from '@/utils/navigation';
+import { useRouter } from "@/utils/navigation";
 
 /***************************  HOOKS - BASE URL  ***************************/
 
@@ -23,7 +23,7 @@ export default function useBaseUrl() {
 
   useEffect(() => {
     // Ensure this runs only on the client side
-    if (typeof window !== 'undefined') {
+    if (typeof window !== "undefined") {
       // Get the protocol (e.g., "http:" or "https:")
       const protocol = window.location.protocol;
 

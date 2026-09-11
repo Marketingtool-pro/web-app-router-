@@ -8,7 +8,7 @@ export function globalFilterFn(row, columnIds, filterValue) {
 }
 
 function deepSearch(value, filterValue) {
-  if (typeof value === 'string' || typeof value === 'number') {
+  if (typeof value === "string" || typeof value === "number") {
     return value.toString().toLowerCase().includes(filterValue);
   }
 
@@ -16,7 +16,7 @@ function deepSearch(value, filterValue) {
     return value.some((item) => deepSearch(item, filterValue));
   }
 
-  if (typeof value === 'object' && value !== null) {
+  if (typeof value === "object" && value !== null) {
     return Object.values(value).some((nested) => deepSearch(nested, filterValue));
   }
 

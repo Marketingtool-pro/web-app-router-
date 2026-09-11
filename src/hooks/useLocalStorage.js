@@ -1,11 +1,11 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback } from "react";
 
 /***************************  HOOKS - LOCAL STORAGE  ***************************/
 
 export default function useLocalStorage(key, defaultValue) {
   // Load initial state from localStorage or fallback to default
   const readValue = () => {
-    if (typeof window === 'undefined') return defaultValue;
+    if (typeof window === "undefined") return defaultValue;
 
     try {
       const item = localStorage.getItem(key);
@@ -31,7 +31,7 @@ export default function useLocalStorage(key, defaultValue) {
   const setField = useCallback((key, value) => {
     setState((prev) => ({
       ...prev,
-      [key]: value
+      [key]: value,
     }));
   }, []);
 

@@ -1,24 +1,24 @@
 // @mui
-import Divider from '@mui/material/Divider';
-import Link from '@mui/material/Link';
-import Stack from '@mui/material/Stack';
-import Typography from '@mui/material/Typography';
-import Box from '@mui/material/Box';
+import Divider from "@mui/material/Divider";
+import Link from "@mui/material/Link";
+import Stack from "@mui/material/Stack";
+import Typography from "@mui/material/Typography";
+import Box from "@mui/material/Box";
 
 // @project
-import RouterLink from '@/components/Link';
-import { SocialTypes } from '@/enum';
-import AuthRegister from '@/sections/auth/AuthRegister';
-import AuthSocial from '@/sections/auth/AuthSocial';
-import Copyright from '@/sections/auth/Copyright';
+import RouterLink from "@/components/Link";
+import { SocialTypes } from "@/enum";
+import AuthRegister from "@/sections/auth/AuthRegister";
+import AuthSocial from "@/sections/auth/AuthSocial";
+import Copyright from "@/sections/auth/Copyright";
 
 /***************************  AUTH - REGISTER  ***************************/
 
 export default function Register() {
   return (
-    <Stack sx={{ height: 1, alignItems: 'center', justifyContent: 'space-between', gap: 3 }}>
+    <Stack sx={{ height: 1, alignItems: "center", justifyContent: "space-between", gap: 3 }}>
       <Box sx={{ width: 1, maxWidth: 458 }}>
-        <Stack sx={{ gap: { xs: 1, sm: 1.5 }, textAlign: 'center', mb: { xs: 3, sm: 8 } }}>
+        <Stack sx={{ gap: { xs: 1, sm: 1.5 }, textAlign: "center", mb: { xs: 3, sm: 8 } }}>
           <Typography variant="h1">Sign Up</Typography>
           <Typography variant="body1" color="text.secondary">
             Sign Up for free. No credit card required.
@@ -38,8 +38,14 @@ export default function Register() {
         <AuthRegister />
 
         <Typography variant="body2" color="text.secondary" sx={{ mt: { xs: 2, sm: 3 } }}>
-          Already have an account?{' '}
-          <Link component={RouterLink} underline="hover" variant="subtitle2" to="/login" sx={{ '&:hover': { color: 'primary.dark' } }}>
+          Already have an account?{" "}
+          <Link
+            component={RouterLink}
+            underline="hover"
+            variant="subtitle2"
+            to="/login"
+            sx={{ "&:hover": { color: "primary.dark" } }}
+          >
             Sign In
           </Link>
         </Typography>

@@ -1,14 +1,14 @@
-import PropTypes from 'prop-types';
+import PropTypes from "prop-types";
 // @mui
-import { useTheme } from '@mui/material/styles';
-import ButtonBase from '@mui/material/ButtonBase';
+import { useTheme } from "@mui/material/styles";
+import ButtonBase from "@mui/material/ButtonBase";
 
 // @project
-import LogoMain from './LogoMain';
-import LogoIcon from './LogoIcon';
-import { APP_DEFAULT_PATH } from '@/config';
-import RouterLink from '@/components/Link';
-import { generateFocusStyle } from '@/utils/generateFocusStyle';
+import LogoMain from "./LogoMain";
+import LogoIcon from "./LogoIcon";
+import { APP_DEFAULT_PATH } from "@/config";
+import RouterLink from "@/components/Link";
+import { generateFocusStyle } from "@/utils/generateFocusStyle";
 
 /***************************  MAIN - LOGO  ***************************/
 
@@ -17,7 +17,11 @@ export default function LogoSection({ isIcon, sx, to }) {
 
   return (
     <RouterLink to={!to ? APP_DEFAULT_PATH : to}>
-      <ButtonBase disableRipple sx={{ ...sx, '&:focus-visible': generateFocusStyle(theme.vars.palette.primary.main) }} aria-label="logo">
+      <ButtonBase
+        disableRipple
+        sx={{ ...sx, "&:focus-visible": generateFocusStyle(theme.vars.palette.primary.main) }}
+        aria-label="logo"
+      >
         {isIcon ? <LogoIcon /> : <LogoMain />}
       </ButtonBase>
     </RouterLink>

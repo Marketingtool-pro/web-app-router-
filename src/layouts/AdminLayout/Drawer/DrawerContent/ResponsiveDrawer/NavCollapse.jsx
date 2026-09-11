@@ -1,43 +1,43 @@
-import PropTypes from 'prop-types';
-import { Activity, useState } from 'react';
+import PropTypes from "prop-types";
+import { Activity, useState } from "react";
 
 // @mui
-import { useColorScheme, useTheme } from '@mui/material/styles';
-import Collapse from '@mui/material/Collapse';
-import List from '@mui/material/List';
-import ListItemButton from '@mui/material/ListItemButton';
-import ListItemIcon from '@mui/material/ListItemIcon';
-import ListItemText from '@mui/material/ListItemText';
-import Typography from '@mui/material/Typography';
+import { useColorScheme, useTheme } from "@mui/material/styles";
+import Collapse from "@mui/material/Collapse";
+import List from "@mui/material/List";
+import ListItemButton from "@mui/material/ListItemButton";
+import ListItemIcon from "@mui/material/ListItemIcon";
+import ListItemText from "@mui/material/ListItemText";
+import Typography from "@mui/material/Typography";
 
 // @project
-import NavItem from './NavItem';
-import DynamicIcon from '@/components/DynamicIcon';
-import { ThemeMode } from '@/config';
-import useCurrentUser from '@/hooks/useCurrentUser';
-import useMenuCollapse from '@/hooks/useMenuCollapse';
-import { usePathname } from '@/utils/navigation';
+import NavItem from "./NavItem";
+import DynamicIcon from "@/components/DynamicIcon";
+import { ThemeMode } from "@/config";
+import useCurrentUser from "@/hooks/useCurrentUser";
+import useMenuCollapse from "@/hooks/useMenuCollapse";
+import { usePathname } from "@/utils/navigation";
 
 // @third-party
-import { FormattedMessage } from 'react-intl';
+import { FormattedMessage } from "react-intl";
 
 // @types
 
 // @assets
-import { IconChevronDown, IconChevronUp } from '@tabler/icons-react';
+import { IconChevronDown, IconChevronUp } from "@tabler/icons-react";
 
 // @style
 const verticalDivider = {
-  '&:after': {
+  "&:after": {
     content: "''",
-    position: 'absolute',
+    position: "absolute",
     left: 16,
     top: -2,
     height: `calc(100% + 2px)`,
-    width: '1px',
+    width: "1px",
     opacity: 1,
-    bgcolor: 'divider'
-  }
+    bgcolor: "divider",
+  },
 };
 
 /***************************  COLLAPSE - LOOP  ***************************/
@@ -50,9 +50,9 @@ function NavCollapseLoop({ item, userRole }) {
     }
 
     switch (item.type) {
-      case 'collapse':
+      case "collapse":
         return <NavCollapse key={item.id} item={item} level={1} />;
-      case 'item':
+      case "item":
         return <NavItem key={item.id} item={item} level={1} />;
       default:
         return (
@@ -97,25 +97,29 @@ export default function NavCollapse({ item, level = 0 }) {
         selected={open || selected === item.id}
         sx={{
           my: 0.25,
-          color: 'text.primary',
-          '&.Mui-selected': {
-            color: 'text.primary',
-            ...theme.applyStyles('dark', { color: 'background.default' }),
-            '&.Mui-focusVisible': { bgcolor: 'primary.light' }
-          }
+          color: "text.primary",
+          "&.Mui-selected": {
+            color: "text.primary",
+            ...theme.applyStyles("dark", { color: "background.default" }),
+            "&.Mui-focusVisible": { bgcolor: "primary.light" },
+          },
         }}
         onClick={handleClick}
       >
-        <Activity mode={level === 0 ? 'visible' : 'hidden'}>
+        <Activity mode={level === 0 ? "visible" : "hidden"}>
           <ListItemIcon>
             <DynamicIcon name={item.icon} color={iconcolor} size={18} stroke={1.5} />
           </ListItemIcon>
         </Activity>
-        <ListItemText primary={<FormattedMessage id={item.title} />} sx={{ mb: '-1px' }} />
-        {open ? <IconChevronUp size={18} stroke={1.5} /> : <IconChevronDown size={18} stroke={1.5} />}
+        <ListItemText primary={<FormattedMessage id={item.title} />} sx={{ mb: "-1px" }} />
+        {open ? (
+          <IconChevronUp size={18} stroke={1.5} />
+        ) : (
+          <IconChevronDown size={18} stroke={1.5} />
+        )}
       </ListItemButton>
       <Collapse in={open} timeout="auto" unmountOnExit>
-        <List component="div" sx={{ p: 0, pl: 3, position: 'relative', ...verticalDivider }}>
+        <List component="div" sx={{ p: 0, pl: 3, position: "relative", ...verticalDivider }}>
           <NavCollapseLoop item={item} userRole={userRole} />
         </List>
       </Collapse>

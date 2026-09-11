@@ -1,7 +1,7 @@
-import SvgIcon from '@mui/material/SvgIcon';
+import SvgIcon from "@mui/material/SvgIcon";
 
 // @project
-import { withAlpha } from '@/utils/colorUtils';
+import { withAlpha } from "@/utils/colorUtils";
 
 const TaskAltOutlinedIcon = (props) => (
   <SvgIcon {...props} fontSize="inherit">
@@ -15,51 +15,51 @@ export default function Alert(theme) {
   const { vars } = theme;
 
   const standardVariant = ({ ownerState }) => {
-    if (ownerState.severity === 'primary' || ownerState.severity === 'secondary') {
+    if (ownerState.severity === "primary" || ownerState.severity === "secondary") {
       const paletteColor = vars.palette[ownerState.severity];
 
       return {
         color: vars.palette.text.secondary,
         backgroundColor: withAlpha(paletteColor.lighter, 0.25),
-        '& .MuiAlert-icon': { color: paletteColor.main },
-        ...theme.applyStyles('dark', {
-          color: paletteColor.main
-        })
+        "& .MuiAlert-icon": { color: paletteColor.main },
+        ...theme.applyStyles("dark", {
+          color: paletteColor.main,
+        }),
       };
     }
   };
 
   const outlinedVariant = ({ ownerState }) => {
-    if (ownerState.severity === 'primary' || ownerState.severity === 'secondary') {
+    if (ownerState.severity === "primary" || ownerState.severity === "secondary") {
       const paletteColor = vars.palette[ownerState.severity];
 
       return {
         color: vars.palette.text.secondary,
-        '& .MuiAlert-icon': { color: paletteColor.main },
-        ...theme.applyStyles('dark', {
-          color: paletteColor.main
-        })
+        "& .MuiAlert-icon": { color: paletteColor.main },
+        ...theme.applyStyles("dark", {
+          color: paletteColor.main,
+        }),
       };
     }
   };
 
   const filledVariant = ({ ownerState }) => {
-    if (ownerState.severity === 'primary' || ownerState.severity === 'secondary') {
+    if (ownerState.severity === "primary" || ownerState.severity === "secondary") {
       const paletteColor = vars.palette[ownerState.severity];
 
       return {
         color: vars.palette.common.white,
         backgroundColor: paletteColor.main,
-        '& .MuiAlert-icon': {
-          color: vars.palette.common.white
+        "& .MuiAlert-icon": {
+          color: vars.palette.common.white,
         },
-        ...theme.applyStyles('dark', {
+        ...theme.applyStyles("dark", {
           color: withAlpha(vars.palette.common.black, 0.87),
           backgroundColor: paletteColor.dark,
-          '& .MuiAlert-icon': {
-            color: withAlpha(vars.palette.common.black, 0.87)
-          }
-        })
+          "& .MuiAlert-icon": {
+            color: withAlpha(vars.palette.common.black, 0.87),
+          },
+        }),
       };
     }
   };
@@ -69,21 +69,21 @@ export default function Alert(theme) {
       defaultProps: {
         iconMapping: {
           primary: <TaskAltOutlinedIcon />,
-          secondary: <TaskAltOutlinedIcon />
-        }
+          secondary: <TaskAltOutlinedIcon />,
+        },
       },
       styleOverrides: {
         icon: {
-          fontSize: 20
+          fontSize: 20,
         },
         root: {
           variants: [
-            { props: { variant: 'standard' }, style: standardVariant },
-            { props: { variant: 'outlined' }, style: outlinedVariant },
-            { props: { variant: 'filled' }, style: filledVariant }
-          ]
-        }
-      }
-    }
+            { props: { variant: "standard" }, style: standardVariant },
+            { props: { variant: "outlined" }, style: outlinedVariant },
+            { props: { variant: "filled" }, style: filledVariant },
+          ],
+        },
+      },
+    },
   };
 }

@@ -1,9 +1,9 @@
-import PropTypes from 'prop-types';
-import Stack from '@mui/material/Stack';
-import Typography from '@mui/material/Typography';
+import PropTypes from "prop-types";
+import Stack from "@mui/material/Stack";
+import Typography from "@mui/material/Typography";
 
 // @project
-import MainCard from '@/components/MainCard';
+import MainCard from "@/components/MainCard";
 
 /***************************  PRESENTATION CARD  ***************************/
 

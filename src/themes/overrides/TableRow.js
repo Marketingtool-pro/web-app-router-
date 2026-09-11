@@ -5,14 +5,16 @@ export default function TableRow(theme) {
     MuiTableRow: {
       styleOverrides: {
         root: {
-          '&.Mui-selected': {
+          "&.Mui-selected": {
             backgroundColor: theme.vars.palette.grey[50],
-            ...theme.applyStyles('dark', { backgroundColor: theme.vars.palette.grey[200] }),
-            '&:hover': { backgroundColor: theme.vars.palette.grey[100] }
+            ...theme.applyStyles("dark", { backgroundColor: theme.vars.palette.grey[200] }),
+            "&:hover": { backgroundColor: theme.vars.palette.grey[100] },
           },
-          '&:not(.Mui-selected)&.MuiTableRow-hover:hover': { backgroundColor: theme.vars.palette.action.hover }
-        }
-      }
-    }
+          "&:not(.Mui-selected)&.MuiTableRow-hover:hover": {
+            backgroundColor: theme.vars.palette.action.hover,
+          },
+        },
+      },
+    },
   };
 }

@@ -1,11 +1,11 @@
 // @project
-import { AUTH_USER_KEY } from '@/config';
-import { AuthRole } from '@/enum';
-import { createUserPool } from '@/utils/auth-client/aws';
+import { AUTH_USER_KEY } from "@/config";
+import { AuthRole } from "@/enum";
+import { createUserPool } from "@/utils/auth-client/aws";
 
 // @third-party
-import { CognitoUser, AuthenticationDetails } from 'amazon-cognito-identity-js';
-import axios from 'axios';
+import { CognitoUser, AuthenticationDetails } from "amazon-cognito-identity-js";
+import axios from "axios";
 
 const userPool = createUserPool();
 
@@ -19,20 +19,20 @@ export async function login(formData) {
       // Create a CognitoUser instance for the user
       const user = new CognitoUser({
         Username: email,
-        Pool: userPool
+        Pool: userPool,
       });
 
       // Create authentication details with the provided email and password
       const authDetails = new AuthenticationDetails({
         Username: email,
-        Password: password
+        Password: password,
       });
 
       // Authenticate the user using Cognito's `authenticateUser` method
       const session = await new Promise((resolve, reject) => {
         user.authenticateUser(authDetails, {
           onSuccess: (session) => resolve(session),
-          onFailure: (err) => reject(err)
+          onFailure: (err) => reject(err),
         });
       });
 
@@ -44,14 +44,14 @@ export async function login(formData) {
       resolve({
         id,
         email: email,
-        access_token: accessToken // Access token from the session
+        access_token: accessToken, // Access token from the session
       });
     } catch (error) {
       if (error instanceof Error) {
-        reject(new Error(error.message || 'Authentication failed'));
+        reject(new Error(error.message || "Authentication failed"));
         return;
       }
-      reject(new Error('Server error'));
+      reject(new Error("Server error"));
     }
   });
 }
@@ -61,7 +61,8 @@ export async function login(formData) {
 export async function getUser() {
   return new Promise(async (resolve, reject) => {
     try {
-      const storedValue = typeof window !== 'undefined' ? localStorage.getItem(AUTH_USER_KEY) : null;
+      const storedValue =
+        typeof window !== "undefined" ? localStorage.getItem(AUTH_USER_KEY) : null;
       const parsedValue = storedValue && JSON.parse(storedValue);
 
       if (parsedValue?.access_token) {
@@ -70,14 +71,18 @@ export async function getUser() {
         // Configure headers for the Cognito API request
         const config = {
           headers: {
-            'Content-Type': 'application/x-amz-json-1.0',
+            "Content-Type": "application/x-amz-json-1.0",
             Authorization: `Bearer ${parsedValue.access_token}`,
-            'X-Amz-Target': 'AWSCognitoIdentityProviderService.GetUser'
-          }
+            "X-Amz-Target": "AWSCognitoIdentityProviderService.GetUser",
+          },
         };
 
         // Make a POST request to Cognito's GetUser endpoint
-        const response = await axios.post(`https://cognito-idp.${region}.amazonaws.com`, { AccessToken: parsedValue.access_token }, config);
+        const response = await axios.post(
+          `https://cognito-idp.${region}.amazonaws.com`,
+          { AccessToken: parsedValue.access_token },
+          config,
+        );
 
         let userDetails = {};
 
@@ -93,16 +98,16 @@ export async function getUser() {
             id: data.sub, // Unique user ID
             email: data.email, // User email address
             role: AuthRole.USER, // User role (default: USER)
-            contact: '123456789', // Placeholder for contact information
-            dialcode: '+1', // Placeholder for dial code
-            firstname: 'Bob', // Placeholder for first name
-            lastname: 'Dylan' // Placeholder for last name
+            contact: "123456789", // Placeholder for contact information
+            dialcode: "+1", // Placeholder for dial code
+            firstname: "Bob", // Placeholder for first name
+            lastname: "Dylan", // Placeholder for last name
           };
         }
 
         resolve(userDetails);
       } else {
-        reject(new Error('Token not found'));
+        reject(new Error("Token not found"));
       }
     } catch (error) {
       // Handle different types of errors
@@ -111,10 +116,10 @@ export async function getUser() {
         reject(new Error(error.response.data.message || error.response.statusText));
       } else if (error instanceof Error) {
         // Something happened while setting up the request
-        reject(new Error(error.message || 'Server error'));
+        reject(new Error(error.message || "Server error"));
       } else {
         // Unexpected error case
-        reject(new Error('Unknown error occurred'));
+        reject(new Error("Unknown error occurred"));
       }
     }
   });
@@ -154,9 +159,9 @@ export async function signUp(formData) {
             } else if (result) {
               resolve(result);
             } else {
-              reject(new Error('Something went wrong!')); // Handle unexpected case
+              reject(new Error("Something went wrong!")); // Handle unexpected case
             }
-          }
+          },
         );
       });
 
@@ -164,9 +169,9 @@ export async function signUp(formData) {
       resolve({ status: 200 });
     } catch (error) {
       if (error instanceof Error) {
-        reject(new Error(error.message || 'Server error'));
+        reject(new Error(error.message || "Server error"));
       } else {
-        reject(new Error('Unknown error occurred'));
+        reject(new Error("Unknown error occurred"));
       }
     }
   });
@@ -195,9 +200,9 @@ export async function verifyOtp(formData) {
       resolve({ status: 200 });
     } catch (error) {
       if (error instanceof Error) {
-        reject(new Error(error.message || 'Server error'));
+        reject(new Error(error.message || "Server error"));
       } else {
-        reject(new Error('Unknown error occurred'));
+        reject(new Error("Unknown error occurred"));
       }
     }
   });
@@ -211,7 +216,7 @@ export async function resend(formData) {
       // Create a CognitoUser instance for the user
       const user = new CognitoUser({
         Username: formData.email,
-        Pool: userPool
+        Pool: userPool,
       });
 
       // Resend the confirmation code using Cognito's resendConfirmationCode method
@@ -229,9 +234,9 @@ export async function resend(formData) {
       resolve({ status: 200 });
     } catch (error) {
       if (error instanceof Error) {
-        reject(new Error(error.message || 'Server error'));
+        reject(new Error(error.message || "Server error"));
       } else {
-        reject(new Error('Unknown error occurred'));
+        reject(new Error("Unknown error occurred"));
       }
     }
   });
@@ -251,7 +256,7 @@ export async function forgotPassword(formData) {
       await new Promise((resolve, reject) => {
         user.forgotPassword({
           onSuccess: (data) => resolve(data),
-          onFailure: (err) => reject(err)
+          onFailure: (err) => reject(err),
         });
       });
 
@@ -259,9 +264,9 @@ export async function forgotPassword(formData) {
       resolve({ status: 200 });
     } catch (error) {
       if (error instanceof Error) {
-        reject(new Error(error.message || 'Server error'));
+        reject(new Error(error.message || "Server error"));
       } else {
-        reject(new Error('Unknown error occurred'));
+        reject(new Error("Unknown error occurred"));
       }
     }
   });
@@ -278,14 +283,14 @@ export async function resetPassword(formData) {
       // Create a CognitoUser instance for the user
       const user = new CognitoUser({
         Username: email,
-        Pool: userPool
+        Pool: userPool,
       });
 
       // Reset the password using Cognito's confirmPassword method
       await new Promise((resolve, reject) => {
         user.confirmPassword(otp, password, {
           onSuccess: () => resolve(),
-          onFailure: (err) => reject(err)
+          onFailure: (err) => reject(err),
         });
       });
 
@@ -293,9 +298,9 @@ export async function resetPassword(formData) {
       resolve({ status: 200 });
     } catch (error) {
       if (error instanceof Error) {
-        reject(new Error(error.message || 'Server error'));
+        reject(new Error(error.message || "Server error"));
       } else {
-        reject(new Error('Unknown error occurred'));
+        reject(new Error("Unknown error occurred"));
       }
     }
   });
@@ -310,6 +315,15 @@ export async function signOut() {
 }
 
 // Export as a single object for easy import
-const awsAuth = { login, getUser, signUp, verifyOtp, resend, forgotPassword, resetPassword, signOut };
+const awsAuth = {
+  login,
+  getUser,
+  signUp,
+  verifyOtp,
+  resend,
+  forgotPassword,
+  resetPassword,
+  signOut,
+};
 
 export default awsAuth;

@@ -1,8 +1,8 @@
 export default function getDropzoneData(file, index) {
-  if (typeof file === 'string') {
+  if (typeof file === "string") {
     return {
       key: index ? `${file}-${index}` : file,
-      preview: file
+      preview: file,
     };
   }
 
@@ -13,6 +13,6 @@ export default function getDropzoneData(file, index) {
     path: file.path,
     preview: file.preview,
     lastModified: file.lastModified,
-    lastModifiedDate: file.lastModifiedDate
+    lastModifiedDate: file.lastModifiedDate,
   };
 }

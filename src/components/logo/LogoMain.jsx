@@ -1,10 +1,10 @@
 // @mui
-import { useTheme } from '@mui/material/styles';
-import CardMedia from '@mui/material/CardMedia';
-import Box from '@mui/material/Box';
+import { useTheme } from "@mui/material/styles";
+import CardMedia from "@mui/material/CardMedia";
+import Box from "@mui/material/Box";
 
 // @project
-import branding from '@/branding.json';
+import branding from "@/branding.json";
 
 /***************************  LOGO - MAIN  ***************************/
 
@@ -13,7 +13,12 @@ export default function LogoMain() {
   const logoMainPath = branding.logo.main;
 
   return logoMainPath ? (
-    <CardMedia src={logoMainPath} component="img" alt="MarketingTool" sx={{ width: { xs: 56, lg: 72 }, height: 'auto' }} />
+    <CardMedia
+      src={logoMainPath}
+      component="img"
+      alt="MarketingTool"
+      sx={{ width: { xs: 56, lg: 72 }, height: "auto" }}
+    />
   ) : (
     <Box sx={{ width: { xs: 112, lg: 140 }, height: { xs: 22, lg: 26 } }}>
       <svg viewBox="0 0 140 27" fill="none" xmlns="http://www.w3.org/2000/svg">

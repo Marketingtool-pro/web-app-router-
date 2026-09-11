@@ -1,23 +1,29 @@
-import PropTypes from 'prop-types';
-import { useEffect, useRef, useState } from 'react';
+import PropTypes from "prop-types";
+import { useEffect, useRef, useState } from "react";
 
-import Stack from '@mui/material/Stack';
-import Typography from '@mui/material/Typography';
+import Stack from "@mui/material/Stack";
+import Typography from "@mui/material/Typography";
 
 // @project
-import MainCard from '@/components/MainCard';
+import MainCard from "@/components/MainCard";
 
 /***************************  CARDS - VIDEO  ***************************/
 
-export default function VideoCard({ caption, poster, videoSrc, autoPlayOnScroll = false, cardProps }) {
+export default function VideoCard({
+  caption,
+  poster,
+  videoSrc,
+  autoPlayOnScroll = false,
+  cardProps,
+}) {
   const videoRef = useRef(null);
   const [isPlaying, setIsPlaying] = useState(false);
 
   useEffect(() => {
     const options = {
       root: null,
-      rootMargin: '0px',
-      threshold: 0.6 // Adjust threshold as needed
+      rootMargin: "0px",
+      threshold: 0.6, // Adjust threshold as needed
     };
 
     // Handle video play/pause based on intersection with the viewport
@@ -31,7 +37,7 @@ export default function VideoCard({ caption, poster, videoSrc, autoPlayOnScroll 
                 setIsPlaying(true);
               })
               .catch((error) => {
-                console.error('Autoplay was prevented:', error);
+                console.error("Autoplay was prevented:", error);
               });
           }
         } else {
@@ -63,7 +69,13 @@ export default function VideoCard({ caption, poster, videoSrc, autoPlayOnScroll 
         <MainCard sx={{ p: 0 }}>
           <video
             ref={videoRef}
-            style={{ maxHeight: '180px', display: 'flex', objectFit: 'cover', width: '100%', height: '100%' }}
+            style={{
+              maxHeight: "180px",
+              display: "flex",
+              objectFit: "cover",
+              width: "100%",
+              height: "100%",
+            }}
             controls
             preload="metadata"
             poster={poster}
@@ -85,5 +97,5 @@ VideoCard.propTypes = {
   poster: PropTypes.string,
   videoSrc: PropTypes.string,
   autoPlayOnScroll: PropTypes.bool,
-  cardProps: PropTypes.any
+  cardProps: PropTypes.any,
 };

@@ -1,9 +1,9 @@
 // @mui
-import Grid from '@mui/material/Grid';
+import Grid from "@mui/material/Grid";
 
 // @project
-import ComponentsWrapper from '@/components/ComponentsWrapper';
-import { BasicSlider, ColorSlider } from '@/sections/components/slider';
+import ComponentsWrapper from "@/components/ComponentsWrapper";
+import { BasicSlider, ColorSlider } from "@/sections/components/slider";
 
 /***************************  INPUTS - SLIDER  ***************************/
 

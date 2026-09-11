@@ -1,15 +1,15 @@
-import { RouterProvider } from 'react-router-dom';
+import { RouterProvider } from "react-router-dom";
 
 // @project
-import Locales from '@/components/Locales';
-import RTLLayout from '@/components/RTLLayout';
-import Snackbar from '@/components/Snackbar';
-import Notistack from '@/components/third-party/Notistack';
-import { ConfigProvider } from '@/contexts/ConfigContext';
+import Locales from "@/components/Locales";
+import RTLLayout from "@/components/RTLLayout";
+import Snackbar from "@/components/Snackbar";
+import Notistack from "@/components/third-party/Notistack";
+import { ConfigProvider } from "@/contexts/ConfigContext";
 
-import Metrics from '@/metrics';
-import router from '@/routes';
-import ThemeCustomization from '@/themes';
+import Metrics from "@/metrics";
+import router from "@/routes";
+import ThemeCustomization from "@/themes";
 
 function App() {
   return (

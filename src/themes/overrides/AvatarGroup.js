@@ -6,13 +6,13 @@ export default function AvatarGroup() {
       defaultProps: {
         slotProps: {
           additionalAvatar: {
-            color: 'default'
-          }
-        }
+            color: "default",
+          },
+        },
       },
       styleOverrides: {
-        avatar: { width: 32, height: 32 }
-      }
-    }
+        avatar: { width: 32, height: 32 },
+      },
+    },
   };
 }

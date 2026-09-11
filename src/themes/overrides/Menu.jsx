@@ -12,14 +12,14 @@ export default function Menu(theme) {
               padding: 0.5,
               border: `1px solid ${theme.vars.palette.divider}`,
               borderRadius: 3,
-              boxShadow: theme.vars.customShadows.tooltip
-            }
-          }
-        }
+              boxShadow: theme.vars.customShadows.tooltip,
+            },
+          },
+        },
       },
       styleOverrides: {
-        list: { padding: 0 }
-      }
-    }
+        list: { padding: 0 },
+      },
+    },
   };
 }

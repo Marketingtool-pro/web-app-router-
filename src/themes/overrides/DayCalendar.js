@@ -6,9 +6,9 @@ export default function DayCalendar(theme) {
       styleOverrides: {
         weekDayLabel: {
           ...theme.typography.body1,
-          color: theme.vars.palette.text.primary
-        }
-      }
-    }
+          color: theme.vars.palette.text.primary,
+        },
+      },
+    },
   };
 }

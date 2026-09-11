@@ -20,27 +20,28 @@ export function conditionalSchema(isPublishing) {
     validateSlug: (value, isPublishing) => {
       const trimmed = value.trim();
       if (!trimmed && !isPublishing) return true;
-      if (!trimmed) return 'Slug cannot be empty or contain only spaces';
+      if (!trimmed) return "Slug cannot be empty or contain only spaces";
 
       return /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(trimmed)
         ? true
-        : 'Only lowercase letters, numbers, and hyphens allowed (no leading, trailing, or repeated hyphens)';
+        : "Only lowercase letters, numbers, and hyphens allowed (no leading, trailing, or repeated hyphens)";
     },
 
     validateContent: (value, message) => {
-      if (typeof value !== 'string') return true;
-      const trimmed = value.replace(/<p><br><\/p>/g, '').trim();
+      if (typeof value !== "string") return true;
+      const trimmed = value.replace(/<p><br><\/p>/g, "").trim();
       if (!trimmed && isPublishing) return message;
 
       return true;
     },
 
     validateFile: (file, message) => {
-      const isValidFile = file instanceof File || (file && typeof file === 'object' && 'url' in file && file.url);
+      const isValidFile =
+        file instanceof File || (file && typeof file === "object" && "url" in file && file.url);
 
       if (!isValidFile && isPublishing) return message;
       return true;
-    }
+    },
   };
 }
 
@@ -49,35 +50,35 @@ export function getBlogFormSchemas(isPublishing) {
 
   return {
     titleSchema: {
-      required: cond.required('Blog title is required')
+      required: cond.required("Blog title is required"),
     },
 
     slugSchema: {
-      required: cond.required('Slug is required'),
+      required: cond.required("Slug is required"),
       validate: {
-        slug: (value) => cond.validateSlug(value, isPublishing)
-      }
+        slug: (value) => cond.validateSlug(value, isPublishing),
+      },
     },
 
     categorySchema: {
-      required: cond.required('At least one category is required')
+      required: cond.required("At least one category is required"),
     },
 
     seoTitleSchema: {
-      required: cond.required('SEO title is required')
+      required: cond.required("SEO title is required"),
     },
 
     contentSchema: {
-      required: cond.required('Blog content is required'),
+      required: cond.required("Blog content is required"),
       validate: {
-        trim: (value) => cond.validateContent(value, 'Blog content cannot be empty')
-      }
+        trim: (value) => cond.validateContent(value, "Blog content cannot be empty"),
+      },
     },
 
     bannerSchema: {
       validate: {
-        file: (file) => cond.validateFile(file, 'Cover image is required')
-      }
-    }
+        file: (file) => cond.validateFile(file, "Cover image is required"),
+      },
+    },
   };
 }

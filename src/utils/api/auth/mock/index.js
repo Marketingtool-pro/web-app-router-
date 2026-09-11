@@ -1,25 +1,27 @@
 // @project
-import mockUsers from './data';
-import { AUTH_USER_KEY } from '@/config';
+import mockUsers from "./data";
+import { AUTH_USER_KEY } from "@/config";
 
 /***************************  MOCK - LOGIN  ***************************/
 
 export async function login(formData) {
   return new Promise((resolve, reject) => {
     try {
-      const user = mockUsers.find((user) => user.email === formData.email && user.password === formData.password);
+      const user = mockUsers.find(
+        (user) => user.email === formData.email && user.password === formData.password,
+      );
       if (!user) {
-        reject(new Error('Invalid email or password'));
+        reject(new Error("Invalid email or password"));
         return;
       }
 
       resolve({
         id: user.id,
         email: user.email,
-        access_token: user.access_token
+        access_token: user.access_token,
       });
     } catch {
-      reject(new Error('Server error'));
+      reject(new Error("Server error"));
     }
   });
 }
@@ -29,13 +31,14 @@ export async function login(formData) {
 export async function getUser() {
   return new Promise((resolve, reject) => {
     try {
-      const storedValue = typeof window !== 'undefined' ? localStorage.getItem(AUTH_USER_KEY) : null;
+      const storedValue =
+        typeof window !== "undefined" ? localStorage.getItem(AUTH_USER_KEY) : null;
       const parsedValue = storedValue && JSON.parse(storedValue);
 
       if (parsedValue?.access_token) {
         const user = mockUsers.find((user) => user.access_token === parsedValue.access_token);
         if (!user) {
-          reject(new Error('Invalid token'));
+          reject(new Error("Invalid token"));
           return;
         }
 
@@ -46,13 +49,13 @@ export async function getUser() {
           contact: user.contact,
           dialcode: user.dialcode,
           firstname: user.firstname,
-          lastname: user.lastname
+          lastname: user.lastname,
         });
       } else {
-        reject(new Error('Token not found'));
+        reject(new Error("Token not found"));
       }
     } catch {
-      reject(new Error('Server error'));
+      reject(new Error("Server error"));
     }
   });
 }
@@ -61,7 +64,7 @@ export async function getUser() {
 
 export async function signUp(formData) {
   return new Promise((resolve) => {
-    console.log('signUp', formData);
+    console.log("signUp", formData);
     resolve({ status: 200 });
   });
 }
@@ -70,7 +73,7 @@ export async function signUp(formData) {
 
 export async function verifyOtp(formData) {
   return new Promise((resolve) => {
-    console.log('verifyOtp', formData);
+    console.log("verifyOtp", formData);
     resolve({ status: 200 });
   });
 }
@@ -79,7 +82,7 @@ export async function verifyOtp(formData) {
 
 export async function resend(formData) {
   return new Promise((resolve) => {
-    console.log('resendOtp', formData);
+    console.log("resendOtp", formData);
     resolve({ status: 200 });
   });
 }
@@ -88,7 +91,7 @@ export async function resend(formData) {
 
 export async function forgotPassword(formData) {
   return new Promise((resolve) => {
-    console.log('forgotPassword', formData);
+    console.log("forgotPassword", formData);
     resolve({ status: 200 });
   });
 }
@@ -97,7 +100,7 @@ export async function forgotPassword(formData) {
 
 export async function resetPassword(formData) {
   return new Promise((resolve) => {
-    console.log('resetPassword', formData);
+    console.log("resetPassword", formData);
     resolve({ status: 200 });
   });
 }
@@ -111,6 +114,15 @@ export async function signOut() {
 }
 
 // Export as a single object for easy import
-const mockAuth = { login, getUser, signUp, verifyOtp, resend, forgotPassword, resetPassword, signOut };
+const mockAuth = {
+  login,
+  getUser,
+  signUp,
+  verifyOtp,
+  resend,
+  forgotPassword,
+  resetPassword,
+  signOut,
+};
 
 export default mockAuth;

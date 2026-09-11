@@ -1,11 +1,11 @@
 // @project
-import { AUTH_CONFIG_KEY, defaultAuthConfig } from '@/config';
+import { AUTH_CONFIG_KEY, defaultAuthConfig } from "@/config";
 
 let state = readValue();
 const listeners = new Set();
 
 function readValue() {
-  if (typeof window === 'undefined') return defaultAuthConfig;
+  if (typeof window === "undefined") return defaultAuthConfig;
   try {
     const item = localStorage.getItem(AUTH_CONFIG_KEY);
     return item ? JSON.parse(item) : defaultAuthConfig;
@@ -56,19 +56,19 @@ export const authConfigManager = {
   setField(key, value) {
     saveValue({
       ...state,
-      [key]: value
+      [key]: value,
     });
   },
 
   // Reset
   reset() {
     saveValue(defaultAuthConfig);
-  }
+  },
 };
 
 // Init sync
-if (typeof window !== 'undefined') {
-  window.addEventListener('storage', (e) => {
+if (typeof window !== "undefined") {
+  window.addEventListener("storage", (e) => {
     if (e.key === AUTH_CONFIG_KEY) {
       state = readValue();
       notify();

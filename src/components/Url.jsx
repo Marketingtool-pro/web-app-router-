@@ -1,33 +1,39 @@
-import PropTypes from 'prop-types';
-import { useState } from 'react';
+import PropTypes from "prop-types";
+import { useState } from "react";
 
 // @mui
-import { useTheme } from '@mui/material/styles';
-import Button from '@mui/material/Button';
-import Divider from '@mui/material/Divider';
-import InputAdornment from '@mui/material/InputAdornment';
-import OutlinedInput from '@mui/material/OutlinedInput';
-import Stack from '@mui/material/Stack';
-import Tooltip from '@mui/material/Tooltip';
+import { useTheme } from "@mui/material/styles";
+import Button from "@mui/material/Button";
+import Divider from "@mui/material/Divider";
+import InputAdornment from "@mui/material/InputAdornment";
+import OutlinedInput from "@mui/material/OutlinedInput";
+import Stack from "@mui/material/Stack";
+import Tooltip from "@mui/material/Tooltip";
 
 // @assets
-import { IconCopy, IconHelp, IconWorld } from '@tabler/icons-react';
+import { IconCopy, IconHelp, IconWorld } from "@tabler/icons-react";
 
 // @types
 
 /***************************  URL FIELD  ***************************/
 
-export default function UrlField({ defaultValue, placeholder = 'saasable.io', helpText, isDisabled = false, fullWidth = false }) {
+export default function UrlField({
+  defaultValue,
+  placeholder = "saasable.io",
+  helpText,
+  isDisabled = false,
+  fullWidth = false,
+}) {
   const theme = useTheme();
 
-  const [value, setValue] = useState(defaultValue || '');
+  const [value, setValue] = useState(defaultValue || "");
 
   const handleClick = () => {
     navigator.clipboard
       .writeText(value)
       .then(() => {})
       .catch((err) => {
-        console.error('Failed to copy: ', err);
+        console.error("Failed to copy: ", err);
       });
   };
 
@@ -38,7 +44,7 @@ export default function UrlField({ defaultValue, placeholder = 'saasable.io', he
       value={value}
       onChange={(e) => setValue(e.target.value)}
       aria-describedby="link-field"
-      slotProps={{ input: { 'aria-label': 'link' } }}
+      slotProps={{ input: { "aria-label": "link" } }}
       fullWidth={fullWidth}
       startAdornment={
         <InputAdornment position="start">
@@ -46,9 +52,9 @@ export default function UrlField({ defaultValue, placeholder = 'saasable.io', he
         </InputAdornment>
       }
       endAdornment={
-        <Stack direction="row" sx={{ height: 1, gap: 1.25, alignItems: 'center', ml: 0.75 }}>
+        <Stack direction="row" sx={{ height: 1, gap: 1.25, alignItems: "center", ml: 0.75 }}>
           {helpText && (
-            <InputAdornment position="end" sx={{ '& svg': { cursor: 'default' } }}>
+            <InputAdornment position="end" sx={{ "& svg": { cursor: "default" } }}>
               <Tooltip title={helpText}>
                 <IconHelp />
               </Tooltip>
@@ -61,13 +67,13 @@ export default function UrlField({ defaultValue, placeholder = 'saasable.io', he
             color="secondary"
             sx={{
               ...theme.typography.body2,
-              height: 'auto',
+              height: "auto",
               p: 0,
               borderRadius: 2,
               minWidth: 56,
-              '&:hover': { bgcolor: 'transparent' },
-              '&:before': { display: 'none' },
-              '& .MuiInputBase-input:focus': { bgcolor: 'transparent' }
+              "&:hover": { bgcolor: "transparent" },
+              "&:before": { display: "none" },
+              "& .MuiInputBase-input:focus": { bgcolor: "transparent" },
             }}
             disableRipple
             aria-describedby="copy-link"
@@ -87,5 +93,5 @@ UrlField.propTypes = {
   placeholder: PropTypes.string,
   helpText: PropTypes.any,
   isDisabled: PropTypes.bool,
-  fullWidth: PropTypes.bool
+  fullWidth: PropTypes.bool,
 };

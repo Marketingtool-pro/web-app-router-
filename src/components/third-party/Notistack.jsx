@@ -1,47 +1,53 @@
-import PropTypes from 'prop-types';
+import PropTypes from "prop-types";
 
 // @mui
-import { styled } from '@mui/material/styles';
-import Fade from '@mui/material/Fade';
-import Grow from '@mui/material/Grow';
-import Slide from '@mui/material/Slide';
-import Zoom from '@mui/material/Zoom';
+import { styled } from "@mui/material/styles";
+import Fade from "@mui/material/Fade";
+import Grow from "@mui/material/Grow";
+import Slide from "@mui/material/Slide";
+import Zoom from "@mui/material/Zoom";
 
 // @third-party
-import { SnackbarProvider } from 'notistack';
+import { SnackbarProvider } from "notistack";
 
 // @project
-import { useGetSnackbar } from '@/states/snackbar';
-import Loader from '@/components/Loader';
+import { useGetSnackbar } from "@/states/snackbar";
+import Loader from "@/components/Loader";
 
 // @types
 
 // @assets
-import { IconAlertTriangle, IconBug, IconChecks, IconInfoCircle, IconSpeakerphone } from '@tabler/icons-react';
+import {
+  IconAlertTriangle,
+  IconBug,
+  IconChecks,
+  IconInfoCircle,
+  IconSpeakerphone,
+} from "@tabler/icons-react";
 
 // custom styles
 const StyledSnackbarProvider = styled(SnackbarProvider)(({ theme }) => ({
-  '&.notistack-MuiContent': {
-    color: theme.vars.palette.background.default
+  "&.notistack-MuiContent": {
+    color: theme.vars.palette.background.default,
   },
-  '&.notistack-MuiContent-default': {
-    backgroundColor: theme.vars.palette.primary.main
+  "&.notistack-MuiContent-default": {
+    backgroundColor: theme.vars.palette.primary.main,
   },
-  '&.notistack-MuiContent-error': {
-    backgroundColor: theme.vars.palette.error.main
+  "&.notistack-MuiContent-error": {
+    backgroundColor: theme.vars.palette.error.main,
   },
-  '&.notistack-MuiContent-success': {
-    backgroundColor: theme.vars.palette.success.main
+  "&.notistack-MuiContent-success": {
+    backgroundColor: theme.vars.palette.success.main,
   },
-  '&.notistack-MuiContent-info': {
-    backgroundColor: theme.vars.palette.info.main
+  "&.notistack-MuiContent-info": {
+    backgroundColor: theme.vars.palette.info.main,
   },
-  '&.notistack-MuiContent-warning': {
-    backgroundColor: theme.vars.palette.warning.main
+  "&.notistack-MuiContent-warning": {
+    backgroundColor: theme.vars.palette.warning.main,
   },
-  '& #notistack-snackbar': {
-    gap: 8
-  }
+  "& #notistack-snackbar": {
+    gap: 8,
+  },
 }));
 
 /***************************  SNACKBAR - ANIMATION  ***************************/
@@ -77,10 +83,10 @@ const animation = {
   SlideDown: TransitionSlideDown,
   Grow: GrowTransition,
   Zoom: ZoomTransition,
-  Fade
+  Fade,
 };
 
-const iconSX = { fontSize: '1.15rem' };
+const iconSX = { fontSize: "1.15rem" };
 
 /***************************  SNACKBAR - NOTISTACK  ***************************/
 
@@ -96,17 +102,17 @@ export default function Notistack({ children }) {
       anchorOrigin={snackbar.anchorOrigin}
       TransitionComponent={animation[snackbar.transition]}
       iconVariant={
-        snackbar.iconVariant === 'useemojis'
+        snackbar.iconVariant === "useemojis"
           ? {
               default: <IconSpeakerphone style={iconSX} />,
               success: <IconChecks style={iconSX} />,
               error: <IconBug style={iconSX} />,
               warning: <IconAlertTriangle style={iconSX} />,
-              info: <IconInfoCircle style={iconSX} />
+              info: <IconInfoCircle style={iconSX} />,
             }
           : undefined
       }
-      hideIconVariant={snackbar.iconVariant === 'hide' ? true : false}
+      hideIconVariant={snackbar.iconVariant === "hide" ? true : false}
     >
       {children}
     </StyledSnackbarProvider>

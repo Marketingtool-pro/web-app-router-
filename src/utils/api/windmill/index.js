@@ -1,12 +1,12 @@
 /***************************  API SERVICE  ***************************/
 
-import { AUTH_USER_KEY } from '@/config';
+import { AUTH_USER_KEY } from "@/config";
 
 // ZERO TRUST: always route through the VPS 2 nginx proxy, never straight to Windmill.
 // The proxy injects the Windmill token server-side and 403s every non-execution path.
 // The frontend holds NO secrets — it sends only the customer's Appwrite JWT.
-const API_BASE = import.meta.env.VITE_WINDMILL_URL || 'https://app.marketingtool.pro';
-const API_WORKSPACE = import.meta.env.VITE_WINDMILL_WORKSPACE || 'marketingtool-pro';
+const API_BASE = import.meta.env.VITE_WINDMILL_URL || "https://app.marketingtool.pro";
+const API_WORKSPACE = import.meta.env.VITE_WINDMILL_WORKSPACE || "marketingtool-pro";
 
 // Get Appwrite JWT to pass to Windmill scripts for validation.
 // Exported so the few components that call Windmill directly use the same source
@@ -16,12 +16,12 @@ export function getAppwriteJwt() {
     const stored = localStorage.getItem(AUTH_USER_KEY);
     if (stored) {
       const parsed = JSON.parse(stored);
-      return parsed?.access_token || '';
+      return parsed?.access_token || "";
     }
   } catch {
     // ignore
   }
-  return '';
+  return "";
 }
 
 async function apiFetch(path, options = {}) {
@@ -42,26 +42,26 @@ async function apiFetch(path, options = {}) {
       body: bodyStr,
       signal: controller.signal,
       headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
         // Appwrite JWT only. Nginx forwards this as X-Appwrite-JWT and replaces
         // Authorization with the Windmill token server-side.
         Authorization: `Bearer ${getAppwriteJwt()}`,
-        ...options.headers
-      }
+        ...options.headers,
+      },
     });
 
     clearTimeout(timeoutId);
 
     if (!response.ok) {
-      const errorText = await response.text().catch(() => 'Unknown error');
+      const errorText = await response.text().catch(() => "Unknown error");
       throw new Error(`Request failed (${response.status}): ${errorText}`);
     }
 
     return response.json();
   } catch (err) {
     clearTimeout(timeoutId);
-    if (err.name === 'AbortError') {
-      throw new Error('Request timed out. Please try again.');
+    if (err.name === "AbortError") {
+      throw new Error("Request timed out. Please try again.");
     }
     throw err;
   }
@@ -72,9 +72,9 @@ async function apiFetch(path, options = {}) {
  * Skips the ai-generate router for lower latency
  */
 const ENGINE_SCRIPTS = {
-  creative: 'f/tools/engine-creative',
-  automation: 'f/tools/engine-automation',
-  insight: 'f/tools/engine-insight',
+  creative: "f/tools/engine-creative",
+  automation: "f/tools/engine-automation",
+  insight: "f/tools/engine-insight",
 };
 
 /**
@@ -86,20 +86,29 @@ const ENGINE_SCRIPTS = {
  * @param {string} [engineType] - Engine type ('creative'|'automation'|'insight') for direct routing
  * @returns {Promise<Object>} Generation result
  */
-export async function executeGeneration({ toolSlug, toolName, toolDescription, toolBadge, mainInput, additionalInputs = {}, userId, engineType }) {
-  const script = ENGINE_SCRIPTS[engineType] || 'f/tools/ai-generate';
+export async function executeGeneration({
+  toolSlug,
+  toolName,
+  toolDescription,
+  toolBadge,
+  mainInput,
+  additionalInputs = {},
+  userId,
+  engineType,
+}) {
+  const script = ENGINE_SCRIPTS[engineType] || "f/tools/ai-generate";
   return apiFetch(`/jobs/run_wait_result/p/${script}`, {
-    method: 'POST',
+    method: "POST",
     timeout: 180000,
     body: JSON.stringify({
       toolSlug,
       toolName,
-      toolDescription: toolDescription || '',
-      toolBadge: toolBadge || '',
+      toolDescription: toolDescription || "",
+      toolBadge: toolBadge || "",
       input: mainInput.slice(0, 5000),
       additionalInputs,
-      userId
-    })
+      userId,
+    }),
   });
 }
 
@@ -111,18 +120,18 @@ export async function executeGeneration({ toolSlug, toolName, toolDescription, t
  */
 export async function executeChat({ message, sessionId, userId }) {
   try {
-    return await apiFetch('/jobs/run_wait_result/p/f/mobile/chat_ai', {
-      method: 'POST',
+    return await apiFetch("/jobs/run_wait_result/p/f/mobile/chat_ai", {
+      method: "POST",
       timeout: 90000,
-      body: JSON.stringify({ message, sessionId, userId })
+      body: JSON.stringify({ message, sessionId, userId }),
     });
   } catch (err) {
     // Auto-retry once on timeout (Windmill cold start)
-    if (err.message?.includes('timed out')) {
-      return apiFetch('/jobs/run_wait_result/p/f/mobile/chat_ai', {
-        method: 'POST',
+    if (err.message?.includes("timed out")) {
+      return apiFetch("/jobs/run_wait_result/p/f/mobile/chat_ai", {
+        method: "POST",
         timeout: 90000,
-        body: JSON.stringify({ message, sessionId, userId })
+        body: JSON.stringify({ message, sessionId, userId }),
       });
     }
     throw err;
@@ -141,10 +150,10 @@ export async function executeChat({ message, sessionId, userId }) {
  * @returns {Promise<Object>} { success, data: { summary, metrics[], campaigns[], aiAnalysis, aiRecommendations, aiForecast } }
  */
 export async function fetchAnalyticsOverview({ userId, dateRange, platform } = {}) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/engine-analytics-overview', {
-    method: 'POST',
+  return apiFetch("/jobs/run_wait_result/p/f/tools/engine-analytics-overview", {
+    method: "POST",
     timeout: 60000,
-    body: JSON.stringify({ userId, dateRange, platform })
+    body: JSON.stringify({ userId, dateRange, platform }),
   });
 }
 
@@ -156,10 +165,10 @@ export async function fetchAnalyticsOverview({ userId, dateRange, platform } = {
  * @returns {Promise<Object>} { success, data: { platform, summary, metrics[], deepDive, benchmarks, optimization } }
  */
 export async function fetchPlatformAnalytics({ userId, platform, dateRange } = {}) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/engine-analytics-platform', {
-    method: 'POST',
+  return apiFetch("/jobs/run_wait_result/p/f/tools/engine-analytics-platform", {
+    method: "POST",
     timeout: 60000,
-    body: JSON.stringify({ userId, platform, dateRange })
+    body: JSON.stringify({ userId, platform, dateRange }),
   });
 }
 
@@ -171,10 +180,10 @@ export async function fetchPlatformAnalytics({ userId, platform, dateRange } = {
  * @returns {Promise<Object>} { success, platforms, comparison }
  */
 export async function compareAnalytics({ userId, platform1, platform2, dateRange } = {}) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/worker-analytics-compare', {
-    method: 'POST',
+  return apiFetch("/jobs/run_wait_result/p/f/tools/worker-analytics-compare", {
+    method: "POST",
     timeout: 30000,
-    body: JSON.stringify({ userId, platform1, platform2, dateRange })
+    body: JSON.stringify({ userId, platform1, platform2, dateRange }),
   });
 }
 
@@ -186,10 +195,10 @@ export async function compareAnalytics({ userId, platform1, platform2, dateRange
  * @returns {Promise<Object>} { success, exportData }
  */
 export async function exportAnalytics({ userId, dateRange, platform } = {}) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/worker-analytics-export', {
-    method: 'POST',
+  return apiFetch("/jobs/run_wait_result/p/f/tools/worker-analytics-export", {
+    method: "POST",
     timeout: 15000,
-    body: JSON.stringify({ userId, dateRange, platform })
+    body: JSON.stringify({ userId, dateRange, platform }),
   });
 }
 
@@ -199,10 +208,10 @@ export async function exportAnalytics({ userId, dateRange, platform } = {}) {
  * @returns {Promise<Object>} { success, alerts }
  */
 export async function fetchAnalyticsAlerts({ userId } = {}) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/worker-analytics-alerts', {
-    method: 'POST',
+  return apiFetch("/jobs/run_wait_result/p/f/tools/worker-analytics-alerts", {
+    method: "POST",
     timeout: 20000,
-    body: JSON.stringify({ userId })
+    body: JSON.stringify({ userId }),
   });
 }
 
@@ -212,10 +221,10 @@ export async function fetchAnalyticsAlerts({ userId } = {}) {
  * @returns {Promise<Object>} { success, refreshed, accounts }
  */
 export async function refreshAnalytics({ userId } = {}) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/worker-analytics-refresh', {
-    method: 'POST',
+  return apiFetch("/jobs/run_wait_result/p/f/tools/worker-analytics-refresh", {
+    method: "POST",
     timeout: 30000,
-    body: JSON.stringify({ userId })
+    body: JSON.stringify({ userId }),
   });
 }
 
@@ -238,15 +247,17 @@ export async function fetchMetrics(params = {}) {
         cpc: s.avgCPC || 0,
         revenue: (s.totalConversions || 0) * 50,
       },
-      platforms: d.campaigns ? [...new Set((d.campaigns || []).map(c => c.platform))].map(p => {
-        const pCamps = (d.campaigns || []).filter(c => c.platform === p);
-        return {
-          platform: p,
-          spend: pCamps.reduce((sum, c) => sum + (parseFloat(c.spend) || 0), 0),
-          clicks: pCamps.reduce((sum, c) => sum + (parseInt(c.results) || 0), 0),
-          campaigns: pCamps.length,
-        };
-      }) : [],
+      platforms: d.campaigns
+        ? [...new Set((d.campaigns || []).map((c) => c.platform))].map((p) => {
+            const pCamps = (d.campaigns || []).filter((c) => c.platform === p);
+            return {
+              platform: p,
+              spend: pCamps.reduce((sum, c) => sum + (parseFloat(c.spend) || 0), 0),
+              clicks: pCamps.reduce((sum, c) => sum + (parseInt(c.results) || 0), 0),
+              campaigns: pCamps.length,
+            };
+          })
+        : [],
       creatives: [],
       trend: d.metrics || [],
     };
@@ -263,10 +274,10 @@ export async function fetchMetrics(params = {}) {
  * @returns {Promise<Object>} { success, campaigns[], total, summary }
  */
 export async function fetchCampaigns({ userId, platform, status } = {}) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/worker-campaign-list', {
-    method: 'POST',
+  return apiFetch("/jobs/run_wait_result/p/f/tools/worker-campaign-list", {
+    method: "POST",
     timeout: 30000,
-    body: JSON.stringify({ userId, platform, status })
+    body: JSON.stringify({ userId, platform, status }),
   });
 }
 
@@ -275,9 +286,9 @@ export async function fetchCampaigns({ userId, platform, status } = {}) {
  * @returns {Promise<Object>} Dashboard KPIs and chart data
  */
 export async function fetchDashboardSummary() {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/dashboard-summary', {
-    method: 'POST',
-    body: JSON.stringify({})
+  return apiFetch("/jobs/run_wait_result/p/f/tools/dashboard-summary", {
+    method: "POST",
+    body: JSON.stringify({}),
   });
 }
 
@@ -294,10 +305,10 @@ export async function fetchDashboardSummary() {
  * @returns {Promise<Object>} { success, auditId, data: { overallScore, issues[], opportunities[], campaignAudits[], projections, recommendations[] } }
  */
 export async function runMetaAudit({ adAccountId, userId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/worker-audit-run', {
-    method: 'POST',
+  return apiFetch("/jobs/run_wait_result/p/f/tools/worker-audit-run", {
+    method: "POST",
     timeout: 180000,
-    body: JSON.stringify({ adAccountId, userId })
+    body: JSON.stringify({ adAccountId, userId }),
   });
 }
 
@@ -308,10 +319,10 @@ export async function runMetaAudit({ adAccountId, userId }) {
  * @returns {Promise<Object>} { success, audits[], total }
  */
 export async function fetchAuditHistory({ userId, adAccountId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/worker-audit-history', {
-    method: 'POST',
+  return apiFetch("/jobs/run_wait_result/p/f/tools/worker-audit-history", {
+    method: "POST",
     timeout: 15000,
-    body: JSON.stringify({ userId, adAccountId })
+    body: JSON.stringify({ userId, adAccountId }),
   });
 }
 
@@ -323,10 +334,10 @@ export async function fetchAuditHistory({ userId, adAccountId }) {
  * @returns {Promise<Object>} { success, audit1, audit2, comparison, scoreDelta }
  */
 export async function compareAudits({ userId, auditId1, auditId2 }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/worker-audit-compare', {
-    method: 'POST',
+  return apiFetch("/jobs/run_wait_result/p/f/tools/worker-audit-compare", {
+    method: "POST",
     timeout: 30000,
-    body: JSON.stringify({ userId, auditId1, auditId2 })
+    body: JSON.stringify({ userId, auditId1, auditId2 }),
   });
 }
 
@@ -337,10 +348,10 @@ export async function compareAudits({ userId, auditId1, auditId2 }) {
  * @returns {Promise<Object>} { success, exportData, score, date }
  */
 export async function exportAudit({ userId, auditId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/worker-audit-export', {
-    method: 'POST',
+  return apiFetch("/jobs/run_wait_result/p/f/tools/worker-audit-export", {
+    method: "POST",
     timeout: 15000,
-    body: JSON.stringify({ userId, auditId })
+    body: JSON.stringify({ userId, auditId }),
   });
 }
 
@@ -351,9 +362,9 @@ export async function exportAudit({ userId, auditId }) {
  * @returns {Promise<Object>} History records
  */
 export async function fetchHistory({ userId, ...filters }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/fetch-history', {
-    method: 'POST',
-    body: JSON.stringify({ userId, ...filters })
+  return apiFetch("/jobs/run_wait_result/p/f/tools/fetch-history", {
+    method: "POST",
+    body: JSON.stringify({ userId, ...filters }),
   });
 }
 
@@ -375,10 +386,10 @@ export async function fetchHistory({ userId, ...filters }) {
  * @returns {Promise<Object>} { success, ads[], total, marketAnalysis, copyTips }
  */
 export async function searchAdLibrary(params = {}) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/engine-ad-library', {
-    method: 'POST',
+  return apiFetch("/jobs/run_wait_result/p/f/tools/engine-ad-library", {
+    method: "POST",
     timeout: 60000,
-    body: JSON.stringify(params)
+    body: JSON.stringify(params),
   });
 }
 
@@ -390,10 +401,10 @@ export async function searchAdLibrary(params = {}) {
  * @returns {Promise<Object>} { success, analysis: { copyAnalysis, strategyAnalysis, imageAnalysis } }
  */
 export async function analyzeAd({ userId, adId, adData }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/worker-ad-analyze', {
-    method: 'POST',
+  return apiFetch("/jobs/run_wait_result/p/f/tools/worker-ad-analyze", {
+    method: "POST",
     timeout: 30000,
-    body: JSON.stringify({ userId, adId, adData })
+    body: JSON.stringify({ userId, adId, adData }),
   });
 }
 
@@ -406,10 +417,10 @@ export async function analyzeAd({ userId, adId, adData }) {
  * @returns {Promise<Object>} { success, action, adId }
  */
 export async function saveAd({ userId, adId, adData, action }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/worker-ad-save', {
-    method: 'POST',
+  return apiFetch("/jobs/run_wait_result/p/f/tools/worker-ad-save", {
+    method: "POST",
     timeout: 10000,
-    body: JSON.stringify({ userId, adId, adData, action })
+    body: JSON.stringify({ userId, adId, adData, action }),
   });
 }
 
@@ -421,10 +432,10 @@ export async function saveAd({ userId, adId, adData, action }) {
  * @returns {Promise<Object>} { success, trending }
  */
 export async function fetchTrendingAds({ userId, platform, category }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/worker-ad-trending', {
-    method: 'POST',
+  return apiFetch("/jobs/run_wait_result/p/f/tools/worker-ad-trending", {
+    method: "POST",
     timeout: 20000,
-    body: JSON.stringify({ userId, platform, category })
+    body: JSON.stringify({ userId, platform, category }),
   });
 }
 
@@ -434,9 +445,9 @@ export async function fetchTrendingAds({ userId, platform, category }) {
  * @returns {Promise<Object>} Connected accounts list
  */
 export async function fetchAdAccounts({ userId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/connect-ad-account', {
-    method: 'POST',
-    body: JSON.stringify({ userId })
+  return apiFetch("/jobs/run_wait_result/p/f/tools/connect-ad-account", {
+    method: "POST",
+    body: JSON.stringify({ userId }),
   });
 }
 
@@ -446,9 +457,9 @@ export async function fetchAdAccounts({ userId }) {
  * @returns {Promise<Object>} { connections, lastRuns }
  */
 export async function fetchCommandCentreData({ userId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/command-centre-data', {
-    method: 'POST',
-    body: JSON.stringify({ userId })
+  return apiFetch("/jobs/run_wait_result/p/f/tools/command-centre-data", {
+    method: "POST",
+    body: JSON.stringify({ userId }),
   });
 }
 
@@ -460,10 +471,10 @@ export async function fetchCommandCentreData({ userId }) {
  * @returns {Promise<Object>} { run_id, job_id, status: "queued" }
  */
 export async function startWorkflowRun({ workflowId, inputs, userId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/run-workflow-api', {
-    method: 'POST',
+  return apiFetch("/jobs/run_wait_result/p/f/tools/run-workflow-api", {
+    method: "POST",
     timeout: 120000,
-    body: JSON.stringify({ workflowId, inputs, userId })
+    body: JSON.stringify({ workflowId, inputs, userId }),
   });
 }
 
@@ -473,10 +484,10 @@ export async function startWorkflowRun({ workflowId, inputs, userId }) {
  * @returns {Promise<Object>} { status, progress, output_json, error }
  */
 export async function getRunStatus({ runId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/get-run-status', {
-    method: 'POST',
+  return apiFetch("/jobs/run_wait_result/p/f/tools/get-run-status", {
+    method: "POST",
     timeout: 10000,
-    body: JSON.stringify({ runId })
+    body: JSON.stringify({ runId }),
   });
 }
 
@@ -486,9 +497,9 @@ export async function getRunStatus({ runId }) {
  * @returns {Promise<Object>} Connected accounts list
  */
 export async function fetchConnectedAccounts({ userId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/fetch-connected-accounts', {
-    method: 'POST',
-    body: JSON.stringify({ userId })
+  return apiFetch("/jobs/run_wait_result/p/f/tools/fetch-connected-accounts", {
+    method: "POST",
+    body: JSON.stringify({ userId }),
   });
 }
 
@@ -498,10 +509,10 @@ export async function fetchConnectedAccounts({ userId }) {
  * @returns {Promise<Object>} Run logs
  */
 export async function getRunLogs({ runId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/get-run-logs', {
-    method: 'POST',
+  return apiFetch("/jobs/run_wait_result/p/f/tools/get-run-logs", {
+    method: "POST",
     timeout: 10000,
-    body: JSON.stringify({ runId })
+    body: JSON.stringify({ runId }),
   });
 }
 
@@ -512,13 +523,13 @@ export async function getRunLogs({ runId }) {
  */
 export async function checkSubscription({ userId }) {
   try {
-    return await apiFetch('/jobs/run_wait_result/p/f/tools/check-subscription', {
-      method: 'POST',
+    return await apiFetch("/jobs/run_wait_result/p/f/tools/check-subscription", {
+      method: "POST",
       timeout: 10000,
-      body: JSON.stringify({ userId })
+      body: JSON.stringify({ userId }),
     });
   } catch {
-    return { tier: 'free', trialDaysLeft: 0, blocked: true, code: 'CHECK_FAILED' };
+    return { tier: "free", trialDaysLeft: 0, blocked: true, code: "CHECK_FAILED" };
   }
 }
 
@@ -531,20 +542,21 @@ export async function checkSubscription({ userId }) {
  * @returns {Promise<Object>} { success, run_id } or error
  */
 export async function createCampaign({ platform, accountId, campaignData, userId }) {
-  const script = platform === 'google' ? 'f/tools/engine-campaign-google' : 'f/tools/engine-campaign-meta';
+  const script =
+    platform === "google" ? "f/tools/engine-campaign-google" : "f/tools/engine-campaign-meta";
   return apiFetch(`/jobs/run_wait_result/p/${script}`, {
-    method: 'POST',
+    method: "POST",
     timeout: 180000,
     body: JSON.stringify({
       toolSlug: `campaign-create-${platform}`,
-      toolName: platform === 'google' ? 'Google Ads Campaign' : 'Meta Campaign',
-      input: campaignData.name || '',
+      toolName: platform === "google" ? "Google Ads Campaign" : "Meta Campaign",
+      input: campaignData.name || "",
       additionalInputs: campaignData,
       userId,
       platform,
       accountId,
       campaignData,
-    })
+    }),
   });
 }
 
@@ -555,10 +567,10 @@ export async function createCampaign({ platform, accountId, campaignData, userId
  * @returns {Promise<Object>} { success, campaign, metrics[], analysis, recommendations }
  */
 export async function fetchCampaignMetrics({ userId, campaignId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/worker-campaign-metrics', {
-    method: 'POST',
+  return apiFetch("/jobs/run_wait_result/p/f/tools/worker-campaign-metrics", {
+    method: "POST",
     timeout: 30000,
-    body: JSON.stringify({ userId, campaignId })
+    body: JSON.stringify({ userId, campaignId }),
   });
 }
 
@@ -569,10 +581,10 @@ export async function fetchCampaignMetrics({ userId, campaignId }) {
  * @returns {Promise<Object>} { success, campaign, optimization: { bidStrategy, freshAdCopy, audienceExpansion, budgetPlan } }
  */
 export async function optimizeCampaign({ userId, campaignId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/worker-campaign-optimize', {
-    method: 'POST',
+  return apiFetch("/jobs/run_wait_result/p/f/tools/worker-campaign-optimize", {
+    method: "POST",
     timeout: 60000,
-    body: JSON.stringify({ userId, campaignId })
+    body: JSON.stringify({ userId, campaignId }),
   });
 }
 
@@ -584,10 +596,10 @@ export async function optimizeCampaign({ userId, campaignId }) {
  * @returns {Promise<Object>} { success, campaignId, status }
  */
 export async function pauseResumeCampaign({ userId, campaignId, action }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/worker-campaign-pause', {
-    method: 'POST',
+  return apiFetch("/jobs/run_wait_result/p/f/tools/worker-campaign-pause", {
+    method: "POST",
     timeout: 15000,
-    body: JSON.stringify({ userId, campaignId, action })
+    body: JSON.stringify({ userId, campaignId, action }),
   });
 }
 
@@ -599,10 +611,10 @@ export async function pauseResumeCampaign({ userId, campaignId, action }) {
  * @returns {Promise<Object>} { success, campaignId, updated[] }
  */
 export async function editCampaign({ userId, campaignId, updates }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/worker-campaign-edit', {
-    method: 'POST',
+  return apiFetch("/jobs/run_wait_result/p/f/tools/worker-campaign-edit", {
+    method: "POST",
     timeout: 15000,
-    body: JSON.stringify({ userId, campaignId, updates })
+    body: JSON.stringify({ userId, campaignId, updates }),
   });
 }
 
@@ -614,10 +626,10 @@ export async function editCampaign({ userId, campaignId, updates }) {
  * @returns {Promise<Object>} { success, newCampaignId, platform, adaptedCopy }
  */
 export async function duplicateCampaign({ userId, campaignId, targetPlatform }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/worker-campaign-duplicate', {
-    method: 'POST',
+  return apiFetch("/jobs/run_wait_result/p/f/tools/worker-campaign-duplicate", {
+    method: "POST",
     timeout: 30000,
-    body: JSON.stringify({ userId, campaignId, targetPlatform })
+    body: JSON.stringify({ userId, campaignId, targetPlatform }),
   });
 }
 
@@ -628,10 +640,10 @@ export async function duplicateCampaign({ userId, campaignId, targetPlatform }) 
  * @returns {Promise<Object>} { success, campaignId, status: 'archived' }
  */
 export async function deleteCampaign({ userId, campaignId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/worker-campaign-delete', {
-    method: 'POST',
+  return apiFetch("/jobs/run_wait_result/p/f/tools/worker-campaign-delete", {
+    method: "POST",
     timeout: 15000,
-    body: JSON.stringify({ userId, campaignId })
+    body: JSON.stringify({ userId, campaignId }),
   });
 }
 
@@ -643,10 +655,10 @@ export async function deleteCampaign({ userId, campaignId }) {
  * @returns {Promise<Object>} { success, campaign, metrics[], report: { executiveSummary, actionableInsights, benchmarkComparison } }
  */
 export async function generateCampaignReport({ userId, campaignId, dateRange }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/worker-campaign-report', {
-    method: 'POST',
+  return apiFetch("/jobs/run_wait_result/p/f/tools/worker-campaign-report", {
+    method: "POST",
     timeout: 60000,
-    body: JSON.stringify({ userId, campaignId, dateRange })
+    body: JSON.stringify({ userId, campaignId, dateRange }),
   });
 }
 
@@ -672,11 +684,18 @@ export async function generateCampaignReport({ userId, campaignId, dateRange }) 
  * @param {string[]} [metrics]
  * @returns {Promise<Object>} { success, reportId, data: { content, benchmarks, recommendations, forecast, adCopySuggestions, automationRules, coverImage } }
  */
-export async function generateReport({ userId, reportName, reportType, dateRange, platforms, metrics }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/engine-report-generate', {
-    method: 'POST',
+export async function generateReport({
+  userId,
+  reportName,
+  reportType,
+  dateRange,
+  platforms,
+  metrics,
+}) {
+  return apiFetch("/jobs/run_wait_result/p/f/tools/engine-report-generate", {
+    method: "POST",
     timeout: 180000,
-    body: JSON.stringify({ userId, reportName, reportType, dateRange, platforms, metrics })
+    body: JSON.stringify({ userId, reportName, reportType, dateRange, platforms, metrics }),
   });
 }
 
@@ -691,11 +710,27 @@ export async function generateReport({ userId, reportName, reportType, dateRange
  * @param {boolean} [enabled]
  * @returns {Promise<Object>} { success, scheduleId, config, scheduleTip }
  */
-export async function scheduleReport({ userId, reportName, frequency, reportType, platforms, recipients, enabled }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/engine-report-schedule', {
-    method: 'POST',
+export async function scheduleReport({
+  userId,
+  reportName,
+  frequency,
+  reportType,
+  platforms,
+  recipients,
+  enabled,
+}) {
+  return apiFetch("/jobs/run_wait_result/p/f/tools/engine-report-schedule", {
+    method: "POST",
     timeout: 30000,
-    body: JSON.stringify({ userId, reportName, frequency, reportType, platforms, recipients, enabled })
+    body: JSON.stringify({
+      userId,
+      reportName,
+      frequency,
+      reportType,
+      platforms,
+      recipients,
+      enabled,
+    }),
   });
 }
 
@@ -706,10 +741,10 @@ export async function scheduleReport({ userId, reportName, frequency, reportType
  * @returns {Promise<Object>} { success, reports[], total }
  */
 export async function fetchReports({ userId, reportType }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/worker-report-list', {
-    method: 'POST',
+  return apiFetch("/jobs/run_wait_result/p/f/tools/worker-report-list", {
+    method: "POST",
     timeout: 15000,
-    body: JSON.stringify({ userId, reportType })
+    body: JSON.stringify({ userId, reportType }),
   });
 }
 
@@ -719,10 +754,10 @@ export async function fetchReports({ userId, reportType }) {
  * @returns {Promise<Object>} { success, schedules[], total }
  */
 export async function fetchReportSchedules({ userId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/worker-report-schedules', {
-    method: 'POST',
+  return apiFetch("/jobs/run_wait_result/p/f/tools/worker-report-schedules", {
+    method: "POST",
     timeout: 15000,
-    body: JSON.stringify({ userId })
+    body: JSON.stringify({ userId }),
   });
 }
 
@@ -734,10 +769,10 @@ export async function fetchReportSchedules({ userId }) {
  * @returns {Promise<Object>} { success, enabled }
  */
 export async function toggleReportSchedule({ userId, scheduleId, enabled }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/worker-report-toggle-schedule', {
-    method: 'POST',
+  return apiFetch("/jobs/run_wait_result/p/f/tools/worker-report-toggle-schedule", {
+    method: "POST",
     timeout: 10000,
-    body: JSON.stringify({ userId, scheduleId, enabled })
+    body: JSON.stringify({ userId, scheduleId, enabled }),
   });
 }
 
@@ -748,10 +783,10 @@ export async function toggleReportSchedule({ userId, scheduleId, enabled }) {
  * @returns {Promise<Object>} { success, status }
  */
 export async function deleteReportSchedule({ userId, scheduleId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/worker-report-delete-schedule', {
-    method: 'POST',
+  return apiFetch("/jobs/run_wait_result/p/f/tools/worker-report-delete-schedule", {
+    method: "POST",
     timeout: 10000,
-    body: JSON.stringify({ userId, scheduleId })
+    body: JSON.stringify({ userId, scheduleId }),
   });
 }
 
@@ -762,10 +797,10 @@ export async function deleteReportSchedule({ userId, scheduleId }) {
  * @returns {Promise<Object>} { success, report, date, type }
  */
 export async function fetchReportDetail({ userId, reportId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/worker-report-detail', {
-    method: 'POST',
+  return apiFetch("/jobs/run_wait_result/p/f/tools/worker-report-detail", {
+    method: "POST",
     timeout: 15000,
-    body: JSON.stringify({ userId, reportId })
+    body: JSON.stringify({ userId, reportId }),
   });
 }
 
@@ -776,10 +811,10 @@ export async function fetchReportDetail({ userId, reportId }) {
  * @returns {Promise<Object>} { success, exportData }
  */
 export async function exportReport({ userId, reportId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/worker-report-export', {
-    method: 'POST',
+  return apiFetch("/jobs/run_wait_result/p/f/tools/worker-report-export", {
+    method: "POST",
     timeout: 15000,
-    body: JSON.stringify({ userId, reportId })
+    body: JSON.stringify({ userId, reportId }),
   });
 }
 
@@ -790,10 +825,10 @@ export async function exportReport({ userId, reportId }) {
  * @returns {Promise<Object>} { success, status }
  */
 export async function deleteReport({ userId, reportId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/worker-report-delete', {
-    method: 'POST',
+  return apiFetch("/jobs/run_wait_result/p/f/tools/worker-report-delete", {
+    method: "POST",
     timeout: 10000,
-    body: JSON.stringify({ userId, reportId })
+    body: JSON.stringify({ userId, reportId }),
   });
 }
 
@@ -811,10 +846,10 @@ export async function deleteReport({ userId, reportId }) {
  * @returns {Promise<Object>} { success, data: { content, marketContext, imageUrl } }
  */
 export async function executeTool({ userId, toolSlug, toolName, input, additionalInputs }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/engine-tool-execute', {
-    method: 'POST',
+  return apiFetch("/jobs/run_wait_result/p/f/tools/engine-tool-execute", {
+    method: "POST",
     timeout: 120000,
-    body: JSON.stringify({ userId, toolSlug, toolName, input, additionalInputs })
+    body: JSON.stringify({ userId, toolSlug, toolName, input, additionalInputs }),
   });
 }
 
@@ -826,10 +861,10 @@ export async function executeTool({ userId, toolSlug, toolName, input, additiona
  * @returns {Promise<Object>} { success, action }
  */
 export async function favoriteTool({ userId, toolSlug, action }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/worker-tool-favorite', {
-    method: 'POST',
+  return apiFetch("/jobs/run_wait_result/p/f/tools/worker-tool-favorite", {
+    method: "POST",
     timeout: 10000,
-    body: JSON.stringify({ userId, toolSlug, action })
+    body: JSON.stringify({ userId, toolSlug, action }),
   });
 }
 
@@ -842,10 +877,10 @@ export async function favoriteTool({ userId, toolSlug, action }) {
  * @returns {Promise<Object>} { success, rating }
  */
 export async function rateTool({ userId, toolSlug, rating, comment }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/worker-tool-rate', {
-    method: 'POST',
+  return apiFetch("/jobs/run_wait_result/p/f/tools/worker-tool-rate", {
+    method: "POST",
     timeout: 10000,
-    body: JSON.stringify({ userId, toolSlug, rating, comment })
+    body: JSON.stringify({ userId, toolSlug, rating, comment }),
   });
 }
 
@@ -856,10 +891,10 @@ export async function rateTool({ userId, toolSlug, rating, comment }) {
  * @returns {Promise<Object>} { success, history[], total }
  */
 export async function fetchToolHistory({ userId, toolSlug }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/worker-tool-history', {
-    method: 'POST',
+  return apiFetch("/jobs/run_wait_result/p/f/tools/worker-tool-history", {
+    method: "POST",
     timeout: 15000,
-    body: JSON.stringify({ userId, toolSlug })
+    body: JSON.stringify({ userId, toolSlug }),
   });
 }
 
@@ -874,10 +909,10 @@ export async function fetchToolHistory({ userId, toolSlug }) {
  * @returns {Promise<Object>} { success, data: { platform, accounts[], campaigns[], metrics[], overview, tips } }
  */
 export async function fetchPlatformOverview({ userId, platform }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/engine-platform-overview', {
-    method: 'POST',
+  return apiFetch("/jobs/run_wait_result/p/f/tools/engine-platform-overview", {
+    method: "POST",
     timeout: 30000,
-    body: JSON.stringify({ userId, platform })
+    body: JSON.stringify({ userId, platform }),
   });
 }
 
@@ -888,10 +923,10 @@ export async function fetchPlatformOverview({ userId, platform }) {
  * @returns {Promise<Object>} { success, campaigns[] }
  */
 export async function fetchPlatformCampaigns({ userId, platform }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/worker-platform-campaigns', {
-    method: 'POST',
+  return apiFetch("/jobs/run_wait_result/p/f/tools/worker-platform-campaigns", {
+    method: "POST",
     timeout: 15000,
-    body: JSON.stringify({ userId, platform })
+    body: JSON.stringify({ userId, platform }),
   });
 }
 
@@ -905,10 +940,10 @@ export async function fetchPlatformCampaigns({ userId, platform }) {
  * @returns {Promise<Object>} { success, status: 'connected' }
  */
 export async function connectPlatform({ userId, platform, accountId, accessToken, accountName }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/worker-platform-connect', {
-    method: 'POST',
+  return apiFetch("/jobs/run_wait_result/p/f/tools/worker-platform-connect", {
+    method: "POST",
     timeout: 15000,
-    body: JSON.stringify({ userId, platform, accountId, accessToken, accountName })
+    body: JSON.stringify({ userId, platform, accountId, accessToken, accountName }),
   });
 }
 
@@ -920,10 +955,10 @@ export async function connectPlatform({ userId, platform, accountId, accessToken
  * @returns {Promise<Object>} { success, status: 'disconnected' }
  */
 export async function disconnectPlatform({ userId, platform, accountId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/worker-platform-disconnect', {
-    method: 'POST',
+  return apiFetch("/jobs/run_wait_result/p/f/tools/worker-platform-disconnect", {
+    method: "POST",
     timeout: 10000,
-    body: JSON.stringify({ userId, platform, accountId })
+    body: JSON.stringify({ userId, platform, accountId }),
   });
 }
 
@@ -938,10 +973,10 @@ export async function disconnectPlatform({ userId, platform, accountId }) {
  * @returns {Promise<Object>} { success, sessions[], total }
  */
 export async function fetchChatHistory({ userId, limit }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/worker-chat-history', {
-    method: 'POST',
+  return apiFetch("/jobs/run_wait_result/p/f/tools/worker-chat-history", {
+    method: "POST",
     timeout: 15000,
-    body: JSON.stringify({ userId, limit })
+    body: JSON.stringify({ userId, limit }),
   });
 }
 
@@ -952,10 +987,10 @@ export async function fetchChatHistory({ userId, limit }) {
  * @returns {Promise<Object>} { success, sessionId, messages[], total }
  */
 export async function fetchChatMessages({ userId, sessionId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/worker-chat-messages', {
-    method: 'POST',
+  return apiFetch("/jobs/run_wait_result/p/f/tools/worker-chat-messages", {
+    method: "POST",
     timeout: 15000,
-    body: JSON.stringify({ userId, sessionId })
+    body: JSON.stringify({ userId, sessionId }),
   });
 }
 
@@ -966,10 +1001,10 @@ export async function fetchChatMessages({ userId, sessionId }) {
  * @returns {Promise<Object>} { success, sessionId, title }
  */
 export async function createChatSession({ userId, title }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/worker-chat-session-create', {
-    method: 'POST',
+  return apiFetch("/jobs/run_wait_result/p/f/tools/worker-chat-session-create", {
+    method: "POST",
     timeout: 10000,
-    body: JSON.stringify({ userId, title })
+    body: JSON.stringify({ userId, title }),
   });
 }
 
@@ -980,10 +1015,10 @@ export async function createChatSession({ userId, title }) {
  * @returns {Promise<Object>} { success, status }
  */
 export async function deleteChatSession({ userId, sessionId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/worker-chat-session-delete', {
-    method: 'POST',
+  return apiFetch("/jobs/run_wait_result/p/f/tools/worker-chat-session-delete", {
+    method: "POST",
     timeout: 10000,
-    body: JSON.stringify({ userId, sessionId })
+    body: JSON.stringify({ userId, sessionId }),
   });
 }
 
@@ -995,10 +1030,10 @@ export async function deleteChatSession({ userId, sessionId }) {
  * @returns {Promise<Object>} { success, generations[], total }
  */
 export async function fetchGenerationHistory({ userId, toolSlug, limit }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/worker-generation-history', {
-    method: 'POST',
+  return apiFetch("/jobs/run_wait_result/p/f/tools/worker-generation-history", {
+    method: "POST",
     timeout: 15000,
-    body: JSON.stringify({ userId, toolSlug, limit })
+    body: JSON.stringify({ userId, toolSlug, limit }),
   });
 }
 
@@ -1009,10 +1044,10 @@ export async function fetchGenerationHistory({ userId, toolSlug, limit }) {
  * @returns {Promise<Object>} { success, generation }
  */
 export async function fetchGenerationDetail({ userId, generationId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/worker-generation-detail', {
-    method: 'POST',
+  return apiFetch("/jobs/run_wait_result/p/f/tools/worker-generation-detail", {
+    method: "POST",
     timeout: 10000,
-    body: JSON.stringify({ userId, generationId })
+    body: JSON.stringify({ userId, generationId }),
   });
 }
 
@@ -1024,10 +1059,10 @@ export async function fetchGenerationDetail({ userId, generationId }) {
  * @returns {Promise<Object>} { success, action }
  */
 export async function favoriteGeneration({ userId, generationId, action }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/worker-generation-favorite', {
-    method: 'POST',
+  return apiFetch("/jobs/run_wait_result/p/f/tools/worker-generation-favorite", {
+    method: "POST",
     timeout: 10000,
-    body: JSON.stringify({ userId, generationId, action })
+    body: JSON.stringify({ userId, generationId, action }),
   });
 }
 
@@ -1038,10 +1073,10 @@ export async function favoriteGeneration({ userId, generationId, action }) {
  * @returns {Promise<Object>} { success, shareCode, shareUrl }
  */
 export async function shareGeneration({ userId, generationId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/worker-generation-share', {
-    method: 'POST',
+  return apiFetch("/jobs/run_wait_result/p/f/tools/worker-generation-share", {
+    method: "POST",
     timeout: 10000,
-    body: JSON.stringify({ userId, generationId })
+    body: JSON.stringify({ userId, generationId }),
   });
 }
 
@@ -1054,10 +1089,10 @@ export async function shareGeneration({ userId, generationId }) {
  * @returns {Promise<Object>} { success, rating }
  */
 export async function rateGeneration({ userId, generationId, rating, comment }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/worker-generation-rate', {
-    method: 'POST',
+  return apiFetch("/jobs/run_wait_result/p/f/tools/worker-generation-rate", {
+    method: "POST",
     timeout: 10000,
-    body: JSON.stringify({ userId, generationId, rating, comment })
+    body: JSON.stringify({ userId, generationId, rating, comment }),
   });
 }
 
@@ -1067,10 +1102,10 @@ export async function rateGeneration({ userId, generationId, rating, comment }) 
  * @returns {Promise<Object>} { success, tier, todayUsed, dailyLimit, remaining }
  */
 export async function checkCredits({ userId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/worker-credit-check', {
-    method: 'POST',
+  return apiFetch("/jobs/run_wait_result/p/f/tools/worker-credit-check", {
+    method: "POST",
     timeout: 10000,
-    body: JSON.stringify({ userId })
+    body: JSON.stringify({ userId }),
   });
 }
 
@@ -1089,11 +1124,27 @@ export async function checkCredits({ userId }) {
  * @param {string} [accountId]
  * @returns {Promise<Object>} { success, data: { content, benchmarks, adCopy, automationRules, image, codeSnippet } }
  */
-export async function executeGoogleTool({ userId, section, toolSlug, toolName, input, additionalInputs, accountId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/router-google-platform', {
-    method: 'POST',
+export async function executeGoogleTool({
+  userId,
+  section,
+  toolSlug,
+  toolName,
+  input,
+  additionalInputs,
+  accountId,
+}) {
+  return apiFetch("/jobs/run_wait_result/p/f/tools/router-google-platform", {
+    method: "POST",
     timeout: 180000,
-    body: JSON.stringify({ userId, section, toolSlug, toolName, input, additionalInputs, accountId })
+    body: JSON.stringify({
+      userId,
+      section,
+      toolSlug,
+      toolName,
+      input,
+      additionalInputs,
+      accountId,
+    }),
   });
 }
 
@@ -1106,11 +1157,17 @@ export async function executeGoogleTool({ userId, section, toolSlug, toolName, i
  * @param {Object} [additionalInputs]
  * @returns {Promise<Object>} { success, data: { content, benchmarks, image, code, automationRules } }
  */
-export async function executeGoogleToolDirect({ userId, toolSlug, toolName, input, additionalInputs }) {
+export async function executeGoogleToolDirect({
+  userId,
+  toolSlug,
+  toolName,
+  input,
+  additionalInputs,
+}) {
   return apiFetch(`/jobs/run_wait_result/p/f/tools/${toolSlug}`, {
-    method: 'POST',
+    method: "POST",
     timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug, toolName, input, additionalInputs })
+    body: JSON.stringify({ userId, toolSlug, toolName, input, additionalInputs }),
   });
 }
 
@@ -1120,10 +1177,10 @@ export async function executeGoogleToolDirect({ userId, toolSlug, toolName, inpu
  * @returns {Promise<Object>} { success, accounts[] }
  */
 export async function fetchGoogleAccounts({ userId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/worker-google-accounts', {
-    method: 'POST',
+  return apiFetch("/jobs/run_wait_result/p/f/tools/worker-google-accounts", {
+    method: "POST",
     timeout: 15000,
-    body: JSON.stringify({ userId })
+    body: JSON.stringify({ userId }),
   });
 }
 
@@ -1134,10 +1191,10 @@ export async function fetchGoogleAccounts({ userId }) {
  * @returns {Promise<Object>} { success, metrics[] }
  */
 export async function fetchGoogleMetrics({ userId, accountId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/worker-google-metrics', {
-    method: 'POST',
+  return apiFetch("/jobs/run_wait_result/p/f/tools/worker-google-metrics", {
+    method: "POST",
     timeout: 15000,
-    body: JSON.stringify({ userId, accountId })
+    body: JSON.stringify({ userId, accountId }),
   });
 }
 
@@ -1147,10 +1204,10 @@ export async function fetchGoogleMetrics({ userId, accountId }) {
  * @returns {Promise<Object>} { success, campaigns[] }
  */
 export async function fetchGoogleCampaigns({ userId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/worker-google-campaigns', {
-    method: 'POST',
+  return apiFetch("/jobs/run_wait_result/p/f/tools/worker-google-campaigns", {
+    method: "POST",
     timeout: 15000,
-    body: JSON.stringify({ userId })
+    body: JSON.stringify({ userId }),
   });
 }
 
@@ -1160,10 +1217,10 @@ export async function fetchGoogleCampaigns({ userId }) {
  * @returns {Promise<Object>} { success, generations[], total }
  */
 export async function fetchGoogleToolHistory({ userId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/worker-google-tool-list', {
-    method: 'POST',
+  return apiFetch("/jobs/run_wait_result/p/f/tools/worker-google-tool-list", {
+    method: "POST",
     timeout: 15000,
-    body: JSON.stringify({ userId })
+    body: JSON.stringify({ userId }),
   });
 }
 
@@ -1182,11 +1239,27 @@ export async function fetchGoogleToolHistory({ userId }) {
  * @param {string} [accountId]
  * @returns {Promise<Object>} { success, data: { content, benchmarks, adCopy, automationRules, image, code } }
  */
-export async function executeMetaTool({ userId, section, toolSlug, toolName, input, additionalInputs, accountId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/router-meta-platform', {
-    method: 'POST',
+export async function executeMetaTool({
+  userId,
+  section,
+  toolSlug,
+  toolName,
+  input,
+  additionalInputs,
+  accountId,
+}) {
+  return apiFetch("/jobs/run_wait_result/p/f/tools/router-meta-platform", {
+    method: "POST",
     timeout: 180000,
-    body: JSON.stringify({ userId, section, toolSlug, toolName, input, additionalInputs, accountId })
+    body: JSON.stringify({
+      userId,
+      section,
+      toolSlug,
+      toolName,
+      input,
+      additionalInputs,
+      accountId,
+    }),
   });
 }
 
@@ -1199,11 +1272,17 @@ export async function executeMetaTool({ userId, section, toolSlug, toolName, inp
  * @param {Object} [additionalInputs]
  * @returns {Promise<Object>} { success, data: { content, benchmarks, image, code, automationRules } }
  */
-export async function executeMetaToolDirect({ userId, toolSlug, toolName, input, additionalInputs }) {
+export async function executeMetaToolDirect({
+  userId,
+  toolSlug,
+  toolName,
+  input,
+  additionalInputs,
+}) {
   return apiFetch(`/jobs/run_wait_result/p/f/tools/${toolSlug}`, {
-    method: 'POST',
+    method: "POST",
     timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug, toolName, input, additionalInputs })
+    body: JSON.stringify({ userId, toolSlug, toolName, input, additionalInputs }),
   });
 }
 
@@ -1213,10 +1292,10 @@ export async function executeMetaToolDirect({ userId, toolSlug, toolName, input,
  * @returns {Promise<Object>} { success, accounts[] }
  */
 export async function fetchMetaAccounts({ userId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/worker-google-accounts', {
-    method: 'POST',
+  return apiFetch("/jobs/run_wait_result/p/f/tools/worker-google-accounts", {
+    method: "POST",
     timeout: 15000,
-    body: JSON.stringify({ userId })
+    body: JSON.stringify({ userId }),
   });
 }
 
@@ -1227,10 +1306,10 @@ export async function fetchMetaAccounts({ userId }) {
  * @returns {Promise<Object>} { success, metrics[] }
  */
 export async function fetchMetaMetrics({ userId, accountId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/worker-meta-metrics', {
-    method: 'POST',
+  return apiFetch("/jobs/run_wait_result/p/f/tools/worker-meta-metrics", {
+    method: "POST",
     timeout: 15000,
-    body: JSON.stringify({ userId, accountId })
+    body: JSON.stringify({ userId, accountId }),
   });
 }
 
@@ -1240,10 +1319,10 @@ export async function fetchMetaMetrics({ userId, accountId }) {
  * @returns {Promise<Object>} { success, campaigns[] }
  */
 export async function fetchMetaCampaigns({ userId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/worker-meta-campaigns', {
-    method: 'POST',
+  return apiFetch("/jobs/run_wait_result/p/f/tools/worker-meta-campaigns", {
+    method: "POST",
     timeout: 15000,
-    body: JSON.stringify({ userId })
+    body: JSON.stringify({ userId }),
   });
 }
 
@@ -1253,10 +1332,10 @@ export async function fetchMetaCampaigns({ userId }) {
  * @returns {Promise<Object>} { success, generations[], total }
  */
 export async function fetchMetaToolHistory({ userId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/worker-meta-tool-list', {
-    method: 'POST',
+  return apiFetch("/jobs/run_wait_result/p/f/tools/worker-meta-tool-list", {
+    method: "POST",
     timeout: 15000,
-    body: JSON.stringify({ userId })
+    body: JSON.stringify({ userId }),
   });
 }
 
@@ -1267,10 +1346,10 @@ export async function fetchMetaToolHistory({ userId }) {
  * @returns {Promise<Object>} { success, audiences[] }
  */
 export async function fetchMetaAudiences({ userId, accountId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/worker-meta-audiences', {
-    method: 'POST',
+  return apiFetch("/jobs/run_wait_result/p/f/tools/worker-meta-audiences", {
+    method: "POST",
     timeout: 15000,
-    body: JSON.stringify({ userId, accountId })
+    body: JSON.stringify({ userId, accountId }),
   });
 }
 
@@ -1280,10 +1359,10 @@ export async function fetchMetaAudiences({ userId, accountId }) {
  * @returns {Promise<Object>} { success, creatives[], total }
  */
 export async function fetchMetaCreatives({ userId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/worker-meta-creatives', {
-    method: 'POST',
+  return apiFetch("/jobs/run_wait_result/p/f/tools/worker-meta-creatives", {
+    method: "POST",
     timeout: 15000,
-    body: JSON.stringify({ userId })
+    body: JSON.stringify({ userId }),
   });
 }
 
@@ -1294,10 +1373,10 @@ export async function fetchMetaCreatives({ userId }) {
  * @returns {Promise<Object>} { success, insights[] }
  */
 export async function fetchMetaInsights({ userId, accountId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/worker-meta-insights', {
-    method: 'POST',
+  return apiFetch("/jobs/run_wait_result/p/f/tools/worker-meta-insights", {
+    method: "POST",
     timeout: 15000,
-    body: JSON.stringify({ userId, accountId })
+    body: JSON.stringify({ userId, accountId }),
   });
 }
 
@@ -1308,10 +1387,10 @@ export async function fetchMetaInsights({ userId, accountId }) {
  * @returns {Promise<Object>} { success, audiences[] }
  */
 export async function fetchGoogleAudiences({ userId, accountId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/worker-google-audiences', {
-    method: 'POST',
+  return apiFetch("/jobs/run_wait_result/p/f/tools/worker-google-audiences", {
+    method: "POST",
     timeout: 15000,
-    body: JSON.stringify({ userId, accountId })
+    body: JSON.stringify({ userId, accountId }),
   });
 }
 
@@ -1321,10 +1400,10 @@ export async function fetchGoogleAudiences({ userId, accountId }) {
  * @returns {Promise<Object>} { success, creatives[], total }
  */
 export async function fetchGoogleCreatives({ userId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/worker-google-creatives', {
-    method: 'POST',
+  return apiFetch("/jobs/run_wait_result/p/f/tools/worker-google-creatives", {
+    method: "POST",
     timeout: 15000,
-    body: JSON.stringify({ userId })
+    body: JSON.stringify({ userId }),
   });
 }
 
@@ -1335,10 +1414,10 @@ export async function fetchGoogleCreatives({ userId }) {
  * @returns {Promise<Object>} { success, insights[] }
  */
 export async function fetchGoogleInsights({ userId, accountId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/worker-google-insights', {
-    method: 'POST',
+  return apiFetch("/jobs/run_wait_result/p/f/tools/worker-google-insights", {
+    method: "POST",
     timeout: 15000,
-    body: JSON.stringify({ userId, accountId })
+    body: JSON.stringify({ userId, accountId }),
   });
 }
 
@@ -1357,11 +1436,27 @@ export async function fetchGoogleInsights({ userId, accountId }) {
  * @param {string} [accountId]
  * @returns {Promise<Object>} { success, data: { content, benchmarks, adCopy, automationRules, image, code, visionAnalysis, ocrResult } }
  */
-export async function executeSocialTool({ userId, section, toolSlug, toolName, input, additionalInputs, accountId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/router-social-platform', {
-    method: 'POST',
+export async function executeSocialTool({
+  userId,
+  section,
+  toolSlug,
+  toolName,
+  input,
+  additionalInputs,
+  accountId,
+}) {
+  return apiFetch("/jobs/run_wait_result/p/f/tools/router-social-platform", {
+    method: "POST",
     timeout: 180000,
-    body: JSON.stringify({ userId, section, toolSlug, toolName, input, additionalInputs, accountId })
+    body: JSON.stringify({
+      userId,
+      section,
+      toolSlug,
+      toolName,
+      input,
+      additionalInputs,
+      accountId,
+    }),
   });
 }
 
@@ -1374,11 +1469,17 @@ export async function executeSocialTool({ userId, section, toolSlug, toolName, i
  * @param {Object} [additionalInputs]
  * @returns {Promise<Object>} { success, data }
  */
-export async function executeSocialToolDirect({ userId, toolSlug, toolName, input, additionalInputs }) {
+export async function executeSocialToolDirect({
+  userId,
+  toolSlug,
+  toolName,
+  input,
+  additionalInputs,
+}) {
   return apiFetch(`/jobs/run_wait_result/p/f/tools/${toolSlug}`, {
-    method: 'POST',
+    method: "POST",
     timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug, toolName, input, additionalInputs })
+    body: JSON.stringify({ userId, toolSlug, toolName, input, additionalInputs }),
   });
 }
 
@@ -1389,10 +1490,10 @@ export async function executeSocialToolDirect({ userId, toolSlug, toolName, inpu
  * @returns {Promise<Object>} { success, accounts[] }
  */
 export async function fetchSocialAccounts({ userId, platform }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/worker-platform-campaigns', {
-    method: 'POST',
+  return apiFetch("/jobs/run_wait_result/p/f/tools/worker-platform-campaigns", {
+    method: "POST",
     timeout: 15000,
-    body: JSON.stringify({ userId, platform: platform || 'instagram' })
+    body: JSON.stringify({ userId, platform: platform || "instagram" }),
   });
 }
 
@@ -1403,10 +1504,10 @@ export async function fetchSocialAccounts({ userId, platform }) {
  * @returns {Promise<Object>} { success, metrics[] }
  */
 export async function fetchSocialMetrics({ userId, platform }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/worker-analytics-export', {
-    method: 'POST',
+  return apiFetch("/jobs/run_wait_result/p/f/tools/worker-analytics-export", {
+    method: "POST",
     timeout: 15000,
-    body: JSON.stringify({ userId, platform })
+    body: JSON.stringify({ userId, platform }),
   });
 }
 
@@ -1416,10 +1517,10 @@ export async function fetchSocialMetrics({ userId, platform }) {
  * @returns {Promise<Object>} { success, generations[], total }
  */
 export async function fetchSocialToolHistory({ userId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/worker-generation-history', {
-    method: 'POST',
+  return apiFetch("/jobs/run_wait_result/p/f/tools/worker-generation-history", {
+    method: "POST",
     timeout: 15000,
-    body: JSON.stringify({ userId })
+    body: JSON.stringify({ userId }),
   });
 }
 
@@ -1429,10 +1530,10 @@ export async function fetchSocialToolHistory({ userId }) {
  * @returns {Promise<Object>} { success, insights[] }
  */
 export async function fetchInstagramInsights({ userId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/worker-meta-insights', {
-    method: 'POST',
+  return apiFetch("/jobs/run_wait_result/p/f/tools/worker-meta-insights", {
+    method: "POST",
     timeout: 15000,
-    body: JSON.stringify({ userId })
+    body: JSON.stringify({ userId }),
   });
 }
 
@@ -1442,10 +1543,10 @@ export async function fetchInstagramInsights({ userId }) {
  * @returns {Promise<Object>} { success, audiences[] }
  */
 export async function fetchInstagramAudiences({ userId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/worker-meta-audiences', {
-    method: 'POST',
+  return apiFetch("/jobs/run_wait_result/p/f/tools/worker-meta-audiences", {
+    method: "POST",
     timeout: 15000,
-    body: JSON.stringify({ userId })
+    body: JSON.stringify({ userId }),
   });
 }
 
@@ -1455,10 +1556,10 @@ export async function fetchInstagramAudiences({ userId }) {
  * @returns {Promise<Object>} { success, creatives[] }
  */
 export async function fetchInstagramCreatives({ userId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/worker-meta-creatives', {
-    method: 'POST',
+  return apiFetch("/jobs/run_wait_result/p/f/tools/worker-meta-creatives", {
+    method: "POST",
     timeout: 15000,
-    body: JSON.stringify({ userId })
+    body: JSON.stringify({ userId }),
   });
 }
 
@@ -1469,10 +1570,10 @@ export async function fetchInstagramCreatives({ userId }) {
  * @returns {Promise<Object>} { success, campaigns[] }
  */
 export async function fetchSocialCampaigns({ userId, platform }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/worker-platform-campaigns', {
-    method: 'POST',
+  return apiFetch("/jobs/run_wait_result/p/f/tools/worker-platform-campaigns", {
+    method: "POST",
     timeout: 15000,
-    body: JSON.stringify({ userId, platform: platform || 'meta' })
+    body: JSON.stringify({ userId, platform: platform || "meta" }),
   });
 }
 
@@ -1491,9 +1592,9 @@ export async function fetchSocialCampaigns({ userId, platform }) {
  */
 export async function executeSeoTool({ userId, toolSlug, toolName, input, additionalInputs }) {
   return apiFetch(`/jobs/run_wait_result/p/f/tools/${toolSlug}`, {
-    method: 'POST',
+    method: "POST",
     timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug, toolName, input, additionalInputs })
+    body: JSON.stringify({ userId, toolSlug, toolName, input, additionalInputs }),
   });
 }
 
@@ -1507,10 +1608,10 @@ export async function executeSeoTool({ userId, toolSlug, toolName, input, additi
  * @returns {Promise<Object>} { success, data }
  */
 export async function executeSeoEngine({ userId, toolSlug, toolName, input, additionalInputs }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/engine-seo-content', {
-    method: 'POST',
+  return apiFetch("/jobs/run_wait_result/p/f/tools/engine-seo-content", {
+    method: "POST",
     timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug, toolName, input, additionalInputs })
+    body: JSON.stringify({ userId, toolSlug, toolName, input, additionalInputs }),
   });
 }
 
@@ -1520,10 +1621,10 @@ export async function executeSeoEngine({ userId, toolSlug, toolName, input, addi
  * @returns {Promise<Object>} { success, generations[], total }
  */
 export async function fetchSeoToolHistory({ userId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/worker-generation-history', {
-    method: 'POST',
+  return apiFetch("/jobs/run_wait_result/p/f/tools/worker-generation-history", {
+    method: "POST",
     timeout: 15000,
-    body: JSON.stringify({ userId })
+    body: JSON.stringify({ userId }),
   });
 }
 
@@ -1533,10 +1634,10 @@ export async function fetchSeoToolHistory({ userId }) {
  * @returns {Promise<Object>} { success, insights[] }
  */
 export async function fetchSeoInsights({ userId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/worker-meta-insights', {
-    method: 'POST',
+  return apiFetch("/jobs/run_wait_result/p/f/tools/worker-meta-insights", {
+    method: "POST",
     timeout: 15000,
-    body: JSON.stringify({ userId })
+    body: JSON.stringify({ userId }),
   });
 }
 
@@ -1546,10 +1647,10 @@ export async function fetchSeoInsights({ userId }) {
  * @returns {Promise<Object>} { success, generations[] }
  */
 export async function fetchSeoKeywords({ userId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/worker-generation-history', {
-    method: 'POST',
+  return apiFetch("/jobs/run_wait_result/p/f/tools/worker-generation-history", {
+    method: "POST",
     timeout: 15000,
-    body: JSON.stringify({ userId, toolSlug: 'keyword-research-tool' })
+    body: JSON.stringify({ userId, toolSlug: "keyword-research-tool" }),
   });
 }
 
@@ -1559,10 +1660,10 @@ export async function fetchSeoKeywords({ userId }) {
  * @returns {Promise<Object>} { success, generations[] }
  */
 export async function fetchContentHistory({ userId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/worker-generation-history', {
-    method: 'POST',
+  return apiFetch("/jobs/run_wait_result/p/f/tools/worker-generation-history", {
+    method: "POST",
     timeout: 15000,
-    body: JSON.stringify({ userId })
+    body: JSON.stringify({ userId }),
   });
 }
 
@@ -1572,10 +1673,10 @@ export async function fetchContentHistory({ userId }) {
  * @returns {Promise<Object>} { success, insights[] }
  */
 export async function fetchSeoAudits({ userId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/worker-audit-history', {
-    method: 'POST',
+  return apiFetch("/jobs/run_wait_result/p/f/tools/worker-audit-history", {
+    method: "POST",
     timeout: 15000,
-    body: JSON.stringify({ userId })
+    body: JSON.stringify({ userId }),
   });
 }
 
@@ -1585,10 +1686,10 @@ export async function fetchSeoAudits({ userId }) {
  * @returns {Promise<Object>} { success, creatives[] }
  */
 export async function fetchSeoCreatives({ userId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/worker-generation-history', {
-    method: 'POST',
+  return apiFetch("/jobs/run_wait_result/p/f/tools/worker-generation-history", {
+    method: "POST",
     timeout: 15000,
-    body: JSON.stringify({ userId })
+    body: JSON.stringify({ userId }),
   });
 }
 
@@ -1598,10 +1699,10 @@ export async function fetchSeoCreatives({ userId }) {
  * @returns {Promise<Object>} { success, campaigns[] }
  */
 export async function fetchSeoCampaigns({ userId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/worker-platform-campaigns', {
-    method: 'POST',
+  return apiFetch("/jobs/run_wait_result/p/f/tools/worker-platform-campaigns", {
+    method: "POST",
     timeout: 15000,
-    body: JSON.stringify({ userId, platform: 'seo' })
+    body: JSON.stringify({ userId, platform: "seo" }),
   });
 }
 
@@ -1619,11 +1720,18 @@ export async function fetchSeoCampaigns({ userId }) {
  * @param {Object} [additionalInputs]
  * @returns {Promise<Object>} { success, data: { content, benchmarks, image, code, automationRules, visionAnalysis, ocrResult } }
  */
-export async function executeAnalyticsPlatformTool({ userId, section, toolSlug, toolName, input, additionalInputs }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/router-analytics-platform', {
-    method: 'POST',
+export async function executeAnalyticsPlatformTool({
+  userId,
+  section,
+  toolSlug,
+  toolName,
+  input,
+  additionalInputs,
+}) {
+  return apiFetch("/jobs/run_wait_result/p/f/tools/router-analytics-platform", {
+    method: "POST",
     timeout: 180000,
-    body: JSON.stringify({ userId, section, toolSlug, toolName, input, additionalInputs })
+    body: JSON.stringify({ userId, section, toolSlug, toolName, input, additionalInputs }),
   });
 }
 
@@ -1636,11 +1744,17 @@ export async function executeAnalyticsPlatformTool({ userId, section, toolSlug, 
  * @param {Object} [additionalInputs]
  * @returns {Promise<Object>} { success, data }
  */
-export async function executeAnalyticsPlatformToolDirect({ userId, toolSlug, toolName, input, additionalInputs }) {
+export async function executeAnalyticsPlatformToolDirect({
+  userId,
+  toolSlug,
+  toolName,
+  input,
+  additionalInputs,
+}) {
   return apiFetch(`/jobs/run_wait_result/p/f/tools/${toolSlug}`, {
-    method: 'POST',
+    method: "POST",
     timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug, toolName, input, additionalInputs })
+    body: JSON.stringify({ userId, toolSlug, toolName, input, additionalInputs }),
   });
 }
 
@@ -1650,10 +1764,10 @@ export async function executeAnalyticsPlatformToolDirect({ userId, toolSlug, too
  * @returns {Promise<Object>} { success, generations[], total }
  */
 export async function fetchAnalyticsPlatformHistory({ userId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/worker-generation-history', {
-    method: 'POST',
+  return apiFetch("/jobs/run_wait_result/p/f/tools/worker-generation-history", {
+    method: "POST",
     timeout: 15000,
-    body: JSON.stringify({ userId })
+    body: JSON.stringify({ userId }),
   });
 }
 
@@ -1663,10 +1777,10 @@ export async function fetchAnalyticsPlatformHistory({ userId }) {
  * @returns {Promise<Object>} { success, insights[] }
  */
 export async function fetchRoiData({ userId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/worker-meta-insights', {
-    method: 'POST',
+  return apiFetch("/jobs/run_wait_result/p/f/tools/worker-meta-insights", {
+    method: "POST",
     timeout: 15000,
-    body: JSON.stringify({ userId })
+    body: JSON.stringify({ userId }),
   });
 }
 
@@ -1676,10 +1790,10 @@ export async function fetchRoiData({ userId }) {
  * @returns {Promise<Object>} { success, insights[] }
  */
 export async function fetchAttributionData({ userId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/worker-meta-insights', {
-    method: 'POST',
+  return apiFetch("/jobs/run_wait_result/p/f/tools/worker-meta-insights", {
+    method: "POST",
     timeout: 15000,
-    body: JSON.stringify({ userId })
+    body: JSON.stringify({ userId }),
   });
 }
 
@@ -1689,10 +1803,10 @@ export async function fetchAttributionData({ userId }) {
  * @returns {Promise<Object>} { success, metrics[] }
  */
 export async function fetchAnalyticsPlatformMetrics({ userId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/worker-google-metrics', {
-    method: 'POST',
+  return apiFetch("/jobs/run_wait_result/p/f/tools/worker-google-metrics", {
+    method: "POST",
     timeout: 15000,
-    body: JSON.stringify({ userId })
+    body: JSON.stringify({ userId }),
   });
 }
 
@@ -1702,10 +1816,10 @@ export async function fetchAnalyticsPlatformMetrics({ userId }) {
  * @returns {Promise<Object>} { success, campaigns[] }
  */
 export async function fetchAnalyticsPlatformCampaigns({ userId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/worker-platform-campaigns', {
-    method: 'POST',
+  return apiFetch("/jobs/run_wait_result/p/f/tools/worker-platform-campaigns", {
+    method: "POST",
     timeout: 15000,
-    body: JSON.stringify({ userId, platform: 'analytics' })
+    body: JSON.stringify({ userId, platform: "analytics" }),
   });
 }
 
@@ -1715,10 +1829,10 @@ export async function fetchAnalyticsPlatformCampaigns({ userId }) {
  * @returns {Promise<Object>} { success, creatives[] }
  */
 export async function fetchAnalyticsPlatformCreatives({ userId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/worker-generation-history', {
-    method: 'POST',
+  return apiFetch("/jobs/run_wait_result/p/f/tools/worker-generation-history", {
+    method: "POST",
     timeout: 15000,
-    body: JSON.stringify({ userId })
+    body: JSON.stringify({ userId }),
   });
 }
 
@@ -1728,10 +1842,10 @@ export async function fetchAnalyticsPlatformCreatives({ userId }) {
  * @returns {Promise<Object>} { success, audiences[] }
  */
 export async function fetchAnalyticsPlatformAudiences({ userId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/worker-meta-audiences', {
-    method: 'POST',
+  return apiFetch("/jobs/run_wait_result/p/f/tools/worker-meta-audiences", {
+    method: "POST",
     timeout: 15000,
-    body: JSON.stringify({ userId })
+    body: JSON.stringify({ userId }),
   });
 }
 
@@ -1749,11 +1863,18 @@ export async function fetchAnalyticsPlatformAudiences({ userId }) {
  * @param {Object} [additionalInputs]
  * @returns {Promise<Object>} { success, data: { content, benchmarks, image, code, automationRules, visionAnalysis, ocrResult } }
  */
-export async function executeEcommerceTool({ userId, section, toolSlug, toolName, input, additionalInputs }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/router-ecommerce-platform', {
-    method: 'POST',
+export async function executeEcommerceTool({
+  userId,
+  section,
+  toolSlug,
+  toolName,
+  input,
+  additionalInputs,
+}) {
+  return apiFetch("/jobs/run_wait_result/p/f/tools/router-ecommerce-platform", {
+    method: "POST",
     timeout: 180000,
-    body: JSON.stringify({ userId, section, toolSlug, toolName, input, additionalInputs })
+    body: JSON.stringify({ userId, section, toolSlug, toolName, input, additionalInputs }),
   });
 }
 
@@ -1766,11 +1887,17 @@ export async function executeEcommerceTool({ userId, section, toolSlug, toolName
  * @param {Object} [additionalInputs]
  * @returns {Promise<Object>} { success, data }
  */
-export async function executeEcommerceToolDirect({ userId, toolSlug, toolName, input, additionalInputs }) {
+export async function executeEcommerceToolDirect({
+  userId,
+  toolSlug,
+  toolName,
+  input,
+  additionalInputs,
+}) {
   return apiFetch(`/jobs/run_wait_result/p/f/tools/${toolSlug}`, {
-    method: 'POST',
+    method: "POST",
     timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug, toolName, input, additionalInputs })
+    body: JSON.stringify({ userId, toolSlug, toolName, input, additionalInputs }),
   });
 }
 
@@ -1786,10 +1913,10 @@ export async function executeEcommerceToolDirect({ userId, toolSlug, toolName, i
  * @returns {Promise<Object>} { success, data }
  */
 export async function executeShopifyTool({ userId, toolSlug, toolName, input, additionalInputs }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/engine-ecom-shopify', {
-    method: 'POST',
+  return apiFetch("/jobs/run_wait_result/p/f/tools/engine-ecom-shopify", {
+    method: "POST",
     timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug, toolName, input, additionalInputs })
+    body: JSON.stringify({ userId, toolSlug, toolName, input, additionalInputs }),
   });
 }
 
@@ -1799,10 +1926,10 @@ export async function executeShopifyTool({ userId, toolSlug, toolName, input, ad
  * @returns {Promise<Object>} { success, generations[] }
  */
 export async function fetchShopifyData({ userId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/worker-generation-history', {
-    method: 'POST',
+  return apiFetch("/jobs/run_wait_result/p/f/tools/worker-generation-history", {
+    method: "POST",
     timeout: 15000,
-    body: JSON.stringify({ userId, toolSlug: 'shopify' })
+    body: JSON.stringify({ userId, toolSlug: "shopify" }),
   });
 }
 
@@ -1812,10 +1939,10 @@ export async function fetchShopifyData({ userId }) {
  * @returns {Promise<Object>} { success, generations[] }
  */
 export async function fetchShopifyToolHistory({ userId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/worker-generation-history', {
-    method: 'POST',
+  return apiFetch("/jobs/run_wait_result/p/f/tools/worker-generation-history", {
+    method: "POST",
     timeout: 15000,
-    body: JSON.stringify({ userId })
+    body: JSON.stringify({ userId }),
   });
 }
 
@@ -1831,10 +1958,10 @@ export async function fetchShopifyToolHistory({ userId }) {
  * @returns {Promise<Object>} { success, data }
  */
 export async function executeEcomAdsTool({ userId, toolSlug, toolName, input, additionalInputs }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/engine-ecom-advertising', {
-    method: 'POST',
+  return apiFetch("/jobs/run_wait_result/p/f/tools/engine-ecom-advertising", {
+    method: "POST",
     timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug, toolName, input, additionalInputs })
+    body: JSON.stringify({ userId, toolSlug, toolName, input, additionalInputs }),
   });
 }
 
@@ -1844,10 +1971,10 @@ export async function executeEcomAdsTool({ userId, toolSlug, toolName, input, ad
  * @returns {Promise<Object>} { success, accounts[] }
  */
 export async function fetchEcomAdAccounts({ userId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/worker-google-accounts', {
-    method: 'POST',
+  return apiFetch("/jobs/run_wait_result/p/f/tools/worker-google-accounts", {
+    method: "POST",
     timeout: 15000,
-    body: JSON.stringify({ userId })
+    body: JSON.stringify({ userId }),
   });
 }
 
@@ -1857,10 +1984,10 @@ export async function fetchEcomAdAccounts({ userId }) {
  * @returns {Promise<Object>} { success, campaigns[] }
  */
 export async function fetchEcomAdCampaigns({ userId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/worker-platform-campaigns', {
-    method: 'POST',
+  return apiFetch("/jobs/run_wait_result/p/f/tools/worker-platform-campaigns", {
+    method: "POST",
     timeout: 15000,
-    body: JSON.stringify({ userId, platform: 'ecommerce' })
+    body: JSON.stringify({ userId, platform: "ecommerce" }),
   });
 }
 
@@ -1870,10 +1997,10 @@ export async function fetchEcomAdCampaigns({ userId }) {
  * @returns {Promise<Object>} { success, metrics[] }
  */
 export async function fetchEcomAdMetrics({ userId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/worker-google-metrics', {
-    method: 'POST',
+  return apiFetch("/jobs/run_wait_result/p/f/tools/worker-google-metrics", {
+    method: "POST",
     timeout: 15000,
-    body: JSON.stringify({ userId })
+    body: JSON.stringify({ userId }),
   });
 }
 
@@ -1888,11 +2015,17 @@ export async function fetchEcomAdMetrics({ userId }) {
  * @param {Object} [additionalInputs]
  * @returns {Promise<Object>} { success, data }
  */
-export async function executeEcomAnalyticsTool({ userId, toolSlug, toolName, input, additionalInputs }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/engine-ecom-analytics', {
-    method: 'POST',
+export async function executeEcomAnalyticsTool({
+  userId,
+  toolSlug,
+  toolName,
+  input,
+  additionalInputs,
+}) {
+  return apiFetch("/jobs/run_wait_result/p/f/tools/engine-ecom-analytics", {
+    method: "POST",
     timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug, toolName, input, additionalInputs })
+    body: JSON.stringify({ userId, toolSlug, toolName, input, additionalInputs }),
   });
 }
 
@@ -1902,10 +2035,10 @@ export async function executeEcomAnalyticsTool({ userId, toolSlug, toolName, inp
  * @returns {Promise<Object>} { success, insights[] }
  */
 export async function fetchEcomKpis({ userId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/worker-meta-insights', {
-    method: 'POST',
+  return apiFetch("/jobs/run_wait_result/p/f/tools/worker-meta-insights", {
+    method: "POST",
     timeout: 15000,
-    body: JSON.stringify({ userId })
+    body: JSON.stringify({ userId }),
   });
 }
 
@@ -1915,10 +2048,10 @@ export async function fetchEcomKpis({ userId }) {
  * @returns {Promise<Object>} { success, metrics[] }
  */
 export async function fetchEcomRoas({ userId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/worker-google-metrics', {
-    method: 'POST',
+  return apiFetch("/jobs/run_wait_result/p/f/tools/worker-google-metrics", {
+    method: "POST",
     timeout: 15000,
-    body: JSON.stringify({ userId })
+    body: JSON.stringify({ userId }),
   });
 }
 
@@ -1928,10 +2061,10 @@ export async function fetchEcomRoas({ userId }) {
  * @returns {Promise<Object>} { success, generations[] }
  */
 export async function fetchEcomConversions({ userId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/worker-generation-history', {
-    method: 'POST',
+  return apiFetch("/jobs/run_wait_result/p/f/tools/worker-generation-history", {
+    method: "POST",
     timeout: 15000,
-    body: JSON.stringify({ userId })
+    body: JSON.stringify({ userId }),
   });
 }
 
@@ -1946,11 +2079,17 @@ export async function fetchEcomConversions({ userId }) {
  * @param {Object} [additionalInputs]
  * @returns {Promise<Object>} { success, data }
  */
-export async function executeEcomAutomationTool({ userId, toolSlug, toolName, input, additionalInputs }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/engine-ecom-automation', {
-    method: 'POST',
+export async function executeEcomAutomationTool({
+  userId,
+  toolSlug,
+  toolName,
+  input,
+  additionalInputs,
+}) {
+  return apiFetch("/jobs/run_wait_result/p/f/tools/engine-ecom-automation", {
+    method: "POST",
     timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug, toolName, input, additionalInputs })
+    body: JSON.stringify({ userId, toolSlug, toolName, input, additionalInputs }),
   });
 }
 
@@ -1960,10 +2099,10 @@ export async function executeEcomAutomationTool({ userId, toolSlug, toolName, in
  * @returns {Promise<Object>} { success, generations[] }
  */
 export async function fetchEcomAutomationFlows({ userId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/worker-generation-history', {
-    method: 'POST',
+  return apiFetch("/jobs/run_wait_result/p/f/tools/worker-generation-history", {
+    method: "POST",
     timeout: 15000,
-    body: JSON.stringify({ userId })
+    body: JSON.stringify({ userId }),
   });
 }
 
@@ -1973,10 +2112,10 @@ export async function fetchEcomAutomationFlows({ userId }) {
  * @returns {Promise<Object>} { success, generations[] }
  */
 export async function fetchEcomEmailSequences({ userId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/worker-generation-history', {
-    method: 'POST',
+  return apiFetch("/jobs/run_wait_result/p/f/tools/worker-generation-history", {
+    method: "POST",
     timeout: 15000,
-    body: JSON.stringify({ userId })
+    body: JSON.stringify({ userId }),
   });
 }
 
@@ -1991,11 +2130,17 @@ export async function fetchEcomEmailSequences({ userId }) {
  * @param {Object} [additionalInputs]
  * @returns {Promise<Object>} { success, data }
  */
-export async function executeEcomStrategyTool({ userId, toolSlug, toolName, input, additionalInputs }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/engine-ecom-strategy', {
-    method: 'POST',
+export async function executeEcomStrategyTool({
+  userId,
+  toolSlug,
+  toolName,
+  input,
+  additionalInputs,
+}) {
+  return apiFetch("/jobs/run_wait_result/p/f/tools/engine-ecom-strategy", {
+    method: "POST",
     timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug, toolName, input, additionalInputs })
+    body: JSON.stringify({ userId, toolSlug, toolName, input, additionalInputs }),
   });
 }
 
@@ -2005,10 +2150,10 @@ export async function executeEcomStrategyTool({ userId, toolSlug, toolName, inpu
  * @returns {Promise<Object>} { success, generations[] }
  */
 export async function fetchEcomGrowthRoadmap({ userId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/worker-generation-history', {
-    method: 'POST',
+  return apiFetch("/jobs/run_wait_result/p/f/tools/worker-generation-history", {
+    method: "POST",
     timeout: 15000,
-    body: JSON.stringify({ userId })
+    body: JSON.stringify({ userId }),
   });
 }
 
@@ -2018,10 +2163,10 @@ export async function fetchEcomGrowthRoadmap({ userId }) {
  * @returns {Promise<Object>} { success, generations[] }
  */
 export async function fetchEcomPricingData({ userId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/worker-generation-history', {
-    method: 'POST',
+  return apiFetch("/jobs/run_wait_result/p/f/tools/worker-generation-history", {
+    method: "POST",
     timeout: 15000,
-    body: JSON.stringify({ userId })
+    body: JSON.stringify({ userId }),
   });
 }
 
@@ -2031,10 +2176,10 @@ export async function fetchEcomPricingData({ userId }) {
  * @returns {Promise<Object>} { success, generations[] }
  */
 export async function fetchEcomInventory({ userId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/worker-generation-history', {
-    method: 'POST',
+  return apiFetch("/jobs/run_wait_result/p/f/tools/worker-generation-history", {
+    method: "POST",
     timeout: 15000,
-    body: JSON.stringify({ userId })
+    body: JSON.stringify({ userId }),
   });
 }
 
@@ -2044,10 +2189,10 @@ export async function fetchEcomInventory({ userId }) {
  * @returns {Promise<Object>} { success, generations[] }
  */
 export async function fetchEcomProducts({ userId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/worker-generation-history', {
-    method: 'POST',
+  return apiFetch("/jobs/run_wait_result/p/f/tools/worker-generation-history", {
+    method: "POST",
     timeout: 15000,
-    body: JSON.stringify({ userId })
+    body: JSON.stringify({ userId }),
   });
 }
 
@@ -2057,10 +2202,10 @@ export async function fetchEcomProducts({ userId }) {
  * @returns {Promise<Object>} { success, generations[] }
  */
 export async function fetchEcomAbTests({ userId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/worker-generation-history', {
-    method: 'POST',
+  return apiFetch("/jobs/run_wait_result/p/f/tools/worker-generation-history", {
+    method: "POST",
     timeout: 15000,
-    body: JSON.stringify({ userId })
+    body: JSON.stringify({ userId }),
   });
 }
 
@@ -2070,10 +2215,10 @@ export async function fetchEcomAbTests({ userId }) {
  * @returns {Promise<Object>} { success, generations[], total }
  */
 export async function fetchEcomToolHistory({ userId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/worker-generation-history', {
-    method: 'POST',
+  return apiFetch("/jobs/run_wait_result/p/f/tools/worker-generation-history", {
+    method: "POST",
     timeout: 15000,
-    body: JSON.stringify({ userId })
+    body: JSON.stringify({ userId }),
   });
 }
 
@@ -2083,10 +2228,10 @@ export async function fetchEcomToolHistory({ userId }) {
  * @returns {Promise<Object>} { success, insights[] }
  */
 export async function fetchEcomInsights({ userId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/worker-meta-insights', {
-    method: 'POST',
+  return apiFetch("/jobs/run_wait_result/p/f/tools/worker-meta-insights", {
+    method: "POST",
     timeout: 15000,
-    body: JSON.stringify({ userId })
+    body: JSON.stringify({ userId }),
   });
 }
 
@@ -2096,10 +2241,10 @@ export async function fetchEcomInsights({ userId }) {
  * @returns {Promise<Object>} { success, audiences[] }
  */
 export async function fetchEcomAudiences({ userId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/worker-meta-audiences', {
-    method: 'POST',
+  return apiFetch("/jobs/run_wait_result/p/f/tools/worker-meta-audiences", {
+    method: "POST",
     timeout: 15000,
-    body: JSON.stringify({ userId })
+    body: JSON.stringify({ userId }),
   });
 }
 
@@ -2109,10 +2254,10 @@ export async function fetchEcomAudiences({ userId }) {
  * @returns {Promise<Object>} { success, creatives[] }
  */
 export async function fetchEcomCreatives({ userId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/worker-generation-history', {
-    method: 'POST',
+  return apiFetch("/jobs/run_wait_result/p/f/tools/worker-generation-history", {
+    method: "POST",
     timeout: 15000,
-    body: JSON.stringify({ userId })
+    body: JSON.stringify({ userId }),
   });
 }
 
@@ -2125,10 +2270,18 @@ export async function fetchEcomCreatives({ userId }) {
 /**
  * Execute Google Grader tool via router
  */
-export async function executeGoogleGraderTool({ userId, toolSlug, toolName, input, additionalInputs, accountId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/router-google-graders', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug, toolName, input, additionalInputs, accountId })
+export async function executeGoogleGraderTool({
+  userId,
+  toolSlug,
+  toolName,
+  input,
+  additionalInputs,
+  accountId,
+}) {
+  return apiFetch("/jobs/run_wait_result/p/f/tools/router-google-graders", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({ userId, toolSlug, toolName, input, additionalInputs, accountId }),
   });
 }
 
@@ -2137,10 +2290,18 @@ export async function executeGoogleGraderTool({ userId, toolSlug, toolName, inpu
 /**
  * Execute Google Audit tool via router
  */
-export async function executeGoogleAuditTool({ userId, toolSlug, toolName, input, additionalInputs, accountId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/router-google-audit', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug, toolName, input, additionalInputs, accountId })
+export async function executeGoogleAuditTool({
+  userId,
+  toolSlug,
+  toolName,
+  input,
+  additionalInputs,
+  accountId,
+}) {
+  return apiFetch("/jobs/run_wait_result/p/f/tools/router-google-audit", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({ userId, toolSlug, toolName, input, additionalInputs, accountId }),
   });
 }
 
@@ -2149,10 +2310,18 @@ export async function executeGoogleAuditTool({ userId, toolSlug, toolName, input
 /**
  * Execute Google Campaign Management tool via router
  */
-export async function executeGoogleCampaignTool({ userId, toolSlug, toolName, input, additionalInputs, accountId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/router-google-campaign-mgmt', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug, toolName, input, additionalInputs, accountId })
+export async function executeGoogleCampaignTool({
+  userId,
+  toolSlug,
+  toolName,
+  input,
+  additionalInputs,
+  accountId,
+}) {
+  return apiFetch("/jobs/run_wait_result/p/f/tools/router-google-campaign-mgmt", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({ userId, toolSlug, toolName, input, additionalInputs, accountId }),
   });
 }
 
@@ -2161,10 +2330,18 @@ export async function executeGoogleCampaignTool({ userId, toolSlug, toolName, in
 /**
  * Execute Google Budget & Bidding tool via router
  */
-export async function executeGoogleBudgetTool({ userId, toolSlug, toolName, input, additionalInputs, accountId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/router-google-budget-bidding', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug, toolName, input, additionalInputs, accountId })
+export async function executeGoogleBudgetTool({
+  userId,
+  toolSlug,
+  toolName,
+  input,
+  additionalInputs,
+  accountId,
+}) {
+  return apiFetch("/jobs/run_wait_result/p/f/tools/router-google-budget-bidding", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({ userId, toolSlug, toolName, input, additionalInputs, accountId }),
   });
 }
 
@@ -2182,11 +2359,18 @@ export async function executeGoogleBudgetTool({ userId, toolSlug, toolName, inpu
  * @param {string} [action] - 'analyze' | 'predict' | 'optimize' | 'generate'
  * @returns {Promise<Object>} { success, data: { vertexResult, content, benchmarks, image, code, automationRules, visionAnalysis, ocrResult } }
  */
-export async function executeVertexAi({ userId, toolSlug, toolName, input, additionalInputs, action }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/worker-vertex-ai', {
-    method: 'POST',
+export async function executeVertexAi({
+  userId,
+  toolSlug,
+  toolName,
+  input,
+  additionalInputs,
+  action,
+}) {
+  return apiFetch("/jobs/run_wait_result/p/f/tools/worker-vertex-ai", {
+    method: "POST",
     timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug, toolName, input, additionalInputs, action })
+    body: JSON.stringify({ userId, toolSlug, toolName, input, additionalInputs, action }),
   });
 }
 
@@ -2204,60 +2388,106 @@ export async function executeVertexAi({ userId, toolSlug, toolName, input, addit
  * @param {string} [accountId]
  * @returns {Promise<Object>} { success, data: { content, benchmarks, image, code, automationRules, visionAnalysis, ocrResult, summary } }
  */
-export async function executeMetaAdsTool({ userId, toolSlug, toolName, input, additionalInputs, accountId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/router-meta-ads-management', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug, toolName, input, additionalInputs, accountId })
+export async function executeMetaAdsTool({
+  userId,
+  toolSlug,
+  toolName,
+  input,
+  additionalInputs,
+  accountId,
+}) {
+  return apiFetch("/jobs/run_wait_result/p/f/tools/router-meta-ads-management", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({ userId, toolSlug, toolName, input, additionalInputs, accountId }),
   });
 }
 
 /**
  * Execute Meta Audience & Targeting tool
  */
-export async function executeMetaAudienceTool({ userId, toolSlug, toolName, input, additionalInputs, accountId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/router-meta-audience-targeting', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug, toolName, input, additionalInputs, accountId })
+export async function executeMetaAudienceTool({
+  userId,
+  toolSlug,
+  toolName,
+  input,
+  additionalInputs,
+  accountId,
+}) {
+  return apiFetch("/jobs/run_wait_result/p/f/tools/router-meta-audience-targeting", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({ userId, toolSlug, toolName, input, additionalInputs, accountId }),
   });
 }
 
 /**
  * Execute Meta Creative & Copy tool
  */
-export async function executeMetaCreativeTool({ userId, toolSlug, toolName, input, additionalInputs }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/router-meta-creative-copy', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug, toolName, input, additionalInputs })
+export async function executeMetaCreativeTool({
+  userId,
+  toolSlug,
+  toolName,
+  input,
+  additionalInputs,
+}) {
+  return apiFetch("/jobs/run_wait_result/p/f/tools/router-meta-creative-copy", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({ userId, toolSlug, toolName, input, additionalInputs }),
   });
 }
 
 /**
  * Execute Meta Automation & Optimization tool
  */
-export async function executeMetaAutomationTool({ userId, toolSlug, toolName, input, additionalInputs, accountId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/router-meta-automation-optimization', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug, toolName, input, additionalInputs, accountId })
+export async function executeMetaAutomationTool({
+  userId,
+  toolSlug,
+  toolName,
+  input,
+  additionalInputs,
+  accountId,
+}) {
+  return apiFetch("/jobs/run_wait_result/p/f/tools/router-meta-automation-optimization", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({ userId, toolSlug, toolName, input, additionalInputs, accountId }),
   });
 }
 
 /**
  * Execute Meta Tracking & Analytics tool
  */
-export async function executeMetaTrackingTool({ userId, toolSlug, toolName, input, additionalInputs, accountId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/router-meta-tracking-analytics', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug, toolName, input, additionalInputs, accountId })
+export async function executeMetaTrackingTool({
+  userId,
+  toolSlug,
+  toolName,
+  input,
+  additionalInputs,
+  accountId,
+}) {
+  return apiFetch("/jobs/run_wait_result/p/f/tools/router-meta-tracking-analytics", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({ userId, toolSlug, toolName, input, additionalInputs, accountId }),
   });
 }
 
 /**
  * Execute Meta Agency tool
  */
-export async function executeMetaAgencyTool({ userId, toolSlug, toolName, input, additionalInputs }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/router-meta-agency-tools', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug, toolName, input, additionalInputs })
+export async function executeMetaAgencyTool({
+  userId,
+  toolSlug,
+  toolName,
+  input,
+  additionalInputs,
+}) {
+  return apiFetch("/jobs/run_wait_result/p/f/tools/router-meta-agency-tools", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({ userId, toolSlug, toolName, input, additionalInputs }),
   });
 }
 
@@ -2275,30 +2505,53 @@ export async function executeMetaAgencyTool({ userId, toolSlug, toolName, input,
  * @param {string} [accountId]
  * @returns {Promise<Object>} { success, data: { content, benchmarks, image, code, automationRules, visionAnalysis, ocrResult, summary } }
  */
-export async function executeInstagramTool({ userId, toolSlug, toolName, input, additionalInputs, accountId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/router-social-instagram', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug, toolName, input, additionalInputs, accountId })
+export async function executeInstagramTool({
+  userId,
+  toolSlug,
+  toolName,
+  input,
+  additionalInputs,
+  accountId,
+}) {
+  return apiFetch("/jobs/run_wait_result/p/f/tools/router-social-instagram", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({ userId, toolSlug, toolName, input, additionalInputs, accountId }),
   });
 }
 
 /**
  * Execute Social Media Management tool via router
  */
-export async function executeSocialManagementTool({ userId, toolSlug, toolName, input, additionalInputs }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/router-social-social-management', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug, toolName, input, additionalInputs })
+export async function executeSocialManagementTool({
+  userId,
+  toolSlug,
+  toolName,
+  input,
+  additionalInputs,
+}) {
+  return apiFetch("/jobs/run_wait_result/p/f/tools/router-social-social-management", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({ userId, toolSlug, toolName, input, additionalInputs }),
   });
 }
 
 /**
  * Execute YouTube tool via router
  */
-export async function executeYoutubeTool({ userId, toolSlug, toolName, input, additionalInputs, accountId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/router-social-youtube', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug, toolName, input, additionalInputs, accountId })
+export async function executeYoutubeTool({
+  userId,
+  toolSlug,
+  toolName,
+  input,
+  additionalInputs,
+  accountId,
+}) {
+  return apiFetch("/jobs/run_wait_result/p/f/tools/router-social-youtube", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({ userId, toolSlug, toolName, input, additionalInputs, accountId }),
   });
 }
 
@@ -2315,20 +2568,34 @@ export async function executeYoutubeTool({ userId, toolSlug, toolName, input, ad
  * @param {Object} [additionalInputs]
  * @returns {Promise<Object>} { success, data: { content, benchmarks, image, code, automationRules, visionAnalysis, ocrResult, summary } }
  */
-export async function executeSeoOptimizationTool({ userId, toolSlug, toolName, input, additionalInputs }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/router-seo-seo-optimization', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug, toolName, input, additionalInputs })
+export async function executeSeoOptimizationTool({
+  userId,
+  toolSlug,
+  toolName,
+  input,
+  additionalInputs,
+}) {
+  return apiFetch("/jobs/run_wait_result/p/f/tools/router-seo-seo-optimization", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({ userId, toolSlug, toolName, input, additionalInputs }),
   });
 }
 
 /**
  * Execute Content Writing tool via router
  */
-export async function executeContentWritingTool({ userId, toolSlug, toolName, input, additionalInputs }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/router-seo-content-writing', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug, toolName, input, additionalInputs })
+export async function executeContentWritingTool({
+  userId,
+  toolSlug,
+  toolName,
+  input,
+  additionalInputs,
+}) {
+  return apiFetch("/jobs/run_wait_result/p/f/tools/router-seo-content-writing", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({ userId, toolSlug, toolName, input, additionalInputs }),
   });
 }
 
@@ -2339,20 +2606,36 @@ export async function executeContentWritingTool({ userId, toolSlug, toolName, in
 /**
  * Execute Analytics & Insights tool via router
  */
-export async function executeAnalyticsInsightsTool({ userId, toolSlug, toolName, input, additionalInputs, accountId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/router-analytics-analytics-insights', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug, toolName, input, additionalInputs, accountId })
+export async function executeAnalyticsInsightsTool({
+  userId,
+  toolSlug,
+  toolName,
+  input,
+  additionalInputs,
+  accountId,
+}) {
+  return apiFetch("/jobs/run_wait_result/p/f/tools/router-analytics-analytics-insights", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({ userId, toolSlug, toolName, input, additionalInputs, accountId }),
   });
 }
 
 /**
  * Execute ROI & Attribution tool via router
  */
-export async function executeRoiAttributionTool({ userId, toolSlug, toolName, input, additionalInputs, accountId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/router-analytics-roi-attribution', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug, toolName, input, additionalInputs, accountId })
+export async function executeRoiAttributionTool({
+  userId,
+  toolSlug,
+  toolName,
+  input,
+  additionalInputs,
+  accountId,
+}) {
+  return apiFetch("/jobs/run_wait_result/p/f/tools/router-analytics-roi-attribution", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({ userId, toolSlug, toolName, input, additionalInputs, accountId }),
   });
 }
 
@@ -2371,10 +2654,17 @@ export async function executeRoiAttributionTool({ userId, toolSlug, toolName, in
  * @param {Object} [additionalInputs]
  * @returns {Promise<Object>} { success, data: { content, benchmarks, image, code, automationRules, visionAnalysis, ocrResult, summary } }
  */
-export async function executeShopifyToolV2({ userId, toolSlug, toolName, input, additionalInputs }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/router-ecom-shopify', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug, toolName, input, additionalInputs })
+export async function executeShopifyToolV2({
+  userId,
+  toolSlug,
+  toolName,
+  input,
+  additionalInputs,
+}) {
+  return apiFetch("/jobs/run_wait_result/p/f/tools/router-ecom-shopify", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({ userId, toolSlug, toolName, input, additionalInputs }),
   });
 }
 
@@ -2382,9 +2672,16 @@ export async function executeShopifyToolV2({ userId, toolSlug, toolName, input, 
  * Execute Shopify Store Audit
  */
 export async function runShopifyStoreAudit({ userId, input, additionalInputs }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/shopify-store-audit', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'shopify-store-audit', toolName: 'Shopify Store Audit', input, additionalInputs })
+  return apiFetch("/jobs/run_wait_result/p/f/tools/shopify-store-audit", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "shopify-store-audit",
+      toolName: "Shopify Store Audit",
+      input,
+      additionalInputs,
+    }),
   });
 }
 
@@ -2392,9 +2689,16 @@ export async function runShopifyStoreAudit({ userId, input, additionalInputs }) 
  * Execute Shopify SEO Optimizer
  */
 export async function runShopifySeoOptimizer({ userId, input, additionalInputs }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/shopify-seo-optimizer', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'shopify-seo-optimizer', toolName: 'Shopify SEO Optimizer', input, additionalInputs })
+  return apiFetch("/jobs/run_wait_result/p/f/tools/shopify-seo-optimizer", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "shopify-seo-optimizer",
+      toolName: "Shopify SEO Optimizer",
+      input,
+      additionalInputs,
+    }),
   });
 }
 
@@ -2410,10 +2714,18 @@ export async function runShopifySeoOptimizer({ userId, input, additionalInputs }
  * @param {string} [accountId]
  * @returns {Promise<Object>} { success, data }
  */
-export async function executeEcomAdvertisingTool({ userId, toolSlug, toolName, input, additionalInputs, accountId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/router-ecom-advertising', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug, toolName, input, additionalInputs, accountId })
+export async function executeEcomAdvertisingTool({
+  userId,
+  toolSlug,
+  toolName,
+  input,
+  additionalInputs,
+  accountId,
+}) {
+  return apiFetch("/jobs/run_wait_result/p/f/tools/router-ecom-advertising", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({ userId, toolSlug, toolName, input, additionalInputs, accountId }),
   });
 }
 
@@ -2421,9 +2733,17 @@ export async function executeEcomAdvertisingTool({ userId, toolSlug, toolName, i
  * Execute Google Shopping Optimizer
  */
 export async function runGoogleShoppingOptimizer({ userId, input, additionalInputs, accountId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/google-shopping-optimizer', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'google-shopping-optimizer', toolName: 'Google Shopping Optimizer', input, additionalInputs, accountId })
+  return apiFetch("/jobs/run_wait_result/p/f/tools/google-shopping-optimizer", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "google-shopping-optimizer",
+      toolName: "Google Shopping Optimizer",
+      input,
+      additionalInputs,
+      accountId,
+    }),
   });
 }
 
@@ -2431,9 +2751,16 @@ export async function runGoogleShoppingOptimizer({ userId, input, additionalInpu
  * Execute Amazon PPC Optimizer
  */
 export async function runAmazonPpcOptimizer({ userId, input, additionalInputs }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/amazon-ppc-optimizer', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'amazon-ppc-optimizer', toolName: 'Amazon PPC Optimizer', input, additionalInputs })
+  return apiFetch("/jobs/run_wait_result/p/f/tools/amazon-ppc-optimizer", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "amazon-ppc-optimizer",
+      toolName: "Amazon PPC Optimizer",
+      input,
+      additionalInputs,
+    }),
   });
 }
 
@@ -2448,10 +2775,17 @@ export async function runAmazonPpcOptimizer({ userId, input, additionalInputs })
  * @param {Object} [additionalInputs]
  * @returns {Promise<Object>} { success, data }
  */
-export async function executeEcomAnalyticsToolV2({ userId, toolSlug, toolName, input, additionalInputs }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/router-ecom-analytics', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug, toolName, input, additionalInputs })
+export async function executeEcomAnalyticsToolV2({
+  userId,
+  toolSlug,
+  toolName,
+  input,
+  additionalInputs,
+}) {
+  return apiFetch("/jobs/run_wait_result/p/f/tools/router-ecom-analytics", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({ userId, toolSlug, toolName, input, additionalInputs }),
   });
 }
 
@@ -2459,9 +2793,16 @@ export async function executeEcomAnalyticsToolV2({ userId, toolSlug, toolName, i
  * Execute E-commerce KPI Dashboard
  */
 export async function runEcomKpiDashboard({ userId, input, additionalInputs }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/ecommerce-kpi-dashboard', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'ecommerce-kpi-dashboard', toolName: 'Ecommerce KPI Dashboard', input, additionalInputs })
+  return apiFetch("/jobs/run_wait_result/p/f/tools/ecommerce-kpi-dashboard", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "ecommerce-kpi-dashboard",
+      toolName: "Ecommerce KPI Dashboard",
+      input,
+      additionalInputs,
+    }),
   });
 }
 
@@ -2469,9 +2810,16 @@ export async function runEcomKpiDashboard({ userId, input, additionalInputs }) {
  * Execute ROAS Analyzer
  */
 export async function runRoasAnalyzer({ userId, input, additionalInputs }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/roas-analyzer', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'roas-analyzer', toolName: 'ROAS Analyzer', input, additionalInputs })
+  return apiFetch("/jobs/run_wait_result/p/f/tools/roas-analyzer", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "roas-analyzer",
+      toolName: "ROAS Analyzer",
+      input,
+      additionalInputs,
+    }),
   });
 }
 
@@ -2479,9 +2827,16 @@ export async function runRoasAnalyzer({ userId, input, additionalInputs }) {
  * Execute Cart Abandonment Analyzer
  */
 export async function runCartAbandonmentAnalyzer({ userId, input, additionalInputs }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/cart-abandonment-analyzer', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'cart-abandonment-analyzer', toolName: 'Cart Abandonment Analyzer', input, additionalInputs })
+  return apiFetch("/jobs/run_wait_result/p/f/tools/cart-abandonment-analyzer", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "cart-abandonment-analyzer",
+      toolName: "Cart Abandonment Analyzer",
+      input,
+      additionalInputs,
+    }),
   });
 }
 
@@ -2496,10 +2851,17 @@ export async function runCartAbandonmentAnalyzer({ userId, input, additionalInpu
  * @param {Object} [additionalInputs]
  * @returns {Promise<Object>} { success, data }
  */
-export async function executeEcomAutomationToolV2({ userId, toolSlug, toolName, input, additionalInputs }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/router-ecom-automation', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug, toolName, input, additionalInputs })
+export async function executeEcomAutomationToolV2({
+  userId,
+  toolSlug,
+  toolName,
+  input,
+  additionalInputs,
+}) {
+  return apiFetch("/jobs/run_wait_result/p/f/tools/router-ecom-automation", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({ userId, toolSlug, toolName, input, additionalInputs }),
   });
 }
 
@@ -2507,9 +2869,16 @@ export async function executeEcomAutomationToolV2({ userId, toolSlug, toolName, 
  * Execute Welcome Series Generator
  */
 export async function runWelcomeSeriesGenerator({ userId, input, additionalInputs }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/welcome-series-generator', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'welcome-series-generator', toolName: 'Welcome Series Generator', input, additionalInputs })
+  return apiFetch("/jobs/run_wait_result/p/f/tools/welcome-series-generator", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "welcome-series-generator",
+      toolName: "Welcome Series Generator",
+      input,
+      additionalInputs,
+    }),
   });
 }
 
@@ -2517,9 +2886,16 @@ export async function runWelcomeSeriesGenerator({ userId, input, additionalInput
  * Execute Loyalty VIP Rewards Designer
  */
 export async function runLoyaltyRewardsDesigner({ userId, input, additionalInputs }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/loyalty-vip-rewards-designer', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'loyalty-vip-rewards-designer', toolName: 'Loyalty VIP Rewards Designer', input, additionalInputs })
+  return apiFetch("/jobs/run_wait_result/p/f/tools/loyalty-vip-rewards-designer", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "loyalty-vip-rewards-designer",
+      toolName: "Loyalty VIP Rewards Designer",
+      input,
+      additionalInputs,
+    }),
   });
 }
 
@@ -2534,10 +2910,17 @@ export async function runLoyaltyRewardsDesigner({ userId, input, additionalInput
  * @param {Object} [additionalInputs]
  * @returns {Promise<Object>} { success, data }
  */
-export async function executeEcomStrategyToolV2({ userId, toolSlug, toolName, input, additionalInputs }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/router-ecom-strategy', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug, toolName, input, additionalInputs })
+export async function executeEcomStrategyToolV2({
+  userId,
+  toolSlug,
+  toolName,
+  input,
+  additionalInputs,
+}) {
+  return apiFetch("/jobs/run_wait_result/p/f/tools/router-ecom-strategy", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({ userId, toolSlug, toolName, input, additionalInputs }),
   });
 }
 
@@ -2545,9 +2928,16 @@ export async function executeEcomStrategyToolV2({ userId, toolSlug, toolName, in
  * Execute Dynamic Pricing Optimizer
  */
 export async function runDynamicPricingOptimizer({ userId, input, additionalInputs }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/dynamic-pricing-optimizer', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'dynamic-pricing-optimizer', toolName: 'Dynamic Pricing Optimizer', input, additionalInputs })
+  return apiFetch("/jobs/run_wait_result/p/f/tools/dynamic-pricing-optimizer", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "dynamic-pricing-optimizer",
+      toolName: "Dynamic Pricing Optimizer",
+      input,
+      additionalInputs,
+    }),
   });
 }
 
@@ -2555,9 +2945,16 @@ export async function runDynamicPricingOptimizer({ userId, input, additionalInpu
  * Execute E-commerce Growth Roadmap Generator
  */
 export async function runEcomGrowthRoadmapGenerator({ userId, input, additionalInputs }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/ecommerce-growth-roadmap-generator', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'ecommerce-growth-roadmap-generator', toolName: 'Ecommerce Growth Roadmap Generator', input, additionalInputs })
+  return apiFetch("/jobs/run_wait_result/p/f/tools/ecommerce-growth-roadmap-generator", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "ecommerce-growth-roadmap-generator",
+      toolName: "Ecommerce Growth Roadmap Generator",
+      input,
+      additionalInputs,
+    }),
   });
 }
 
@@ -2565,9 +2962,16 @@ export async function runEcomGrowthRoadmapGenerator({ userId, input, additionalI
  * Execute Product Feed Optimizer
  */
 export async function runProductFeedOptimizer({ userId, input, additionalInputs }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/product-feed-optimizer', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'product-feed-optimizer', toolName: 'Product Feed Optimizer', input, additionalInputs })
+  return apiFetch("/jobs/run_wait_result/p/f/tools/product-feed-optimizer", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "product-feed-optimizer",
+      toolName: "Product Feed Optimizer",
+      input,
+      additionalInputs,
+    }),
   });
 }
 
@@ -2575,9 +2979,16 @@ export async function runProductFeedOptimizer({ userId, input, additionalInputs 
  * Execute Predictive Inventory Manager
  */
 export async function runPredictiveInventoryManager({ userId, input, additionalInputs }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/predictive-inventory-manager', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'predictive-inventory-manager', toolName: 'Predictive Inventory Manager', input, additionalInputs })
+  return apiFetch("/jobs/run_wait_result/p/f/tools/predictive-inventory-manager", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "predictive-inventory-manager",
+      toolName: "Predictive Inventory Manager",
+      input,
+      additionalInputs,
+    }),
   });
 }
 
@@ -2585,9 +2996,16 @@ export async function runPredictiveInventoryManager({ userId, input, additionalI
  * Execute Platform Expansion Planner
  */
 export async function runPlatformExpansionPlanner({ userId, input, additionalInputs }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/platform-expansion-planner', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'platform-expansion-planner', toolName: 'Platform Expansion Planner', input, additionalInputs })
+  return apiFetch("/jobs/run_wait_result/p/f/tools/platform-expansion-planner", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "platform-expansion-planner",
+      toolName: "Platform Expansion Planner",
+      input,
+      additionalInputs,
+    }),
   });
 }
 
@@ -2607,9 +3025,10 @@ export async function runPlatformExpansionPlanner({ userId, input, additionalInp
  * @returns {Promise<Object>} { success, data }
  */
 export async function executeAiAgentTool({ userId, toolSlug, toolName, input, additionalInputs }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/router-aitools-ai-agents', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug, toolName, input, additionalInputs })
+  return apiFetch("/jobs/run_wait_result/p/f/tools/router-aitools-ai-agents", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({ userId, toolSlug, toolName, input, additionalInputs }),
   });
 }
 
@@ -2622,10 +3041,17 @@ export async function executeAiAgentTool({ userId, toolSlug, toolName, input, ad
  * @param {Object} [additionalInputs]
  * @returns {Promise<Object>} { success, data }
  */
-export async function executeAiMarketingTool({ userId, toolSlug, toolName, input, additionalInputs }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/router-aitools-ai-marketing-advertising', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug, toolName, input, additionalInputs })
+export async function executeAiMarketingTool({
+  userId,
+  toolSlug,
+  toolName,
+  input,
+  additionalInputs,
+}) {
+  return apiFetch("/jobs/run_wait_result/p/f/tools/router-aitools-ai-marketing-advertising", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({ userId, toolSlug, toolName, input, additionalInputs }),
   });
 }
 
@@ -2639,9 +3065,10 @@ export async function executeAiMarketingTool({ userId, toolSlug, toolName, input
  * @returns {Promise<Object>} { success, data }
  */
 export async function executeAiTextTool({ userId, toolSlug, toolName, input, additionalInputs }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/router-aitools-ai-text-content', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug, toolName, input, additionalInputs })
+  return apiFetch("/jobs/run_wait_result/p/f/tools/router-aitools-ai-text-content", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({ userId, toolSlug, toolName, input, additionalInputs }),
   });
 }
 
@@ -2654,10 +3081,17 @@ export async function executeAiTextTool({ userId, toolSlug, toolName, input, add
  * @param {Object} [additionalInputs]
  * @returns {Promise<Object>} { success, data }
  */
-export async function executeAiDeveloperTool({ userId, toolSlug, toolName, input, additionalInputs }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/router-aitools-ai-developer-automation', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug, toolName, input, additionalInputs })
+export async function executeAiDeveloperTool({
+  userId,
+  toolSlug,
+  toolName,
+  input,
+  additionalInputs,
+}) {
+  return apiFetch("/jobs/run_wait_result/p/f/tools/router-aitools-ai-developer-automation", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({ userId, toolSlug, toolName, input, additionalInputs }),
   });
 }
 
@@ -2670,10 +3104,17 @@ export async function executeAiDeveloperTool({ userId, toolSlug, toolName, input
  * @param {Object} [additionalInputs]
  * @returns {Promise<Object>} { success, data }
  */
-export async function executeAiEmailGraderTool({ userId, toolSlug, toolName, input, additionalInputs }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/router-aitools-ai-email-graders', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug, toolName, input, additionalInputs })
+export async function executeAiEmailGraderTool({
+  userId,
+  toolSlug,
+  toolName,
+  input,
+  additionalInputs,
+}) {
+  return apiFetch("/jobs/run_wait_result/p/f/tools/router-aitools-ai-email-graders", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({ userId, toolSlug, toolName, input, additionalInputs }),
   });
 }
 
@@ -2683,9 +3124,16 @@ export async function executeAiEmailGraderTool({ userId, toolSlug, toolName, inp
  * Ad Copy Analyzer
  */
 export async function runAdCopyAnalyzer({ userId, input, additionalInputs }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/ad-copy-analyzer', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'ad-copy-analyzer', toolName: 'Ad Copy Analyzer', input, additionalInputs })
+  return apiFetch("/jobs/run_wait_result/p/f/tools/ad-copy-analyzer", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "ad-copy-analyzer",
+      toolName: "Ad Copy Analyzer",
+      input,
+      additionalInputs,
+    }),
   });
 }
 
@@ -2693,9 +3141,16 @@ export async function runAdCopyAnalyzer({ userId, input, additionalInputs }) {
  * Ad Copy Sentiment Analyzer
  */
 export async function runAdCopySentimentAnalyzer({ userId, input, additionalInputs }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/ad-copy-sentiment-analyzer', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'ad-copy-sentiment-analyzer', toolName: 'Ad Copy Sentiment Analyzer', input, additionalInputs })
+  return apiFetch("/jobs/run_wait_result/p/f/tools/ad-copy-sentiment-analyzer", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "ad-copy-sentiment-analyzer",
+      toolName: "Ad Copy Sentiment Analyzer",
+      input,
+      additionalInputs,
+    }),
   });
 }
 
@@ -2703,9 +3158,16 @@ export async function runAdCopySentimentAnalyzer({ userId, input, additionalInpu
  * Ad Fatigue Detector
  */
 export async function runAdFatigueDetector({ userId, input, additionalInputs }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/ad-fatigue-detector', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'ad-fatigue-detector', toolName: 'Ad Fatigue Detector', input, additionalInputs })
+  return apiFetch("/jobs/run_wait_result/p/f/tools/ad-fatigue-detector", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "ad-fatigue-detector",
+      toolName: "Ad Fatigue Detector",
+      input,
+      additionalInputs,
+    }),
   });
 }
 
@@ -2713,9 +3175,16 @@ export async function runAdFatigueDetector({ userId, input, additionalInputs }) 
  * Ad Testing Tools
  */
 export async function runAdTestingTools({ userId, input, additionalInputs }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/ad-testing-tools', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'ad-testing-tools', toolName: 'Ad Testing Tools', input, additionalInputs })
+  return apiFetch("/jobs/run_wait_result/p/f/tools/ad-testing-tools", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "ad-testing-tools",
+      toolName: "Ad Testing Tools",
+      input,
+      additionalInputs,
+    }),
   });
 }
 
@@ -2723,9 +3192,16 @@ export async function runAdTestingTools({ userId, input, additionalInputs }) {
  * Ads Launcher
  */
 export async function runAdsLauncher({ userId, input, additionalInputs }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/ads-launcher', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'ads-launcher', toolName: 'Ads Launcher', input, additionalInputs })
+  return apiFetch("/jobs/run_wait_result/p/f/tools/ads-launcher", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "ads-launcher",
+      toolName: "Ads Launcher",
+      input,
+      additionalInputs,
+    }),
   });
 }
 
@@ -2733,9 +3209,16 @@ export async function runAdsLauncher({ userId, input, additionalInputs }) {
  * Ads Rotation Agent
  */
 export async function runAdsRotationAgent({ userId, input, additionalInputs }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/ads-rotation-agent', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'ads-rotation-agent', toolName: 'Ads Rotation Agent', input, additionalInputs })
+  return apiFetch("/jobs/run_wait_result/p/f/tools/ads-rotation-agent", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "ads-rotation-agent",
+      toolName: "Ads Rotation Agent",
+      input,
+      additionalInputs,
+    }),
   });
 }
 
@@ -2743,9 +3226,16 @@ export async function runAdsRotationAgent({ userId, input, additionalInputs }) {
  * Advanced Ad Analyzer
  */
 export async function runAdvancedAdAnalyzer({ userId, input, additionalInputs }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/advanced-ad-analyzer', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'advanced-ad-analyzer', toolName: 'Advanced Ad Analyzer', input, additionalInputs })
+  return apiFetch("/jobs/run_wait_result/p/f/tools/advanced-ad-analyzer", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "advanced-ad-analyzer",
+      toolName: "Advanced Ad Analyzer",
+      input,
+      additionalInputs,
+    }),
   });
 }
 
@@ -2753,9 +3243,16 @@ export async function runAdvancedAdAnalyzer({ userId, input, additionalInputs })
  * Affiliate Marketing Copy
  */
 export async function runAffiliateMarketingCopy({ userId, input, additionalInputs }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/affiliate-marketing-copy', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'affiliate-marketing-copy', toolName: 'Affiliate Marketing Copy', input, additionalInputs })
+  return apiFetch("/jobs/run_wait_result/p/f/tools/affiliate-marketing-copy", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "affiliate-marketing-copy",
+      toolName: "Affiliate Marketing Copy",
+      input,
+      additionalInputs,
+    }),
   });
 }
 
@@ -2763,9 +3260,16 @@ export async function runAffiliateMarketingCopy({ userId, input, additionalInput
  * Ai Ad Management Tools
  */
 export async function runAiAdManagementTools({ userId, input, additionalInputs }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/ai-ad-management-tools', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'ai-ad-management-tools', toolName: 'Ai Ad Management Tools', input, additionalInputs })
+  return apiFetch("/jobs/run_wait_result/p/f/tools/ai-ad-management-tools", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "ai-ad-management-tools",
+      toolName: "Ai Ad Management Tools",
+      input,
+      additionalInputs,
+    }),
   });
 }
 
@@ -2773,9 +3277,16 @@ export async function runAiAdManagementTools({ userId, input, additionalInputs }
  * Ai Ads Generator
  */
 export async function runAiAdsGenerator({ userId, input, additionalInputs }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/ai-ads-generator', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'ai-ads-generator', toolName: 'Ai Ads Generator', input, additionalInputs })
+  return apiFetch("/jobs/run_wait_result/p/f/tools/ai-ads-generator", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "ai-ads-generator",
+      toolName: "Ai Ads Generator",
+      input,
+      additionalInputs,
+    }),
   });
 }
 
@@ -2783,9 +3294,16 @@ export async function runAiAdsGenerator({ userId, input, additionalInputs }) {
  * Ai Advertising Suite
  */
 export async function runAiAdvertisingSuite({ userId, input, additionalInputs }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/ai-advertising-suite', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'ai-advertising-suite', toolName: 'Ai Advertising Suite', input, additionalInputs })
+  return apiFetch("/jobs/run_wait_result/p/f/tools/ai-advertising-suite", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "ai-advertising-suite",
+      toolName: "Ai Advertising Suite",
+      input,
+      additionalInputs,
+    }),
   });
 }
 
@@ -2793,9 +3311,16 @@ export async function runAiAdvertisingSuite({ userId, input, additionalInputs })
  * Ai Media Buyer
  */
 export async function runAiMediaBuyer({ userId, input, additionalInputs }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/ai-media-buyer', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'ai-media-buyer', toolName: 'Ai Media Buyer', input, additionalInputs })
+  return apiFetch("/jobs/run_wait_result/p/f/tools/ai-media-buyer", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "ai-media-buyer",
+      toolName: "Ai Media Buyer",
+      input,
+      additionalInputs,
+    }),
   });
 }
 
@@ -2803,9 +3328,16 @@ export async function runAiMediaBuyer({ userId, input, additionalInputs }) {
  * Ai Performance Marketer
  */
 export async function runAiPerformanceMarketer({ userId, input, additionalInputs }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/ai-performance-marketer', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'ai-performance-marketer', toolName: 'Ai Performance Marketer', input, additionalInputs })
+  return apiFetch("/jobs/run_wait_result/p/f/tools/ai-performance-marketer", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "ai-performance-marketer",
+      toolName: "Ai Performance Marketer",
+      input,
+      additionalInputs,
+    }),
   });
 }
 
@@ -2813,9 +3345,16 @@ export async function runAiPerformanceMarketer({ userId, input, additionalInputs
  * Ai Task Prioritizer
  */
 export async function runAiTaskPrioritizer({ userId, input, additionalInputs }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/ai-task-prioritizer', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'ai-task-prioritizer', toolName: 'Ai Task Prioritizer', input, additionalInputs })
+  return apiFetch("/jobs/run_wait_result/p/f/tools/ai-task-prioritizer", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "ai-task-prioritizer",
+      toolName: "Ai Task Prioritizer",
+      input,
+      additionalInputs,
+    }),
   });
 }
 
@@ -2823,9 +3362,16 @@ export async function runAiTaskPrioritizer({ userId, input, additionalInputs }) 
  * Api Documentation Generator
  */
 export async function runApiDocumentationGenerator({ userId, input, additionalInputs }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/api-documentation-generator', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'api-documentation-generator', toolName: 'Api Documentation Generator', input, additionalInputs })
+  return apiFetch("/jobs/run_wait_result/p/f/tools/api-documentation-generator", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "api-documentation-generator",
+      toolName: "Api Documentation Generator",
+      input,
+      additionalInputs,
+    }),
   });
 }
 
@@ -2833,9 +3379,16 @@ export async function runApiDocumentationGenerator({ userId, input, additionalIn
  * Automated Ad Launch Tool
  */
 export async function runAutomatedAdLaunchTool({ userId, input, additionalInputs }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/automated-ad-launch-tool', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'automated-ad-launch-tool', toolName: 'Automated Ad Launch Tool', input, additionalInputs })
+  return apiFetch("/jobs/run_wait_result/p/f/tools/automated-ad-launch-tool", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "automated-ad-launch-tool",
+      toolName: "Automated Ad Launch Tool",
+      input,
+      additionalInputs,
+    }),
   });
 }
 
@@ -2843,9 +3396,16 @@ export async function runAutomatedAdLaunchTool({ userId, input, additionalInputs
  * Autonomous Marketing Manager
  */
 export async function runAutonomousMarketingManager({ userId, input, additionalInputs }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/autonomous-marketing-manager', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'autonomous-marketing-manager', toolName: 'Autonomous Marketing Manager', input, additionalInputs })
+  return apiFetch("/jobs/run_wait_result/p/f/tools/autonomous-marketing-manager", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "autonomous-marketing-manager",
+      toolName: "Autonomous Marketing Manager",
+      input,
+      additionalInputs,
+    }),
   });
 }
 
@@ -2853,9 +3413,16 @@ export async function runAutonomousMarketingManager({ userId, input, additionalI
  * Brand Identity Builder
  */
 export async function runBrandIdentityBuilder({ userId, input, additionalInputs }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/brand-identity-builder', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'brand-identity-builder', toolName: 'Brand Identity Builder', input, additionalInputs })
+  return apiFetch("/jobs/run_wait_result/p/f/tools/brand-identity-builder", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "brand-identity-builder",
+      toolName: "Brand Identity Builder",
+      input,
+      additionalInputs,
+    }),
   });
 }
 
@@ -2863,9 +3430,16 @@ export async function runBrandIdentityBuilder({ userId, input, additionalInputs 
  * Brand Voice Generator
  */
 export async function runBrandVoiceGenerator({ userId, input, additionalInputs }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/brand-voice-generator', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'brand-voice-generator', toolName: 'Brand Voice Generator', input, additionalInputs })
+  return apiFetch("/jobs/run_wait_result/p/f/tools/brand-voice-generator", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "brand-voice-generator",
+      toolName: "Brand Voice Generator",
+      input,
+      additionalInputs,
+    }),
   });
 }
 
@@ -2873,9 +3447,16 @@ export async function runBrandVoiceGenerator({ userId, input, additionalInputs }
  * Code Comments Generator
  */
 export async function runCodeCommentsGenerator({ userId, input, additionalInputs }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/code-comments-generator', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'code-comments-generator', toolName: 'Code Comments Generator', input, additionalInputs })
+  return apiFetch("/jobs/run_wait_result/p/f/tools/code-comments-generator", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "code-comments-generator",
+      toolName: "Code Comments Generator",
+      input,
+      additionalInputs,
+    }),
   });
 }
 
@@ -2883,9 +3464,16 @@ export async function runCodeCommentsGenerator({ userId, input, additionalInputs
  * Cold Outreach Email
  */
 export async function runColdOutreachEmail({ userId, input, additionalInputs }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/cold-outreach-email', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'cold-outreach-email', toolName: 'Cold Outreach Email', input, additionalInputs })
+  return apiFetch("/jobs/run_wait_result/p/f/tools/cold-outreach-email", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "cold-outreach-email",
+      toolName: "Cold Outreach Email",
+      input,
+      additionalInputs,
+    }),
   });
 }
 
@@ -2893,9 +3481,16 @@ export async function runColdOutreachEmail({ userId, input, additionalInputs }) 
  * Comparison Chart Creator
  */
 export async function runComparisonChartCreator({ userId, input, additionalInputs }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/comparison-chart-creator', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'comparison-chart-creator', toolName: 'Comparison Chart Creator', input, additionalInputs })
+  return apiFetch("/jobs/run_wait_result/p/f/tools/comparison-chart-creator", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "comparison-chart-creator",
+      toolName: "Comparison Chart Creator",
+      input,
+      additionalInputs,
+    }),
   });
 }
 
@@ -2903,9 +3498,16 @@ export async function runComparisonChartCreator({ userId, input, additionalInput
  * Content Rewriter
  */
 export async function runContentRewriter({ userId, input, additionalInputs }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/content-rewriter', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'content-rewriter', toolName: 'Content Rewriter', input, additionalInputs })
+  return apiFetch("/jobs/run_wait_result/p/f/tools/content-rewriter", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "content-rewriter",
+      toolName: "Content Rewriter",
+      input,
+      additionalInputs,
+    }),
   });
 }
 
@@ -2913,9 +3515,16 @@ export async function runContentRewriter({ userId, input, additionalInputs }) {
  * Copy Generator
  */
 export async function runCopyGenerator({ userId, input, additionalInputs }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/copy-generator', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'copy-generator', toolName: 'Copy Generator', input, additionalInputs })
+  return apiFetch("/jobs/run_wait_result/p/f/tools/copy-generator", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "copy-generator",
+      toolName: "Copy Generator",
+      input,
+      additionalInputs,
+    }),
   });
 }
 
@@ -2923,9 +3532,16 @@ export async function runCopyGenerator({ userId, input, additionalInputs }) {
  * Cta Writer
  */
 export async function runCtaWriter({ userId, input, additionalInputs }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/cta-writer', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'cta-writer', toolName: 'Cta Writer', input, additionalInputs })
+  return apiFetch("/jobs/run_wait_result/p/f/tools/cta-writer", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "cta-writer",
+      toolName: "Cta Writer",
+      input,
+      additionalInputs,
+    }),
   });
 }
 
@@ -2933,9 +3549,16 @@ export async function runCtaWriter({ userId, input, additionalInputs }) {
  * Email Writer
  */
 export async function runEmailWriter({ userId, input, additionalInputs }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/email-writer', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'email-writer', toolName: 'Email Writer', input, additionalInputs })
+  return apiFetch("/jobs/run_wait_result/p/f/tools/email-writer", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "email-writer",
+      toolName: "Email Writer",
+      input,
+      additionalInputs,
+    }),
   });
 }
 
@@ -2943,9 +3566,16 @@ export async function runEmailWriter({ userId, input, additionalInputs }) {
  * Exam Prep Content
  */
 export async function runExamPrepContent({ userId, input, additionalInputs }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/exam-prep-content', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'exam-prep-content', toolName: 'Exam Prep Content', input, additionalInputs })
+  return apiFetch("/jobs/run_wait_result/p/f/tools/exam-prep-content", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "exam-prep-content",
+      toolName: "Exam Prep Content",
+      input,
+      additionalInputs,
+    }),
   });
 }
 
@@ -2953,9 +3583,16 @@ export async function runExamPrepContent({ userId, input, additionalInputs }) {
  * Explainer Generator
  */
 export async function runExplainerGenerator({ userId, input, additionalInputs }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/explainer-generator', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'explainer-generator', toolName: 'Explainer Generator', input, additionalInputs })
+  return apiFetch("/jobs/run_wait_result/p/f/tools/explainer-generator", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "explainer-generator",
+      toolName: "Explainer Generator",
+      input,
+      additionalInputs,
+    }),
   });
 }
 
@@ -2963,9 +3600,16 @@ export async function runExplainerGenerator({ userId, input, additionalInputs })
  * Intelligent Automation Platform
  */
 export async function runIntelligentAutomationPlatform({ userId, input, additionalInputs }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/intelligent-automation-platform', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'intelligent-automation-platform', toolName: 'Intelligent Automation Platform', input, additionalInputs })
+  return apiFetch("/jobs/run_wait_result/p/f/tools/intelligent-automation-platform", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "intelligent-automation-platform",
+      toolName: "Intelligent Automation Platform",
+      input,
+      additionalInputs,
+    }),
   });
 }
 
@@ -2973,9 +3617,16 @@ export async function runIntelligentAutomationPlatform({ userId, input, addition
  * Lead Magnet Creator
  */
 export async function runLeadMagnetCreator({ userId, input, additionalInputs }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/lead-magnet-creator', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'lead-magnet-creator', toolName: 'Lead Magnet Creator', input, additionalInputs })
+  return apiFetch("/jobs/run_wait_result/p/f/tools/lead-magnet-creator", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "lead-magnet-creator",
+      toolName: "Lead Magnet Creator",
+      input,
+      additionalInputs,
+    }),
   });
 }
 
@@ -2983,9 +3634,16 @@ export async function runLeadMagnetCreator({ userId, input, additionalInputs }) 
  * Market Research Summary
  */
 export async function runMarketResearchSummary({ userId, input, additionalInputs }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/market-research-summary', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'market-research-summary', toolName: 'Market Research Summary', input, additionalInputs })
+  return apiFetch("/jobs/run_wait_result/p/f/tools/market-research-summary", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "market-research-summary",
+      toolName: "Market Research Summary",
+      input,
+      additionalInputs,
+    }),
   });
 }
 
@@ -2993,9 +3651,16 @@ export async function runMarketResearchSummary({ userId, input, additionalInputs
  * Marketing Ai Agents Hub
  */
 export async function runMarketingAiAgentsHub({ userId, input, additionalInputs }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/marketing-ai-agents-hub', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'marketing-ai-agents-hub', toolName: 'Marketing Ai Agents Hub', input, additionalInputs })
+  return apiFetch("/jobs/run_wait_result/p/f/tools/marketing-ai-agents-hub", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "marketing-ai-agents-hub",
+      toolName: "Marketing Ai Agents Hub",
+      input,
+      additionalInputs,
+    }),
   });
 }
 
@@ -3003,9 +3668,16 @@ export async function runMarketingAiAgentsHub({ userId, input, additionalInputs 
  * Marketing Asset Library
  */
 export async function runMarketingAssetLibrary({ userId, input, additionalInputs }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/marketing-asset-library', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'marketing-asset-library', toolName: 'Marketing Asset Library', input, additionalInputs })
+  return apiFetch("/jobs/run_wait_result/p/f/tools/marketing-asset-library", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "marketing-asset-library",
+      toolName: "Marketing Asset Library",
+      input,
+      additionalInputs,
+    }),
   });
 }
 
@@ -3013,9 +3685,16 @@ export async function runMarketingAssetLibrary({ userId, input, additionalInputs
  * Marketing Copy Generator
  */
 export async function runMarketingCopyGenerator({ userId, input, additionalInputs }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/marketing-copy-generator', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'marketing-copy-generator', toolName: 'Marketing Copy Generator', input, additionalInputs })
+  return apiFetch("/jobs/run_wait_result/p/f/tools/marketing-copy-generator", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "marketing-copy-generator",
+      toolName: "Marketing Copy Generator",
+      input,
+      additionalInputs,
+    }),
   });
 }
 
@@ -3023,9 +3702,16 @@ export async function runMarketingCopyGenerator({ userId, input, additionalInput
  * Marketing Efficiency Software
  */
 export async function runMarketingEfficiencySoftware({ userId, input, additionalInputs }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/marketing-efficiency-software', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'marketing-efficiency-software', toolName: 'Marketing Efficiency Software', input, additionalInputs })
+  return apiFetch("/jobs/run_wait_result/p/f/tools/marketing-efficiency-software", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "marketing-efficiency-software",
+      toolName: "Marketing Efficiency Software",
+      input,
+      additionalInputs,
+    }),
   });
 }
 
@@ -3033,9 +3719,16 @@ export async function runMarketingEfficiencySoftware({ userId, input, additional
  * Marketing Proposal Generator
  */
 export async function runMarketingProposalGenerator({ userId, input, additionalInputs }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/marketing-proposal-generator', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'marketing-proposal-generator', toolName: 'Marketing Proposal Generator', input, additionalInputs })
+  return apiFetch("/jobs/run_wait_result/p/f/tools/marketing-proposal-generator", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "marketing-proposal-generator",
+      toolName: "Marketing Proposal Generator",
+      input,
+      additionalInputs,
+    }),
   });
 }
 
@@ -3043,9 +3736,16 @@ export async function runMarketingProposalGenerator({ userId, input, additionalI
  * Marketing Software Hub
  */
 export async function runMarketingSoftwareHub({ userId, input, additionalInputs }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/marketing-software-hub', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'marketing-software-hub', toolName: 'Marketing Software Hub', input, additionalInputs })
+  return apiFetch("/jobs/run_wait_result/p/f/tools/marketing-software-hub", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "marketing-software-hub",
+      toolName: "Marketing Software Hub",
+      input,
+      additionalInputs,
+    }),
   });
 }
 
@@ -3053,9 +3753,16 @@ export async function runMarketingSoftwareHub({ userId, input, additionalInputs 
  * Marketing Team Collaboration
  */
 export async function runMarketingTeamCollaboration({ userId, input, additionalInputs }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/marketing-team-collaboration', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'marketing-team-collaboration', toolName: 'Marketing Team Collaboration', input, additionalInputs })
+  return apiFetch("/jobs/run_wait_result/p/f/tools/marketing-team-collaboration", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "marketing-team-collaboration",
+      toolName: "Marketing Team Collaboration",
+      input,
+      additionalInputs,
+    }),
   });
 }
 
@@ -3063,9 +3770,16 @@ export async function runMarketingTeamCollaboration({ userId, input, additionalI
  * Optimization Software Suite
  */
 export async function runOptimizationSoftwareSuite({ userId, input, additionalInputs }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/optimization-software-suite', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'optimization-software-suite', toolName: 'Optimization Software Suite', input, additionalInputs })
+  return apiFetch("/jobs/run_wait_result/p/f/tools/optimization-software-suite", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "optimization-software-suite",
+      toolName: "Optimization Software Suite",
+      input,
+      additionalInputs,
+    }),
   });
 }
 
@@ -3073,9 +3787,16 @@ export async function runOptimizationSoftwareSuite({ userId, input, additionalIn
  * Paragraph Expander
  */
 export async function runParagraphExpander({ userId, input, additionalInputs }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/paragraph-expander', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'paragraph-expander', toolName: 'Paragraph Expander', input, additionalInputs })
+  return apiFetch("/jobs/run_wait_result/p/f/tools/paragraph-expander", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "paragraph-expander",
+      toolName: "Paragraph Expander",
+      input,
+      additionalInputs,
+    }),
   });
 }
 
@@ -3083,9 +3804,16 @@ export async function runParagraphExpander({ userId, input, additionalInputs }) 
  * Paragraph Improver
  */
 export async function runParagraphImprover({ userId, input, additionalInputs }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/paragraph-improver', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'paragraph-improver', toolName: 'Paragraph Improver', input, additionalInputs })
+  return apiFetch("/jobs/run_wait_result/p/f/tools/paragraph-improver", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "paragraph-improver",
+      toolName: "Paragraph Improver",
+      input,
+      additionalInputs,
+    }),
   });
 }
 
@@ -3093,9 +3821,16 @@ export async function runParagraphImprover({ userId, input, additionalInputs }) 
  * Paragraph Rewriter
  */
 export async function runParagraphRewriter({ userId, input, additionalInputs }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/paragraph-rewriter', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'paragraph-rewriter', toolName: 'Paragraph Rewriter', input, additionalInputs })
+  return apiFetch("/jobs/run_wait_result/p/f/tools/paragraph-rewriter", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "paragraph-rewriter",
+      toolName: "Paragraph Rewriter",
+      input,
+      additionalInputs,
+    }),
   });
 }
 
@@ -3103,9 +3838,16 @@ export async function runParagraphRewriter({ userId, input, additionalInputs }) 
  * Paragraph Shortener
  */
 export async function runParagraphShortener({ userId, input, additionalInputs }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/paragraph-shortener', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'paragraph-shortener', toolName: 'Paragraph Shortener', input, additionalInputs })
+  return apiFetch("/jobs/run_wait_result/p/f/tools/paragraph-shortener", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "paragraph-shortener",
+      toolName: "Paragraph Shortener",
+      input,
+      additionalInputs,
+    }),
   });
 }
 
@@ -3113,9 +3855,16 @@ export async function runParagraphShortener({ userId, input, additionalInputs })
  * Paragraph Simplifier
  */
 export async function runParagraphSimplifier({ userId, input, additionalInputs }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/paragraph-simplifier', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'paragraph-simplifier', toolName: 'Paragraph Simplifier', input, additionalInputs })
+  return apiFetch("/jobs/run_wait_result/p/f/tools/paragraph-simplifier", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "paragraph-simplifier",
+      toolName: "Paragraph Simplifier",
+      input,
+      additionalInputs,
+    }),
   });
 }
 
@@ -3123,9 +3872,16 @@ export async function runParagraphSimplifier({ userId, input, additionalInputs }
  * Pinterest Ad Generator
  */
 export async function runPinterestAdGenerator({ userId, input, additionalInputs }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/pinterest-ad-generator', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'pinterest-ad-generator', toolName: 'Pinterest Ad Generator', input, additionalInputs })
+  return apiFetch("/jobs/run_wait_result/p/f/tools/pinterest-ad-generator", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "pinterest-ad-generator",
+      toolName: "Pinterest Ad Generator",
+      input,
+      additionalInputs,
+    }),
   });
 }
 
@@ -3133,9 +3889,16 @@ export async function runPinterestAdGenerator({ userId, input, additionalInputs 
  * Product Description Writer
  */
 export async function runProductDescriptionWriter({ userId, input, additionalInputs }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/product-description-writer', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'product-description-writer', toolName: 'Product Description Writer', input, additionalInputs })
+  return apiFetch("/jobs/run_wait_result/p/f/tools/product-description-writer", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "product-description-writer",
+      toolName: "Product Description Writer",
+      input,
+      additionalInputs,
+    }),
   });
 }
 
@@ -3143,9 +3906,16 @@ export async function runProductDescriptionWriter({ userId, input, additionalInp
  * Product Launch Email Sequence
  */
 export async function runProductLaunchEmailSequence({ userId, input, additionalInputs }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/product-launch-email-sequence', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'product-launch-email-sequence', toolName: 'Product Launch Email Sequence', input, additionalInputs })
+  return apiFetch("/jobs/run_wait_result/p/f/tools/product-launch-email-sequence", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "product-launch-email-sequence",
+      toolName: "Product Launch Email Sequence",
+      input,
+      additionalInputs,
+    }),
   });
 }
 
@@ -3153,9 +3923,16 @@ export async function runProductLaunchEmailSequence({ userId, input, additionalI
  * Sales Page Copy Writer
  */
 export async function runSalesPageCopyWriter({ userId, input, additionalInputs }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/sales-page-copy-writer', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'sales-page-copy-writer', toolName: 'Sales Page Copy Writer', input, additionalInputs })
+  return apiFetch("/jobs/run_wait_result/p/f/tools/sales-page-copy-writer", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "sales-page-copy-writer",
+      toolName: "Sales Page Copy Writer",
+      input,
+      additionalInputs,
+    }),
   });
 }
 
@@ -3163,9 +3940,16 @@ export async function runSalesPageCopyWriter({ userId, input, additionalInputs }
  * Sentence Expander
  */
 export async function runSentenceExpander({ userId, input, additionalInputs }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/sentence-expander', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'sentence-expander', toolName: 'Sentence Expander', input, additionalInputs })
+  return apiFetch("/jobs/run_wait_result/p/f/tools/sentence-expander", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "sentence-expander",
+      toolName: "Sentence Expander",
+      input,
+      additionalInputs,
+    }),
   });
 }
 
@@ -3173,9 +3957,16 @@ export async function runSentenceExpander({ userId, input, additionalInputs }) {
  * Sentence Rewriter
  */
 export async function runSentenceRewriter({ userId, input, additionalInputs }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/sentence-rewriter', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'sentence-rewriter', toolName: 'Sentence Rewriter', input, additionalInputs })
+  return apiFetch("/jobs/run_wait_result/p/f/tools/sentence-rewriter", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "sentence-rewriter",
+      toolName: "Sentence Rewriter",
+      input,
+      additionalInputs,
+    }),
   });
 }
 
@@ -3183,9 +3974,16 @@ export async function runSentenceRewriter({ userId, input, additionalInputs }) {
  * Sentence Shortener
  */
 export async function runSentenceShortener({ userId, input, additionalInputs }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/sentence-shortener', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'sentence-shortener', toolName: 'Sentence Shortener', input, additionalInputs })
+  return apiFetch("/jobs/run_wait_result/p/f/tools/sentence-shortener", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "sentence-shortener",
+      toolName: "Sentence Shortener",
+      input,
+      additionalInputs,
+    }),
   });
 }
 
@@ -3193,9 +3991,16 @@ export async function runSentenceShortener({ userId, input, additionalInputs }) 
  * Sentence Simplifier
  */
 export async function runSentenceSimplifier({ userId, input, additionalInputs }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/sentence-simplifier', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'sentence-simplifier', toolName: 'Sentence Simplifier', input, additionalInputs })
+  return apiFetch("/jobs/run_wait_result/p/f/tools/sentence-simplifier", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "sentence-simplifier",
+      toolName: "Sentence Simplifier",
+      input,
+      additionalInputs,
+    }),
   });
 }
 
@@ -3203,9 +4008,16 @@ export async function runSentenceSimplifier({ userId, input, additionalInputs })
  * Study Notes Generator
  */
 export async function runStudyNotesGenerator({ userId, input, additionalInputs }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/study-notes-generator', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'study-notes-generator', toolName: 'Study Notes Generator', input, additionalInputs })
+  return apiFetch("/jobs/run_wait_result/p/f/tools/study-notes-generator", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "study-notes-generator",
+      toolName: "Study Notes Generator",
+      input,
+      additionalInputs,
+    }),
   });
 }
 
@@ -3213,9 +4025,16 @@ export async function runStudyNotesGenerator({ userId, input, additionalInputs }
  * Technical Explanation Writer
  */
 export async function runTechnicalExplanationWriter({ userId, input, additionalInputs }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/technical-explanation-writer', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'technical-explanation-writer', toolName: 'Technical Explanation Writer', input, additionalInputs })
+  return apiFetch("/jobs/run_wait_result/p/f/tools/technical-explanation-writer", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "technical-explanation-writer",
+      toolName: "Technical Explanation Writer",
+      input,
+      additionalInputs,
+    }),
   });
 }
 
@@ -3223,9 +4042,16 @@ export async function runTechnicalExplanationWriter({ userId, input, additionalI
  * Testimonial Generator
  */
 export async function runTestimonialGenerator({ userId, input, additionalInputs }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/testimonial-generator', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'testimonial-generator', toolName: 'Testimonial Generator', input, additionalInputs })
+  return apiFetch("/jobs/run_wait_result/p/f/tools/testimonial-generator", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "testimonial-generator",
+      toolName: "Testimonial Generator",
+      input,
+      additionalInputs,
+    }),
   });
 }
 
@@ -3233,9 +4059,16 @@ export async function runTestimonialGenerator({ userId, input, additionalInputs 
  * Twitter Thread Generator
  */
 export async function runTwitterThreadGenerator({ userId, input, additionalInputs }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/twitter-thread-generator', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'twitter-thread-generator', toolName: 'Twitter Thread Generator', input, additionalInputs })
+  return apiFetch("/jobs/run_wait_result/p/f/tools/twitter-thread-generator", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "twitter-thread-generator",
+      toolName: "Twitter Thread Generator",
+      input,
+      additionalInputs,
+    }),
   });
 }
 
@@ -3247,9 +4080,17 @@ export async function runTwitterThreadGenerator({ userId, input, additionalInput
  * Cart Recovery Ads
  */
 export async function runCartRecoveryAds({ userId, input, additionalInputs, accountId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/cart-recovery-ads', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'cart-recovery-ads', toolName: 'Cart Recovery Ads', input, additionalInputs, accountId })
+  return apiFetch("/jobs/run_wait_result/p/f/tools/cart-recovery-ads", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "cart-recovery-ads",
+      toolName: "Cart Recovery Ads",
+      input,
+      additionalInputs,
+      accountId,
+    }),
   });
 }
 
@@ -3257,9 +4098,17 @@ export async function runCartRecoveryAds({ userId, input, additionalInputs, acco
  * Cross Sell Ad Generator
  */
 export async function runCrossSellAdGenerator({ userId, input, additionalInputs, accountId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/cross-sell-ad-generator', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'cross-sell-ad-generator', toolName: 'Cross Sell Ad Generator', input, additionalInputs, accountId })
+  return apiFetch("/jobs/run_wait_result/p/f/tools/cross-sell-ad-generator", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "cross-sell-ad-generator",
+      toolName: "Cross Sell Ad Generator",
+      input,
+      additionalInputs,
+      accountId,
+    }),
   });
 }
 
@@ -3267,9 +4116,17 @@ export async function runCrossSellAdGenerator({ userId, input, additionalInputs,
  * Dynamic Product Ads
  */
 export async function runDynamicProductAds({ userId, input, additionalInputs, accountId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/dynamic-product-ads', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'dynamic-product-ads', toolName: 'Dynamic Product Ads', input, additionalInputs, accountId })
+  return apiFetch("/jobs/run_wait_result/p/f/tools/dynamic-product-ads", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "dynamic-product-ads",
+      toolName: "Dynamic Product Ads",
+      input,
+      additionalInputs,
+      accountId,
+    }),
   });
 }
 
@@ -3277,9 +4134,17 @@ export async function runDynamicProductAds({ userId, input, additionalInputs, ac
  * Ecommerce Ad Platform
  */
 export async function runEcommerceAdPlatform({ userId, input, additionalInputs, accountId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/ecommerce-ad-platform', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'ecommerce-ad-platform', toolName: 'Ecommerce Ad Platform', input, additionalInputs, accountId })
+  return apiFetch("/jobs/run_wait_result/p/f/tools/ecommerce-ad-platform", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "ecommerce-ad-platform",
+      toolName: "Ecommerce Ad Platform",
+      input,
+      additionalInputs,
+      accountId,
+    }),
   });
 }
 
@@ -3287,30 +4152,58 @@ export async function runEcommerceAdPlatform({ userId, input, additionalInputs, 
  * Inventory Based Ad Manager
  */
 export async function runInventoryBasedAdManager({ userId, input, additionalInputs, accountId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/inventory-based-ad-manager', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'inventory-based-ad-manager', toolName: 'Inventory Based Ad Manager', input, additionalInputs, accountId })
+  return apiFetch("/jobs/run_wait_result/p/f/tools/inventory-based-ad-manager", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "inventory-based-ad-manager",
+      toolName: "Inventory Based Ad Manager",
+      input,
+      additionalInputs,
+      accountId,
+    }),
   });
 }
-
 
 /**
  * Product Performance Tracker
  */
 export async function runProductPerformanceTracker({ userId, input, additionalInputs, accountId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/product-performance-tracker', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'product-performance-tracker', toolName: 'Product Performance Tracker', input, additionalInputs, accountId })
+  return apiFetch("/jobs/run_wait_result/p/f/tools/product-performance-tracker", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "product-performance-tracker",
+      toolName: "Product Performance Tracker",
+      input,
+      additionalInputs,
+      accountId,
+    }),
   });
 }
 
 /**
  * Product Recommendation Engine
  */
-export async function runProductRecommendationEngine({ userId, input, additionalInputs, accountId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/product-recommendation-engine', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'product-recommendation-engine', toolName: 'Product Recommendation Engine', input, additionalInputs, accountId })
+export async function runProductRecommendationEngine({
+  userId,
+  input,
+  additionalInputs,
+  accountId,
+}) {
+  return apiFetch("/jobs/run_wait_result/p/f/tools/product-recommendation-engine", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "product-recommendation-engine",
+      toolName: "Product Recommendation Engine",
+      input,
+      additionalInputs,
+      accountId,
+    }),
   });
 }
 
@@ -3318,9 +4211,17 @@ export async function runProductRecommendationEngine({ userId, input, additional
  * Seasonal Ecommerce Planner
  */
 export async function runSeasonalEcommercePlanner({ userId, input, additionalInputs, accountId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/seasonal-ecommerce-planner', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'seasonal-ecommerce-planner', toolName: 'Seasonal Ecommerce Planner', input, additionalInputs, accountId })
+  return apiFetch("/jobs/run_wait_result/p/f/tools/seasonal-ecommerce-planner", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "seasonal-ecommerce-planner",
+      toolName: "Seasonal Ecommerce Planner",
+      input,
+      additionalInputs,
+      accountId,
+    }),
   });
 }
 
@@ -3328,9 +4229,17 @@ export async function runSeasonalEcommercePlanner({ userId, input, additionalInp
  * Shopify Marketing Tools
  */
 export async function runShopifyMarketingTools({ userId, input, additionalInputs, accountId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/shopify-marketing-tools', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'shopify-marketing-tools', toolName: 'Shopify Marketing Tools', input, additionalInputs, accountId })
+  return apiFetch("/jobs/run_wait_result/p/f/tools/shopify-marketing-tools", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "shopify-marketing-tools",
+      toolName: "Shopify Marketing Tools",
+      input,
+      additionalInputs,
+      accountId,
+    }),
   });
 }
 
@@ -3338,9 +4247,17 @@ export async function runShopifyMarketingTools({ userId, input, additionalInputs
  * Ecommerce KPI Dashboard
  */
 export async function runEcommerceKpiDashboard({ userId, input, additionalInputs, accountId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/ecommerce-kpi-dashboard', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'ecommerce-kpi-dashboard', toolName: 'Ecommerce KPI Dashboard', input, additionalInputs, accountId })
+  return apiFetch("/jobs/run_wait_result/p/f/tools/ecommerce-kpi-dashboard", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "ecommerce-kpi-dashboard",
+      toolName: "Ecommerce KPI Dashboard",
+      input,
+      additionalInputs,
+      accountId,
+    }),
   });
 }
 
@@ -3348,61 +4265,132 @@ export async function runEcommerceKpiDashboard({ userId, input, additionalInputs
  * Conversion Rate Optimizer
  */
 export async function runConversionRateOptimizer({ userId, input, additionalInputs, accountId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/conversion-rate-optimizer', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'conversion-rate-optimizer', toolName: 'Conversion Rate Optimizer', input, additionalInputs, accountId })
+  return apiFetch("/jobs/run_wait_result/p/f/tools/conversion-rate-optimizer", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "conversion-rate-optimizer",
+      toolName: "Conversion Rate Optimizer",
+      input,
+      additionalInputs,
+      accountId,
+    }),
   });
 }
 
 /**
  * Customer Lifetime Value Calculator
  */
-export async function runCustomerLifetimeValueCalculator({ userId, input, additionalInputs, accountId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/customer-lifetime-value-calculator', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'customer-lifetime-value-calculator', toolName: 'Customer Lifetime Value Calculator', input, additionalInputs, accountId })
+export async function runCustomerLifetimeValueCalculator({
+  userId,
+  input,
+  additionalInputs,
+  accountId,
+}) {
+  return apiFetch("/jobs/run_wait_result/p/f/tools/customer-lifetime-value-calculator", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "customer-lifetime-value-calculator",
+      toolName: "Customer Lifetime Value Calculator",
+      input,
+      additionalInputs,
+      accountId,
+    }),
   });
 }
-
 
 /**
  * Marketing Efficiency Ratio Tracker
  */
-export async function runMarketingEfficiencyRatioTracker({ userId, input, additionalInputs, accountId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/marketing-efficiency-ratio-tracker', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'marketing-efficiency-ratio-tracker', toolName: 'Marketing Efficiency Ratio Tracker', input, additionalInputs, accountId })
+export async function runMarketingEfficiencyRatioTracker({
+  userId,
+  input,
+  additionalInputs,
+  accountId,
+}) {
+  return apiFetch("/jobs/run_wait_result/p/f/tools/marketing-efficiency-ratio-tracker", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "marketing-efficiency-ratio-tracker",
+      toolName: "Marketing Efficiency Ratio Tracker",
+      input,
+      additionalInputs,
+      accountId,
+    }),
   });
 }
-
 
 /**
  * Customer Acquisition Cost Optimizer
  */
-export async function runCustomerAcquisitionCostOptimizer({ userId, input, additionalInputs, accountId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/customer-acquisition-cost-optimizer', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'customer-acquisition-cost-optimizer', toolName: 'Customer Acquisition Cost Optimizer', input, additionalInputs, accountId })
+export async function runCustomerAcquisitionCostOptimizer({
+  userId,
+  input,
+  additionalInputs,
+  accountId,
+}) {
+  return apiFetch("/jobs/run_wait_result/p/f/tools/customer-acquisition-cost-optimizer", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "customer-acquisition-cost-optimizer",
+      toolName: "Customer Acquisition Cost Optimizer",
+      input,
+      additionalInputs,
+      accountId,
+    }),
   });
 }
 
 /**
  * Attribution Window Optimizer
  */
-export async function runAttributionWindowOptimizer({ userId, input, additionalInputs, accountId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/attribution-window-optimizer', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'attribution-window-optimizer', toolName: 'Attribution Window Optimizer', input, additionalInputs, accountId })
+export async function runAttributionWindowOptimizer({
+  userId,
+  input,
+  additionalInputs,
+  accountId,
+}) {
+  return apiFetch("/jobs/run_wait_result/p/f/tools/attribution-window-optimizer", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "attribution-window-optimizer",
+      toolName: "Attribution Window Optimizer",
+      input,
+      additionalInputs,
+      accountId,
+    }),
   });
 }
 
 /**
  * Ecommerce Reporting Automator
  */
-export async function runEcommerceReportingAutomator({ userId, input, additionalInputs, accountId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/ecommerce-reporting-automator', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'ecommerce-reporting-automator', toolName: 'Ecommerce Reporting Automator', input, additionalInputs, accountId })
+export async function runEcommerceReportingAutomator({
+  userId,
+  input,
+  additionalInputs,
+  accountId,
+}) {
+  return apiFetch("/jobs/run_wait_result/p/f/tools/ecommerce-reporting-automator", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "ecommerce-reporting-automator",
+      toolName: "Ecommerce Reporting Automator",
+      input,
+      additionalInputs,
+      accountId,
+    }),
   });
 }
 
@@ -3410,30 +4398,63 @@ export async function runEcommerceReportingAutomator({ userId, input, additional
  * Gross Margin Analyzer
  */
 export async function runGrossMarginAnalyzer({ userId, input, additionalInputs, accountId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/gross-margin-analyzer', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'gross-margin-analyzer', toolName: 'Gross Margin Analyzer', input, additionalInputs, accountId })
+  return apiFetch("/jobs/run_wait_result/p/f/tools/gross-margin-analyzer", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "gross-margin-analyzer",
+      toolName: "Gross Margin Analyzer",
+      input,
+      additionalInputs,
+      accountId,
+    }),
   });
 }
-
 
 /**
  * Post-Purchase Follow-Up Builder
  */
-export async function runPostPurchaseFollowUpBuilder({ userId, input, additionalInputs, accountId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/post-purchase-follow-up-builder', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'post-purchase-follow-up-builder', toolName: 'Post-Purchase Follow-Up Builder', input, additionalInputs, accountId })
+export async function runPostPurchaseFollowUpBuilder({
+  userId,
+  input,
+  additionalInputs,
+  accountId,
+}) {
+  return apiFetch("/jobs/run_wait_result/p/f/tools/post-purchase-follow-up-builder", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "post-purchase-follow-up-builder",
+      toolName: "Post-Purchase Follow-Up Builder",
+      input,
+      additionalInputs,
+      accountId,
+    }),
   });
 }
 
 /**
  * Customer Winback Flow Creator
  */
-export async function runCustomerWinbackFlowCreator({ userId, input, additionalInputs, accountId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/customer-winback-flow-creator', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'customer-winback-flow-creator', toolName: 'Customer Winback Flow Creator', input, additionalInputs, accountId })
+export async function runCustomerWinbackFlowCreator({
+  userId,
+  input,
+  additionalInputs,
+  accountId,
+}) {
+  return apiFetch("/jobs/run_wait_result/p/f/tools/customer-winback-flow-creator", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "customer-winback-flow-creator",
+      toolName: "Customer Winback Flow Creator",
+      input,
+      additionalInputs,
+      accountId,
+    }),
   });
 }
 
@@ -3441,19 +4462,40 @@ export async function runCustomerWinbackFlowCreator({ userId, input, additionalI
  * Loyalty VIP Rewards Designer
  */
 export async function runLoyaltyVipRewardsDesigner({ userId, input, additionalInputs, accountId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/loyalty-vip-rewards-designer', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'loyalty-vip-rewards-designer', toolName: 'Loyalty VIP Rewards Designer', input, additionalInputs, accountId })
+  return apiFetch("/jobs/run_wait_result/p/f/tools/loyalty-vip-rewards-designer", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "loyalty-vip-rewards-designer",
+      toolName: "Loyalty VIP Rewards Designer",
+      input,
+      additionalInputs,
+      accountId,
+    }),
   });
 }
 
 /**
  * Replenishment Reminder Engine
  */
-export async function runReplenishmentReminderEngine({ userId, input, additionalInputs, accountId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/replenishment-reminder-engine', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'replenishment-reminder-engine', toolName: 'Replenishment Reminder Engine', input, additionalInputs, accountId })
+export async function runReplenishmentReminderEngine({
+  userId,
+  input,
+  additionalInputs,
+  accountId,
+}) {
+  return apiFetch("/jobs/run_wait_result/p/f/tools/replenishment-reminder-engine", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "replenishment-reminder-engine",
+      toolName: "Replenishment Reminder Engine",
+      input,
+      additionalInputs,
+      accountId,
+    }),
   });
 }
 
@@ -3461,70 +4503,150 @@ export async function runReplenishmentReminderEngine({ userId, input, additional
  * Milestone Email Automator
  */
 export async function runMilestoneEmailAutomator({ userId, input, additionalInputs, accountId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/milestone-email-automator', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'milestone-email-automator', toolName: 'Milestone Email Automator', input, additionalInputs, accountId })
+  return apiFetch("/jobs/run_wait_result/p/f/tools/milestone-email-automator", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "milestone-email-automator",
+      toolName: "Milestone Email Automator",
+      input,
+      additionalInputs,
+      accountId,
+    }),
   });
 }
 
 /**
  * Cross-Sell Upsell Flow Builder
  */
-export async function runCrossSellUpsellFlowBuilder({ userId, input, additionalInputs, accountId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/cross-sell-upsell-flow-builder', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'cross-sell-upsell-flow-builder', toolName: 'Cross-Sell Upsell Flow Builder', input, additionalInputs, accountId })
+export async function runCrossSellUpsellFlowBuilder({
+  userId,
+  input,
+  additionalInputs,
+  accountId,
+}) {
+  return apiFetch("/jobs/run_wait_result/p/f/tools/cross-sell-upsell-flow-builder", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "cross-sell-upsell-flow-builder",
+      toolName: "Cross-Sell Upsell Flow Builder",
+      input,
+      additionalInputs,
+      accountId,
+    }),
   });
 }
 
 /**
  * Ecommerce Workflow Automator
  */
-export async function runEcommerceWorkflowAutomator({ userId, input, additionalInputs, accountId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/ecommerce-workflow-automator', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'ecommerce-workflow-automator', toolName: 'Ecommerce Workflow Automator', input, additionalInputs, accountId })
+export async function runEcommerceWorkflowAutomator({
+  userId,
+  input,
+  additionalInputs,
+  accountId,
+}) {
+  return apiFetch("/jobs/run_wait_result/p/f/tools/ecommerce-workflow-automator", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "ecommerce-workflow-automator",
+      toolName: "Ecommerce Workflow Automator",
+      input,
+      additionalInputs,
+      accountId,
+    }),
   });
 }
 
 /**
  * Omnichannel Campaign Orchestrator
  */
-export async function runOmnichannelCampaignOrchestrator({ userId, input, additionalInputs, accountId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/omnichannel-campaign-orchestrator', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'omnichannel-campaign-orchestrator', toolName: 'Omnichannel Campaign Orchestrator', input, additionalInputs, accountId })
+export async function runOmnichannelCampaignOrchestrator({
+  userId,
+  input,
+  additionalInputs,
+  accountId,
+}) {
+  return apiFetch("/jobs/run_wait_result/p/f/tools/omnichannel-campaign-orchestrator", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "omnichannel-campaign-orchestrator",
+      toolName: "Omnichannel Campaign Orchestrator",
+      input,
+      additionalInputs,
+      accountId,
+    }),
   });
 }
 
 /**
  * Advantage Plus Campaign Builder
  */
-export async function runAdvantagePlusCampaignBuilder({ userId, input, additionalInputs, accountId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/advantage-plus-campaign-builder', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'advantage-plus-campaign-builder', toolName: 'Advantage Plus Campaign Builder', input, additionalInputs, accountId })
+export async function runAdvantagePlusCampaignBuilder({
+  userId,
+  input,
+  additionalInputs,
+  accountId,
+}) {
+  return apiFetch("/jobs/run_wait_result/p/f/tools/advantage-plus-campaign-builder", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "advantage-plus-campaign-builder",
+      toolName: "Advantage Plus Campaign Builder",
+      input,
+      additionalInputs,
+      accountId,
+    }),
   });
 }
-
 
 /**
  * TikTok Ecommerce Ad Creator
  */
 export async function runTiktokEcommerceAdCreator({ userId, input, additionalInputs, accountId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/tiktok-ecommerce-ad-creator', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'tiktok-ecommerce-ad-creator', toolName: 'TikTok Ecommerce Ad Creator', input, additionalInputs, accountId })
+  return apiFetch("/jobs/run_wait_result/p/f/tools/tiktok-ecommerce-ad-creator", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "tiktok-ecommerce-ad-creator",
+      toolName: "TikTok Ecommerce Ad Creator",
+      input,
+      additionalInputs,
+      accountId,
+    }),
   });
 }
 
 /**
  * Performance Max Campaign Manager
  */
-export async function runPerformanceMaxCampaignManager({ userId, input, additionalInputs, accountId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/performance-max-campaign-manager', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'performance-max-campaign-manager', toolName: 'Performance Max Campaign Manager', input, additionalInputs, accountId })
+export async function runPerformanceMaxCampaignManager({
+  userId,
+  input,
+  additionalInputs,
+  accountId,
+}) {
+  return apiFetch("/jobs/run_wait_result/p/f/tools/performance-max-campaign-manager", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "performance-max-campaign-manager",
+      toolName: "Performance Max Campaign Manager",
+      input,
+      additionalInputs,
+      accountId,
+    }),
   });
 }
 
@@ -3532,9 +4654,17 @@ export async function runPerformanceMaxCampaignManager({ userId, input, addition
  * Ad Budget Allocator
  */
 export async function runAdBudgetAllocator({ userId, input, additionalInputs, accountId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/ad-budget-allocator', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'ad-budget-allocator', toolName: 'Ad Budget Allocator', input, additionalInputs, accountId })
+  return apiFetch("/jobs/run_wait_result/p/f/tools/ad-budget-allocator", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "ad-budget-allocator",
+      toolName: "Ad Budget Allocator",
+      input,
+      additionalInputs,
+      accountId,
+    }),
   });
 }
 
@@ -3542,9 +4672,17 @@ export async function runAdBudgetAllocator({ userId, input, additionalInputs, ac
  * Retargeting Funnel Builder
  */
 export async function runRetargetingFunnelBuilder({ userId, input, additionalInputs, accountId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/retargeting-funnel-builder', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'retargeting-funnel-builder', toolName: 'Retargeting Funnel Builder', input, additionalInputs, accountId })
+  return apiFetch("/jobs/run_wait_result/p/f/tools/retargeting-funnel-builder", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "retargeting-funnel-builder",
+      toolName: "Retargeting Funnel Builder",
+      input,
+      additionalInputs,
+      accountId,
+    }),
   });
 }
 
@@ -3552,71 +4690,145 @@ export async function runRetargetingFunnelBuilder({ userId, input, additionalInp
  * Social Commerce Ad Launcher
  */
 export async function runSocialCommerceAdLauncher({ userId, input, additionalInputs, accountId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/social-commerce-ad-launcher', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'social-commerce-ad-launcher', toolName: 'Social Commerce Ad Launcher', input, additionalInputs, accountId })
+  return apiFetch("/jobs/run_wait_result/p/f/tools/social-commerce-ad-launcher", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "social-commerce-ad-launcher",
+      toolName: "Social Commerce Ad Launcher",
+      input,
+      additionalInputs,
+      accountId,
+    }),
   });
 }
-
 
 /**
  * Creative Fatigue Detector
  */
 export async function runCreativeFatigueDetector({ userId, input, additionalInputs, accountId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/creative-fatigue-detector', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'creative-fatigue-detector', toolName: 'Creative Fatigue Detector', input, additionalInputs, accountId })
+  return apiFetch("/jobs/run_wait_result/p/f/tools/creative-fatigue-detector", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "creative-fatigue-detector",
+      toolName: "Creative Fatigue Detector",
+      input,
+      additionalInputs,
+      accountId,
+    }),
   });
 }
-
 
 /**
  * Shopify Email Flow Builder
  */
 export async function runShopifyEmailFlowBuilder({ userId, input, additionalInputs, accountId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/shopify-email-flow-builder', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'shopify-email-flow-builder', toolName: 'Shopify Email Flow Builder', input, additionalInputs, accountId })
+  return apiFetch("/jobs/run_wait_result/p/f/tools/shopify-email-flow-builder", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "shopify-email-flow-builder",
+      toolName: "Shopify Email Flow Builder",
+      input,
+      additionalInputs,
+      accountId,
+    }),
   });
 }
 
 /**
  * Shopify Theme Conversion Optimizer
  */
-export async function runShopifyThemeConversionOptimizer({ userId, input, additionalInputs, accountId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/shopify-theme-conversion-optimizer', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'shopify-theme-conversion-optimizer', toolName: 'Shopify Theme Conversion Optimizer', input, additionalInputs, accountId })
+export async function runShopifyThemeConversionOptimizer({
+  userId,
+  input,
+  additionalInputs,
+  accountId,
+}) {
+  return apiFetch("/jobs/run_wait_result/p/f/tools/shopify-theme-conversion-optimizer", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "shopify-theme-conversion-optimizer",
+      toolName: "Shopify Theme Conversion Optimizer",
+      input,
+      additionalInputs,
+      accountId,
+    }),
   });
 }
 
 /**
  * Shopify Product Page Enhancer
  */
-export async function runShopifyProductPageEnhancer({ userId, input, additionalInputs, accountId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/shopify-product-page-enhancer', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'shopify-product-page-enhancer', toolName: 'Shopify Product Page Enhancer', input, additionalInputs, accountId })
+export async function runShopifyProductPageEnhancer({
+  userId,
+  input,
+  additionalInputs,
+  accountId,
+}) {
+  return apiFetch("/jobs/run_wait_result/p/f/tools/shopify-product-page-enhancer", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "shopify-product-page-enhancer",
+      toolName: "Shopify Product Page Enhancer",
+      input,
+      additionalInputs,
+      accountId,
+    }),
   });
 }
 
 /**
  * Shopify Upsell Strategy Generator
  */
-export async function runShopifyUpsellStrategyGenerator({ userId, input, additionalInputs, accountId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/shopify-upsell-strategy-generator', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'shopify-upsell-strategy-generator', toolName: 'Shopify Upsell Strategy Generator', input, additionalInputs, accountId })
+export async function runShopifyUpsellStrategyGenerator({
+  userId,
+  input,
+  additionalInputs,
+  accountId,
+}) {
+  return apiFetch("/jobs/run_wait_result/p/f/tools/shopify-upsell-strategy-generator", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "shopify-upsell-strategy-generator",
+      toolName: "Shopify Upsell Strategy Generator",
+      input,
+      additionalInputs,
+      accountId,
+    }),
   });
 }
 
 /**
  * Shopify Trust Badge Optimizer
  */
-export async function runShopifyTrustBadgeOptimizer({ userId, input, additionalInputs, accountId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/shopify-trust-badge-optimizer', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'shopify-trust-badge-optimizer', toolName: 'Shopify Trust Badge Optimizer', input, additionalInputs, accountId })
+export async function runShopifyTrustBadgeOptimizer({
+  userId,
+  input,
+  additionalInputs,
+  accountId,
+}) {
+  return apiFetch("/jobs/run_wait_result/p/f/tools/shopify-trust-badge-optimizer", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "shopify-trust-badge-optimizer",
+      toolName: "Shopify Trust Badge Optimizer",
+      input,
+      additionalInputs,
+      accountId,
+    }),
   });
 }
 
@@ -3624,52 +4836,99 @@ export async function runShopifyTrustBadgeOptimizer({ userId, input, additionalI
  * Shopify App Stack Advisor
  */
 export async function runShopifyAppStackAdvisor({ userId, input, additionalInputs, accountId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/shopify-app-stack-advisor', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'shopify-app-stack-advisor', toolName: 'Shopify App Stack Advisor', input, additionalInputs, accountId })
+  return apiFetch("/jobs/run_wait_result/p/f/tools/shopify-app-stack-advisor", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "shopify-app-stack-advisor",
+      toolName: "Shopify App Stack Advisor",
+      input,
+      additionalInputs,
+      accountId,
+    }),
   });
 }
-
-
 
 /**
  * Ecommerce Chatbot Builder
  */
 export async function runEcommerceChatbotBuilder({ userId, input, additionalInputs, accountId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/ecommerce-chatbot-builder', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'ecommerce-chatbot-builder', toolName: 'Ecommerce Chatbot Builder', input, additionalInputs, accountId })
+  return apiFetch("/jobs/run_wait_result/p/f/tools/ecommerce-chatbot-builder", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "ecommerce-chatbot-builder",
+      toolName: "Ecommerce Chatbot Builder",
+      input,
+      additionalInputs,
+      accountId,
+    }),
   });
 }
 
 /**
  * Ecommerce Growth Roadmap Generator
  */
-export async function runEcommerceGrowthRoadmapGenerator({ userId, input, additionalInputs, accountId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/ecommerce-growth-roadmap-generator', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'ecommerce-growth-roadmap-generator', toolName: 'Ecommerce Growth Roadmap Generator', input, additionalInputs, accountId })
+export async function runEcommerceGrowthRoadmapGenerator({
+  userId,
+  input,
+  additionalInputs,
+  accountId,
+}) {
+  return apiFetch("/jobs/run_wait_result/p/f/tools/ecommerce-growth-roadmap-generator", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "ecommerce-growth-roadmap-generator",
+      toolName: "Ecommerce Growth Roadmap Generator",
+      input,
+      additionalInputs,
+      accountId,
+    }),
   });
 }
-
 
 /**
  * Ecommerce A/B Test Planner
  */
 export async function runEcommerceAbTestPlanner({ userId, input, additionalInputs, accountId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/ecommerce-ab-test-planner', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'ecommerce-ab-test-planner', toolName: 'Ecommerce A/B Test Planner', input, additionalInputs, accountId })
+  return apiFetch("/jobs/run_wait_result/p/f/tools/ecommerce-ab-test-planner", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "ecommerce-ab-test-planner",
+      toolName: "Ecommerce A/B Test Planner",
+      input,
+      additionalInputs,
+      accountId,
+    }),
   });
 }
 
 /**
  * Voice Search Product Optimizer
  */
-export async function runVoiceSearchProductOptimizer({ userId, input, additionalInputs, accountId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/voice-search-product-optimizer', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'voice-search-product-optimizer', toolName: 'Voice Search Product Optimizer', input, additionalInputs, accountId })
+export async function runVoiceSearchProductOptimizer({
+  userId,
+  input,
+  additionalInputs,
+  accountId,
+}) {
+  return apiFetch("/jobs/run_wait_result/p/f/tools/voice-search-product-optimizer", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "voice-search-product-optimizer",
+      toolName: "Voice Search Product Optimizer",
+      input,
+      additionalInputs,
+      accountId,
+    }),
   });
 }
 
@@ -3681,9 +4940,17 @@ export async function runVoiceSearchProductOptimizer({ userId, input, additional
  * Ad Audit Tool
  */
 export async function runAdAuditTool({ userId, input, additionalInputs, accountId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/ad-audit-tool', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'ad-audit-tool', toolName: 'Ad Audit Tool', input, additionalInputs, accountId })
+  return apiFetch("/jobs/run_wait_result/p/f/tools/ad-audit-tool", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "ad-audit-tool",
+      toolName: "Ad Audit Tool",
+      input,
+      additionalInputs,
+      accountId,
+    }),
   });
 }
 
@@ -3691,9 +4958,17 @@ export async function runAdAuditTool({ userId, input, additionalInputs, accountI
  * Ad Group Audit
  */
 export async function runAdGroupAudit({ userId, input, additionalInputs, accountId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/ad-group-audit', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'ad-group-audit', toolName: 'Ad Group Audit', input, additionalInputs, accountId })
+  return apiFetch("/jobs/run_wait_result/p/f/tools/ad-group-audit", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "ad-group-audit",
+      toolName: "Ad Group Audit",
+      input,
+      additionalInputs,
+      accountId,
+    }),
   });
 }
 
@@ -3701,9 +4976,17 @@ export async function runAdGroupAudit({ userId, input, additionalInputs, account
  * Ai Campaign Manager
  */
 export async function runAiCampaignManager({ userId, input, additionalInputs, accountId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/ai-campaign-manager', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'ai-campaign-manager', toolName: 'Ai Campaign Manager', input, additionalInputs, accountId })
+  return apiFetch("/jobs/run_wait_result/p/f/tools/ai-campaign-manager", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "ai-campaign-manager",
+      toolName: "Ai Campaign Manager",
+      input,
+      additionalInputs,
+      accountId,
+    }),
   });
 }
 
@@ -3711,9 +4994,17 @@ export async function runAiCampaignManager({ userId, input, additionalInputs, ac
  * Audience Optimization Tool
  */
 export async function runAudienceOptimizationTool({ userId, input, additionalInputs, accountId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/audience-optimization-tool', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'audience-optimization-tool', toolName: 'Audience Optimization Tool', input, additionalInputs, accountId })
+  return apiFetch("/jobs/run_wait_result/p/f/tools/audience-optimization-tool", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "audience-optimization-tool",
+      toolName: "Audience Optimization Tool",
+      input,
+      additionalInputs,
+      accountId,
+    }),
   });
 }
 
@@ -3721,9 +5012,17 @@ export async function runAudienceOptimizationTool({ userId, input, additionalInp
  * Auto Scaling Budget Tool
  */
 export async function runAutoScalingBudgetTool({ userId, input, additionalInputs, accountId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/auto-scaling-budget-tool', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'auto-scaling-budget-tool', toolName: 'Auto Scaling Budget Tool', input, additionalInputs, accountId })
+  return apiFetch("/jobs/run_wait_result/p/f/tools/auto-scaling-budget-tool", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "auto-scaling-budget-tool",
+      toolName: "Auto Scaling Budget Tool",
+      input,
+      additionalInputs,
+      accountId,
+    }),
   });
 }
 
@@ -3731,9 +5030,17 @@ export async function runAutoScalingBudgetTool({ userId, input, additionalInputs
  * Bid Optimization Engine
  */
 export async function runBidOptimizationEngine({ userId, input, additionalInputs, accountId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/bid-optimization-engine', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'bid-optimization-engine', toolName: 'Bid Optimization Engine', input, additionalInputs, accountId })
+  return apiFetch("/jobs/run_wait_result/p/f/tools/bid-optimization-engine", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "bid-optimization-engine",
+      toolName: "Bid Optimization Engine",
+      input,
+      additionalInputs,
+      accountId,
+    }),
   });
 }
 
@@ -3741,9 +5048,17 @@ export async function runBidOptimizationEngine({ userId, input, additionalInputs
  * Bid Suggestions Tool
  */
 export async function runBidSuggestionsTool({ userId, input, additionalInputs, accountId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/bid-suggestions-tool', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'bid-suggestions-tool', toolName: 'Bid Suggestions Tool', input, additionalInputs, accountId })
+  return apiFetch("/jobs/run_wait_result/p/f/tools/bid-suggestions-tool", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "bid-suggestions-tool",
+      toolName: "Bid Suggestions Tool",
+      input,
+      additionalInputs,
+      accountId,
+    }),
   });
 }
 
@@ -3751,9 +5066,17 @@ export async function runBidSuggestionsTool({ userId, input, additionalInputs, a
  * Budget Manager
  */
 export async function runBudgetManager({ userId, input, additionalInputs, accountId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/budget-manager', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'budget-manager', toolName: 'Budget Manager', input, additionalInputs, accountId })
+  return apiFetch("/jobs/run_wait_result/p/f/tools/budget-manager", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "budget-manager",
+      toolName: "Budget Manager",
+      input,
+      additionalInputs,
+      accountId,
+    }),
   });
 }
 
@@ -3761,9 +5084,17 @@ export async function runBudgetManager({ userId, input, additionalInputs, accoun
  * Budget Performance Analyzer
  */
 export async function runBudgetPerformanceAnalyzer({ userId, input, additionalInputs, accountId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/budget-performance-analyzer', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'budget-performance-analyzer', toolName: 'Budget Performance Analyzer', input, additionalInputs, accountId })
+  return apiFetch("/jobs/run_wait_result/p/f/tools/budget-performance-analyzer", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "budget-performance-analyzer",
+      toolName: "Budget Performance Analyzer",
+      input,
+      additionalInputs,
+      accountId,
+    }),
   });
 }
 
@@ -3771,9 +5102,17 @@ export async function runBudgetPerformanceAnalyzer({ userId, input, additionalIn
  * Campaign Ab Test Manager
  */
 export async function runCampaignAbTestManager({ userId, input, additionalInputs, accountId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/campaign-ab-test-manager', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'campaign-ab-test-manager', toolName: 'Campaign Ab Test Manager', input, additionalInputs, accountId })
+  return apiFetch("/jobs/run_wait_result/p/f/tools/campaign-ab-test-manager", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "campaign-ab-test-manager",
+      toolName: "Campaign Ab Test Manager",
+      input,
+      additionalInputs,
+      accountId,
+    }),
   });
 }
 
@@ -3781,9 +5120,17 @@ export async function runCampaignAbTestManager({ userId, input, additionalInputs
  * Campaign Audit Tool
  */
 export async function runCampaignAuditTool({ userId, input, additionalInputs, accountId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/campaign-audit-tool', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'campaign-audit-tool', toolName: 'Campaign Audit Tool', input, additionalInputs, accountId })
+  return apiFetch("/jobs/run_wait_result/p/f/tools/campaign-audit-tool", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "campaign-audit-tool",
+      toolName: "Campaign Audit Tool",
+      input,
+      additionalInputs,
+      accountId,
+    }),
   });
 }
 
@@ -3791,9 +5138,17 @@ export async function runCampaignAuditTool({ userId, input, additionalInputs, ac
  * Campaign Auto Optimizer
  */
 export async function runCampaignAutoOptimizer({ userId, input, additionalInputs, accountId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/campaign-auto-optimizer', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'campaign-auto-optimizer', toolName: 'Campaign Auto Optimizer', input, additionalInputs, accountId })
+  return apiFetch("/jobs/run_wait_result/p/f/tools/campaign-auto-optimizer", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "campaign-auto-optimizer",
+      toolName: "Campaign Auto Optimizer",
+      input,
+      additionalInputs,
+      accountId,
+    }),
   });
 }
 
@@ -3801,9 +5156,17 @@ export async function runCampaignAutoOptimizer({ userId, input, additionalInputs
  * Campaign Budget Allocator
  */
 export async function runCampaignBudgetAllocator({ userId, input, additionalInputs, accountId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/campaign-budget-allocator', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'campaign-budget-allocator', toolName: 'Campaign Budget Allocator', input, additionalInputs, accountId })
+  return apiFetch("/jobs/run_wait_result/p/f/tools/campaign-budget-allocator", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "campaign-budget-allocator",
+      toolName: "Campaign Budget Allocator",
+      input,
+      additionalInputs,
+      accountId,
+    }),
   });
 }
 
@@ -3811,9 +5174,17 @@ export async function runCampaignBudgetAllocator({ userId, input, additionalInpu
  * Campaign Cloner Pro
  */
 export async function runCampaignClonerPro({ userId, input, additionalInputs, accountId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/campaign-cloner-pro', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'campaign-cloner-pro', toolName: 'Campaign Cloner Pro', input, additionalInputs, accountId })
+  return apiFetch("/jobs/run_wait_result/p/f/tools/campaign-cloner-pro", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "campaign-cloner-pro",
+      toolName: "Campaign Cloner Pro",
+      input,
+      additionalInputs,
+      accountId,
+    }),
   });
 }
 
@@ -3821,9 +5192,17 @@ export async function runCampaignClonerPro({ userId, input, additionalInputs, ac
  * Campaign Compliance Checker
  */
 export async function runCampaignComplianceChecker({ userId, input, additionalInputs, accountId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/campaign-compliance-checker', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'campaign-compliance-checker', toolName: 'Campaign Compliance Checker', input, additionalInputs, accountId })
+  return apiFetch("/jobs/run_wait_result/p/f/tools/campaign-compliance-checker", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "campaign-compliance-checker",
+      toolName: "Campaign Compliance Checker",
+      input,
+      additionalInputs,
+      accountId,
+    }),
   });
 }
 
@@ -3831,29 +5210,63 @@ export async function runCampaignComplianceChecker({ userId, input, additionalIn
  * Campaign Health Monitor
  */
 export async function runCampaignHealthMonitor({ userId, input, additionalInputs, accountId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/campaign-health-monitor', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'campaign-health-monitor', toolName: 'Campaign Health Monitor', input, additionalInputs, accountId })
+  return apiFetch("/jobs/run_wait_result/p/f/tools/campaign-health-monitor", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "campaign-health-monitor",
+      toolName: "Campaign Health Monitor",
+      input,
+      additionalInputs,
+      accountId,
+    }),
   });
 }
 
 /**
  * Campaign Optimization Engine
  */
-export async function runCampaignOptimizationEngine({ userId, input, additionalInputs, accountId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/campaign-optimization-engine', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'campaign-optimization-engine', toolName: 'Campaign Optimization Engine', input, additionalInputs, accountId })
+export async function runCampaignOptimizationEngine({
+  userId,
+  input,
+  additionalInputs,
+  accountId,
+}) {
+  return apiFetch("/jobs/run_wait_result/p/f/tools/campaign-optimization-engine", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "campaign-optimization-engine",
+      toolName: "Campaign Optimization Engine",
+      input,
+      additionalInputs,
+      accountId,
+    }),
   });
 }
 
 /**
  * Campaign Performance Predictor
  */
-export async function runCampaignPerformancePredictor({ userId, input, additionalInputs, accountId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/campaign-performance-predictor', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'campaign-performance-predictor', toolName: 'Campaign Performance Predictor', input, additionalInputs, accountId })
+export async function runCampaignPerformancePredictor({
+  userId,
+  input,
+  additionalInputs,
+  accountId,
+}) {
+  return apiFetch("/jobs/run_wait_result/p/f/tools/campaign-performance-predictor", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "campaign-performance-predictor",
+      toolName: "Campaign Performance Predictor",
+      input,
+      additionalInputs,
+      accountId,
+    }),
   });
 }
 
@@ -3861,9 +5274,17 @@ export async function runCampaignPerformancePredictor({ userId, input, additiona
  * Campaign Scaling Assistant
  */
 export async function runCampaignScalingAssistant({ userId, input, additionalInputs, accountId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/campaign-scaling-assistant', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'campaign-scaling-assistant', toolName: 'Campaign Scaling Assistant', input, additionalInputs, accountId })
+  return apiFetch("/jobs/run_wait_result/p/f/tools/campaign-scaling-assistant", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "campaign-scaling-assistant",
+      toolName: "Campaign Scaling Assistant",
+      input,
+      additionalInputs,
+      accountId,
+    }),
   });
 }
 
@@ -3871,9 +5292,17 @@ export async function runCampaignScalingAssistant({ userId, input, additionalInp
  * Campaign Template Library
  */
 export async function runCampaignTemplateLibrary({ userId, input, additionalInputs, accountId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/campaign-template-library', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'campaign-template-library', toolName: 'Campaign Template Library', input, additionalInputs, accountId })
+  return apiFetch("/jobs/run_wait_result/p/f/tools/campaign-template-library", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "campaign-template-library",
+      toolName: "Campaign Template Library",
+      input,
+      additionalInputs,
+      accountId,
+    }),
   });
 }
 
@@ -3881,9 +5310,17 @@ export async function runCampaignTemplateLibrary({ userId, input, additionalInpu
  * Campaign Tools Suite
  */
 export async function runCampaignToolsSuite({ userId, input, additionalInputs, accountId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/campaign-tools-suite', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'campaign-tools-suite', toolName: 'Campaign Tools Suite', input, additionalInputs, accountId })
+  return apiFetch("/jobs/run_wait_result/p/f/tools/campaign-tools-suite", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "campaign-tools-suite",
+      toolName: "Campaign Tools Suite",
+      input,
+      additionalInputs,
+      accountId,
+    }),
   });
 }
 
@@ -3891,9 +5328,17 @@ export async function runCampaignToolsSuite({ userId, input, additionalInputs, a
  * Ctr Predictor
  */
 export async function runCtrPredictor({ userId, input, additionalInputs, accountId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/ctr-predictor', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'ctr-predictor', toolName: 'Ctr Predictor', input, additionalInputs, accountId })
+  return apiFetch("/jobs/run_wait_result/p/f/tools/ctr-predictor", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "ctr-predictor",
+      toolName: "Ctr Predictor",
+      input,
+      additionalInputs,
+      accountId,
+    }),
   });
 }
 
@@ -3901,9 +5346,17 @@ export async function runCtrPredictor({ userId, input, additionalInputs, account
  * Dayparting Optimizer
  */
 export async function runDaypartingOptimizer({ userId, input, additionalInputs, accountId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/dayparting-optimizer', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'dayparting-optimizer', toolName: 'Dayparting Optimizer', input, additionalInputs, accountId })
+  return apiFetch("/jobs/run_wait_result/p/f/tools/dayparting-optimizer", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "dayparting-optimizer",
+      toolName: "Dayparting Optimizer",
+      input,
+      additionalInputs,
+      accountId,
+    }),
   });
 }
 
@@ -3911,19 +5364,40 @@ export async function runDaypartingOptimizer({ userId, input, additionalInputs, 
  * Device Optimization
  */
 export async function runDeviceOptimization({ userId, input, additionalInputs, accountId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/device-optimization', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'device-optimization', toolName: 'Device Optimization', input, additionalInputs, accountId })
+  return apiFetch("/jobs/run_wait_result/p/f/tools/device-optimization", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "device-optimization",
+      toolName: "Device Optimization",
+      input,
+      additionalInputs,
+      accountId,
+    }),
   });
 }
 
 /**
  * Facebook Ads Performance Grader
  */
-export async function runFacebookAdsPerformanceGrader({ userId, input, additionalInputs, accountId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/facebook-ads-performance-grader', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'facebook-ads-performance-grader', toolName: 'Facebook Ads Performance Grader', input, additionalInputs, accountId })
+export async function runFacebookAdsPerformanceGrader({
+  userId,
+  input,
+  additionalInputs,
+  accountId,
+}) {
+  return apiFetch("/jobs/run_wait_result/p/f/tools/facebook-ads-performance-grader", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "facebook-ads-performance-grader",
+      toolName: "Facebook Ads Performance Grader",
+      input,
+      additionalInputs,
+      accountId,
+    }),
   });
 }
 
@@ -3931,9 +5405,17 @@ export async function runFacebookAdsPerformanceGrader({ userId, input, additiona
  * Geo Targeting Optimizer
  */
 export async function runGeoTargetingOptimizer({ userId, input, additionalInputs, accountId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/geo-targeting-optimizer', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'geo-targeting-optimizer', toolName: 'Geo Targeting Optimizer', input, additionalInputs, accountId })
+  return apiFetch("/jobs/run_wait_result/p/f/tools/geo-targeting-optimizer", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "geo-targeting-optimizer",
+      toolName: "Geo Targeting Optimizer",
+      input,
+      additionalInputs,
+      accountId,
+    }),
   });
 }
 
@@ -3941,19 +5423,40 @@ export async function runGeoTargetingOptimizer({ userId, input, additionalInputs
  * Google Ads Budget Calculator
  */
 export async function runGoogleAdsBudgetCalculator({ userId, input, additionalInputs, accountId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/google-ads-budget-calculator', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'google-ads-budget-calculator', toolName: 'Google Ads Budget Calculator', input, additionalInputs, accountId })
+  return apiFetch("/jobs/run_wait_result/p/f/tools/google-ads-budget-calculator", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "google-ads-budget-calculator",
+      toolName: "Google Ads Budget Calculator",
+      input,
+      additionalInputs,
+      accountId,
+    }),
   });
 }
 
 /**
  * Google Ads Performance Grader
  */
-export async function runGoogleAdsPerformanceGrader({ userId, input, additionalInputs, accountId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/google-ads-performance-grader', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'google-ads-performance-grader', toolName: 'Google Ads Performance Grader', input, additionalInputs, accountId })
+export async function runGoogleAdsPerformanceGrader({
+  userId,
+  input,
+  additionalInputs,
+  accountId,
+}) {
+  return apiFetch("/jobs/run_wait_result/p/f/tools/google-ads-performance-grader", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "google-ads-performance-grader",
+      toolName: "Google Ads Performance Grader",
+      input,
+      additionalInputs,
+      accountId,
+    }),
   });
 }
 
@@ -3961,9 +5464,17 @@ export async function runGoogleAdsPerformanceGrader({ userId, input, additionalI
  * Google Analytics Grader
  */
 export async function runGoogleAnalyticsGrader({ userId, input, additionalInputs, accountId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/google-analytics-grader', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'google-analytics-grader', toolName: 'Google Analytics Grader', input, additionalInputs, accountId })
+  return apiFetch("/jobs/run_wait_result/p/f/tools/google-analytics-grader", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "google-analytics-grader",
+      toolName: "Google Analytics Grader",
+      input,
+      additionalInputs,
+      accountId,
+    }),
   });
 }
 
@@ -3971,9 +5482,17 @@ export async function runGoogleAnalyticsGrader({ userId, input, additionalInputs
  * Keyword Audit Tool
  */
 export async function runKeywordAuditTool({ userId, input, additionalInputs, accountId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/keyword-audit-tool', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'keyword-audit-tool', toolName: 'Keyword Audit Tool', input, additionalInputs, accountId })
+  return apiFetch("/jobs/run_wait_result/p/f/tools/keyword-audit-tool", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "keyword-audit-tool",
+      toolName: "Keyword Audit Tool",
+      input,
+      additionalInputs,
+      accountId,
+    }),
   });
 }
 
@@ -3981,9 +5500,17 @@ export async function runKeywordAuditTool({ userId, input, additionalInputs, acc
  * Landing Page Audit
  */
 export async function runLandingPageAudit({ userId, input, additionalInputs, accountId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/landing-page-audit', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'landing-page-audit', toolName: 'Landing Page Audit', input, additionalInputs, accountId })
+  return apiFetch("/jobs/run_wait_result/p/f/tools/landing-page-audit", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "landing-page-audit",
+      toolName: "Landing Page Audit",
+      input,
+      additionalInputs,
+      accountId,
+    }),
   });
 }
 
@@ -3991,9 +5518,17 @@ export async function runLandingPageAudit({ userId, input, additionalInputs, acc
  * Marketing Budget Planner
  */
 export async function runMarketingBudgetPlanner({ userId, input, additionalInputs, accountId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/marketing-budget-planner', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'marketing-budget-planner', toolName: 'Marketing Budget Planner', input, additionalInputs, accountId })
+  return apiFetch("/jobs/run_wait_result/p/f/tools/marketing-budget-planner", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "marketing-budget-planner",
+      toolName: "Marketing Budget Planner",
+      input,
+      additionalInputs,
+      accountId,
+    }),
   });
 }
 
@@ -4001,9 +5536,17 @@ export async function runMarketingBudgetPlanner({ userId, input, additionalInput
  * Microsoft Ads Grader
  */
 export async function runMicrosoftAdsGrader({ userId, input, additionalInputs, accountId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/microsoft-ads-grader', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'microsoft-ads-grader', toolName: 'Microsoft Ads Grader', input, additionalInputs, accountId })
+  return apiFetch("/jobs/run_wait_result/p/f/tools/microsoft-ads-grader", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "microsoft-ads-grader",
+      toolName: "Microsoft Ads Grader",
+      input,
+      additionalInputs,
+      accountId,
+    }),
   });
 }
 
@@ -4011,9 +5554,17 @@ export async function runMicrosoftAdsGrader({ userId, input, additionalInputs, a
  * Multi Platform Campaign Hub
  */
 export async function runMultiPlatformCampaignHub({ userId, input, additionalInputs, accountId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/multi-platform-campaign-hub', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'multi-platform-campaign-hub', toolName: 'Multi Platform Campaign Hub', input, additionalInputs, accountId })
+  return apiFetch("/jobs/run_wait_result/p/f/tools/multi-platform-campaign-hub", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "multi-platform-campaign-hub",
+      toolName: "Multi Platform Campaign Hub",
+      input,
+      additionalInputs,
+      accountId,
+    }),
   });
 }
 
@@ -4021,9 +5572,17 @@ export async function runMultiPlatformCampaignHub({ userId, input, additionalInp
  * Negative Keyword Audit
  */
 export async function runNegativeKeywordAudit({ userId, input, additionalInputs, accountId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/negative-keyword-audit', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'negative-keyword-audit', toolName: 'Negative Keyword Audit', input, additionalInputs, accountId })
+  return apiFetch("/jobs/run_wait_result/p/f/tools/negative-keyword-audit", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "negative-keyword-audit",
+      toolName: "Negative Keyword Audit",
+      input,
+      additionalInputs,
+      accountId,
+    }),
   });
 }
 
@@ -4031,9 +5590,17 @@ export async function runNegativeKeywordAudit({ userId, input, additionalInputs,
  * On Page Seo Checker
  */
 export async function runOnPageSeoChecker({ userId, input, additionalInputs, accountId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/on-page-seo-checker', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'on-page-seo-checker', toolName: 'On Page Seo Checker', input, additionalInputs, accountId })
+  return apiFetch("/jobs/run_wait_result/p/f/tools/on-page-seo-checker", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "on-page-seo-checker",
+      toolName: "On Page Seo Checker",
+      input,
+      additionalInputs,
+      accountId,
+    }),
   });
 }
 
@@ -4041,9 +5608,17 @@ export async function runOnPageSeoChecker({ userId, input, additionalInputs, acc
  * Placement Audit
  */
 export async function runPlacementAudit({ userId, input, additionalInputs, accountId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/placement-audit', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'placement-audit', toolName: 'Placement Audit', input, additionalInputs, accountId })
+  return apiFetch("/jobs/run_wait_result/p/f/tools/placement-audit", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "placement-audit",
+      toolName: "Placement Audit",
+      input,
+      additionalInputs,
+      accountId,
+    }),
   });
 }
 
@@ -4051,9 +5626,17 @@ export async function runPlacementAudit({ userId, input, additionalInputs, accou
  * Placement Optimization
  */
 export async function runPlacementOptimization({ userId, input, additionalInputs, accountId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/placement-optimization', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'placement-optimization', toolName: 'Placement Optimization', input, additionalInputs, accountId })
+  return apiFetch("/jobs/run_wait_result/p/f/tools/placement-optimization", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "placement-optimization",
+      toolName: "Placement Optimization",
+      input,
+      additionalInputs,
+      accountId,
+    }),
   });
 }
 
@@ -4061,9 +5644,17 @@ export async function runPlacementOptimization({ userId, input, additionalInputs
  * Quality Score Audit
  */
 export async function runQualityScoreAudit({ userId, input, additionalInputs, accountId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/quality-score-audit', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'quality-score-audit', toolName: 'Quality Score Audit', input, additionalInputs, accountId })
+  return apiFetch("/jobs/run_wait_result/p/f/tools/quality-score-audit", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "quality-score-audit",
+      toolName: "Quality Score Audit",
+      input,
+      additionalInputs,
+      accountId,
+    }),
   });
 }
 
@@ -4071,9 +5662,17 @@ export async function runQualityScoreAudit({ userId, input, additionalInputs, ac
  * Quality Score Checker
  */
 export async function runQualityScoreChecker({ userId, input, additionalInputs, accountId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/quality-score-checker', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'quality-score-checker', toolName: 'Quality Score Checker', input, additionalInputs, accountId })
+  return apiFetch("/jobs/run_wait_result/p/f/tools/quality-score-checker", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "quality-score-checker",
+      toolName: "Quality Score Checker",
+      input,
+      additionalInputs,
+      accountId,
+    }),
   });
 }
 
@@ -4081,9 +5680,17 @@ export async function runQualityScoreChecker({ userId, input, additionalInputs, 
  * Rule Based Campaign Manager
  */
 export async function runRuleBasedCampaignManager({ userId, input, additionalInputs, accountId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/rule-based-campaign-manager', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'rule-based-campaign-manager', toolName: 'Rule Based Campaign Manager', input, additionalInputs, accountId })
+  return apiFetch("/jobs/run_wait_result/p/f/tools/rule-based-campaign-manager", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "rule-based-campaign-manager",
+      toolName: "Rule Based Campaign Manager",
+      input,
+      additionalInputs,
+      accountId,
+    }),
   });
 }
 
@@ -4091,9 +5698,17 @@ export async function runRuleBasedCampaignManager({ userId, input, additionalInp
  * Search Term Audit
  */
 export async function runSearchTermAudit({ userId, input, additionalInputs, accountId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/search-term-audit', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'search-term-audit', toolName: 'Search Term Audit', input, additionalInputs, accountId })
+  return apiFetch("/jobs/run_wait_result/p/f/tools/search-term-audit", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "search-term-audit",
+      toolName: "Search Term Audit",
+      input,
+      additionalInputs,
+      accountId,
+    }),
   });
 }
 
@@ -4101,9 +5716,17 @@ export async function runSearchTermAudit({ userId, input, additionalInputs, acco
  * Seo Audit Tool
  */
 export async function runSeoAuditTool({ userId, input, additionalInputs, accountId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/seo-audit-tool', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'seo-audit-tool', toolName: 'Seo Audit Tool', input, additionalInputs, accountId })
+  return apiFetch("/jobs/run_wait_result/p/f/tools/seo-audit-tool", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "seo-audit-tool",
+      toolName: "Seo Audit Tool",
+      input,
+      additionalInputs,
+      accountId,
+    }),
   });
 }
 
@@ -4111,19 +5734,40 @@ export async function runSeoAuditTool({ userId, input, additionalInputs, account
  * Shopify Campaign Manager
  */
 export async function runShopifyCampaignManager({ userId, input, additionalInputs, accountId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/shopify-campaign-manager', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'shopify-campaign-manager', toolName: 'Shopify Campaign Manager', input, additionalInputs, accountId })
+  return apiFetch("/jobs/run_wait_result/p/f/tools/shopify-campaign-manager", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "shopify-campaign-manager",
+      toolName: "Shopify Campaign Manager",
+      input,
+      additionalInputs,
+      accountId,
+    }),
   });
 }
 
 /**
  * Shopping Campaign Intelligence
  */
-export async function runShoppingCampaignIntelligence({ userId, input, additionalInputs, accountId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/shopping-campaign-intelligence', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'shopping-campaign-intelligence', toolName: 'Shopping Campaign Intelligence', input, additionalInputs, accountId })
+export async function runShoppingCampaignIntelligence({
+  userId,
+  input,
+  additionalInputs,
+  accountId,
+}) {
+  return apiFetch("/jobs/run_wait_result/p/f/tools/shopping-campaign-intelligence", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "shopping-campaign-intelligence",
+      toolName: "Shopping Campaign Intelligence",
+      input,
+      additionalInputs,
+      accountId,
+    }),
   });
 }
 
@@ -4131,9 +5775,17 @@ export async function runShoppingCampaignIntelligence({ userId, input, additiona
  * Website Grader
  */
 export async function runWebsiteGrader({ userId, input, additionalInputs, accountId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/website-grader', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'website-grader', toolName: 'Website Grader', input, additionalInputs, accountId })
+  return apiFetch("/jobs/run_wait_result/p/f/tools/website-grader", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "website-grader",
+      toolName: "Website Grader",
+      input,
+      additionalInputs,
+      accountId,
+    }),
   });
 }
 
@@ -4141,9 +5793,17 @@ export async function runWebsiteGrader({ userId, input, additionalInputs, accoun
  * Ad Testing & Optimization
  */
 export async function runAdTesting({ userId, input, additionalInputs, accountId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/ad-testing', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'ad-testing', toolName: 'Ad Testing & Optimization', input, additionalInputs, accountId })
+  return apiFetch("/jobs/run_wait_result/p/f/tools/ad-testing", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "ad-testing",
+      toolName: "Ad Testing & Optimization",
+      input,
+      additionalInputs,
+      accountId,
+    }),
   });
 }
 
@@ -4151,9 +5811,17 @@ export async function runAdTesting({ userId, input, additionalInputs, accountId 
  * PPC Account Auditor
  */
 export async function runAuditing({ userId, input, additionalInputs, accountId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/auditing', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'auditing', toolName: 'PPC Account Auditor', input, additionalInputs, accountId })
+  return apiFetch("/jobs/run_wait_result/p/f/tools/auditing", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "auditing",
+      toolName: "PPC Account Auditor",
+      input,
+      additionalInputs,
+      accountId,
+    }),
   });
 }
 
@@ -4161,9 +5829,17 @@ export async function runAuditing({ userId, input, additionalInputs, accountId }
  * Google Ads Automation Rules
  */
 export async function runAutomation({ userId, input, additionalInputs, accountId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/automation', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'automation', toolName: 'Google Ads Automation Rules', input, additionalInputs, accountId })
+  return apiFetch("/jobs/run_wait_result/p/f/tools/automation", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "automation",
+      toolName: "Google Ads Automation Rules",
+      input,
+      additionalInputs,
+      accountId,
+    }),
   });
 }
 
@@ -4171,9 +5847,17 @@ export async function runAutomation({ userId, input, additionalInputs, accountId
  * Budget Management Tool
  */
 export async function runBudgetManagement({ userId, input, additionalInputs, accountId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/budget-management', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'budget-management', toolName: 'Budget Management Tool', input, additionalInputs, accountId })
+  return apiFetch("/jobs/run_wait_result/p/f/tools/budget-management", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "budget-management",
+      toolName: "Budget Management Tool",
+      input,
+      additionalInputs,
+      accountId,
+    }),
   });
 }
 
@@ -4181,9 +5865,17 @@ export async function runBudgetManagement({ userId, input, additionalInputs, acc
  * Free PPC Audit Report
  */
 export async function runFreePpcTools({ userId, input, additionalInputs, accountId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/free-ppc-tools', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'free-ppc-tools', toolName: 'Free PPC Audit Report', input, additionalInputs, accountId })
+  return apiFetch("/jobs/run_wait_result/p/f/tools/free-ppc-tools", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "free-ppc-tools",
+      toolName: "Free PPC Audit Report",
+      input,
+      additionalInputs,
+      accountId,
+    }),
   });
 }
 
@@ -4191,19 +5883,40 @@ export async function runFreePpcTools({ userId, input, additionalInputs, account
  * PPC Tool Comparison Engine
  */
 export async function runFreeToolComparisons({ userId, input, additionalInputs, accountId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/free-tool-comparisons', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'free-tool-comparisons', toolName: 'PPC Tool Comparison Engine', input, additionalInputs, accountId })
+  return apiFetch("/jobs/run_wait_result/p/f/tools/free-tool-comparisons", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "free-tool-comparisons",
+      toolName: "PPC Tool Comparison Engine",
+      input,
+      additionalInputs,
+      accountId,
+    }),
   });
 }
 
 /**
  * Google Ads Editor Alternative
  */
-export async function runGoogleAdsEditorAlternative({ userId, input, additionalInputs, accountId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/google-ads-editor-alternative', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'google-ads-editor-alternative', toolName: 'Google Ads Editor Alternative', input, additionalInputs, accountId })
+export async function runGoogleAdsEditorAlternative({
+  userId,
+  input,
+  additionalInputs,
+  accountId,
+}) {
+  return apiFetch("/jobs/run_wait_result/p/f/tools/google-ads-editor-alternative", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "google-ads-editor-alternative",
+      toolName: "Google Ads Editor Alternative",
+      input,
+      additionalInputs,
+      accountId,
+    }),
   });
 }
 
@@ -4211,9 +5924,17 @@ export async function runGoogleAdsEditorAlternative({ userId, input, additionalI
  * Quality Score Analyzer
  */
 export async function runGoogleAdsQualityScore({ userId, input, additionalInputs, accountId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/google-ads-quality-score', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'google-ads-quality-score', toolName: 'Quality Score Analyzer', input, additionalInputs, accountId })
+  return apiFetch("/jobs/run_wait_result/p/f/tools/google-ads-quality-score", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "google-ads-quality-score",
+      toolName: "Quality Score Analyzer",
+      input,
+      additionalInputs,
+      accountId,
+    }),
   });
 }
 
@@ -4221,9 +5942,17 @@ export async function runGoogleAdsQualityScore({ userId, input, additionalInputs
  * Google Ads Campaign Manager
  */
 export async function runGoogleAdsManager({ userId, input, additionalInputs, accountId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/google-ads-manager', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'google-ads-manager', toolName: 'Google Ads Campaign Manager', input, additionalInputs, accountId })
+  return apiFetch("/jobs/run_wait_result/p/f/tools/google-ads-manager", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "google-ads-manager",
+      toolName: "Google Ads Campaign Manager",
+      input,
+      additionalInputs,
+      accountId,
+    }),
   });
 }
 
@@ -4231,9 +5960,17 @@ export async function runGoogleAdsManager({ userId, input, additionalInputs, acc
  * PPC Performance Monitor
  */
 export async function runMonitoring({ userId, input, additionalInputs, accountId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/monitoring', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'monitoring', toolName: 'PPC Performance Monitor', input, additionalInputs, accountId })
+  return apiFetch("/jobs/run_wait_result/p/f/tools/monitoring", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "monitoring",
+      toolName: "PPC Performance Monitor",
+      input,
+      additionalInputs,
+      accountId,
+    }),
   });
 }
 
@@ -4241,9 +5978,17 @@ export async function runMonitoring({ userId, input, additionalInputs, accountId
  * Performance Max Optimizer
  */
 export async function runPerformanceMax({ userId, input, additionalInputs, accountId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/performance-max', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'performance-max', toolName: 'Performance Max Optimizer', input, additionalInputs, accountId })
+  return apiFetch("/jobs/run_wait_result/p/f/tools/performance-max", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "performance-max",
+      toolName: "Performance Max Optimizer",
+      input,
+      additionalInputs,
+      accountId,
+    }),
   });
 }
 
@@ -4251,9 +5996,17 @@ export async function runPerformanceMax({ userId, input, additionalInputs, accou
  * Ad Management Suite
  */
 export async function runPpcAdManagementTools({ userId, input, additionalInputs, accountId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/ppc-ad-management-tools', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'ppc-ad-management-tools', toolName: 'Ad Management Suite', input, additionalInputs, accountId })
+  return apiFetch("/jobs/run_wait_result/p/f/tools/ppc-ad-management-tools", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "ppc-ad-management-tools",
+      toolName: "Ad Management Suite",
+      input,
+      additionalInputs,
+      accountId,
+    }),
   });
 }
 
@@ -4261,9 +6014,17 @@ export async function runPpcAdManagementTools({ userId, input, additionalInputs,
  * PPC Audit & Analysis
  */
 export async function runPpcAuditAnalysisTools({ userId, input, additionalInputs, accountId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/ppc-audit-analysis-tools', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'ppc-audit-analysis-tools', toolName: 'PPC Audit & Analysis', input, additionalInputs, accountId })
+  return apiFetch("/jobs/run_wait_result/p/f/tools/ppc-audit-analysis-tools", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "ppc-audit-analysis-tools",
+      toolName: "PPC Audit & Analysis",
+      input,
+      additionalInputs,
+      accountId,
+    }),
   });
 }
 
@@ -4271,9 +6032,17 @@ export async function runPpcAuditAnalysisTools({ userId, input, additionalInputs
  * PPC Rule Engine
  */
 export async function runPpcAuditsRuleEngine({ userId, input, additionalInputs, accountId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/ppc-audits-rule-engine', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'ppc-audits-rule-engine', toolName: 'PPC Rule Engine', input, additionalInputs, accountId })
+  return apiFetch("/jobs/run_wait_result/p/f/tools/ppc-audits-rule-engine", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "ppc-audits-rule-engine",
+      toolName: "PPC Rule Engine",
+      input,
+      additionalInputs,
+      accountId,
+    }),
   });
 }
 
@@ -4281,9 +6050,17 @@ export async function runPpcAuditsRuleEngine({ userId, input, additionalInputs, 
  * Bid Management Tool
  */
 export async function runPpcBidManagementTools({ userId, input, additionalInputs, accountId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/ppc-bid-management-tools', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'ppc-bid-management-tools', toolName: 'Bid Management Tool', input, additionalInputs, accountId })
+  return apiFetch("/jobs/run_wait_result/p/f/tools/ppc-bid-management-tools", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "ppc-bid-management-tools",
+      toolName: "Bid Management Tool",
+      input,
+      additionalInputs,
+      accountId,
+    }),
   });
 }
 
@@ -4291,9 +6068,17 @@ export async function runPpcBidManagementTools({ userId, input, additionalInputs
  * Smart Bidding Optimizer
  */
 export async function runPpcBiddingTools({ userId, input, additionalInputs, accountId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/ppc-bidding-tools', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'ppc-bidding-tools', toolName: 'Smart Bidding Optimizer', input, additionalInputs, accountId })
+  return apiFetch("/jobs/run_wait_result/p/f/tools/ppc-bidding-tools", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "ppc-bidding-tools",
+      toolName: "Smart Bidding Optimizer",
+      input,
+      additionalInputs,
+      accountId,
+    }),
   });
 }
 
@@ -4301,9 +6086,17 @@ export async function runPpcBiddingTools({ userId, input, additionalInputs, acco
  * PPC Campaign Builder
  */
 export async function runPpcCampaignBuilder({ userId, input, additionalInputs, accountId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/ppc-campaign-builder', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'ppc-campaign-builder', toolName: 'PPC Campaign Builder', input, additionalInputs, accountId })
+  return apiFetch("/jobs/run_wait_result/p/f/tools/ppc-campaign-builder", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "ppc-campaign-builder",
+      toolName: "PPC Campaign Builder",
+      input,
+      additionalInputs,
+      accountId,
+    }),
   });
 }
 
@@ -4311,9 +6104,17 @@ export async function runPpcCampaignBuilder({ userId, input, additionalInputs, a
  * Keyword Analysis Tool
  */
 export async function runPpcKeywordAnalysisTool({ userId, input, additionalInputs, accountId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/ppc-keyword-analysis-tool', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'ppc-keyword-analysis-tool', toolName: 'Keyword Analysis Tool', input, additionalInputs, accountId })
+  return apiFetch("/jobs/run_wait_result/p/f/tools/ppc-keyword-analysis-tool", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "ppc-keyword-analysis-tool",
+      toolName: "Keyword Analysis Tool",
+      input,
+      additionalInputs,
+      accountId,
+    }),
   });
 }
 
@@ -4321,9 +6122,17 @@ export async function runPpcKeywordAnalysisTool({ userId, input, additionalInput
  * PPC Optimization Suite
  */
 export async function runPpcOptimizationTools({ userId, input, additionalInputs, accountId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/ppc-optimization-tools', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'ppc-optimization-tools', toolName: 'PPC Optimization Suite', input, additionalInputs, accountId })
+  return apiFetch("/jobs/run_wait_result/p/f/tools/ppc-optimization-tools", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "ppc-optimization-tools",
+      toolName: "PPC Optimization Suite",
+      input,
+      additionalInputs,
+      accountId,
+    }),
   });
 }
 
@@ -4331,9 +6140,17 @@ export async function runPpcOptimizationTools({ userId, input, additionalInputs,
  * Performance Booster
  */
 export async function runPpcPerformanceBoost({ userId, input, additionalInputs, accountId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/ppc-performance-boost', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'ppc-performance-boost', toolName: 'Performance Booster', input, additionalInputs, accountId })
+  return apiFetch("/jobs/run_wait_result/p/f/tools/ppc-performance-boost", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "ppc-performance-boost",
+      toolName: "Performance Booster",
+      input,
+      additionalInputs,
+      accountId,
+    }),
   });
 }
 
@@ -4341,9 +6158,17 @@ export async function runPpcPerformanceBoost({ userId, input, additionalInputs, 
  * Quality Score Improver
  */
 export async function runPpcQualityScore({ userId, input, additionalInputs, accountId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/ppc-quality-score', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'ppc-quality-score', toolName: 'Quality Score Improver', input, additionalInputs, accountId })
+  return apiFetch("/jobs/run_wait_result/p/f/tools/ppc-quality-score", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "ppc-quality-score",
+      toolName: "Quality Score Improver",
+      input,
+      additionalInputs,
+      accountId,
+    }),
   });
 }
 
@@ -4351,9 +6176,17 @@ export async function runPpcQualityScore({ userId, input, additionalInputs, acco
  * Search Term Analyzer
  */
 export async function runPpcSearchTermAnalysis({ userId, input, additionalInputs, accountId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/ppc-search-term-analysis', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'ppc-search-term-analysis', toolName: 'Search Term Analyzer', input, additionalInputs, accountId })
+  return apiFetch("/jobs/run_wait_result/p/f/tools/ppc-search-term-analysis", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "ppc-search-term-analysis",
+      toolName: "Search Term Analyzer",
+      input,
+      additionalInputs,
+      accountId,
+    }),
   });
 }
 
@@ -4361,9 +6194,17 @@ export async function runPpcSearchTermAnalysis({ userId, input, additionalInputs
  * Scientific Ad Testing
  */
 export async function runScientificAdTesting({ userId, input, additionalInputs, accountId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/scientific-ad-testing', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'scientific-ad-testing', toolName: 'Scientific Ad Testing', input, additionalInputs, accountId })
+  return apiFetch("/jobs/run_wait_result/p/f/tools/scientific-ad-testing", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "scientific-ad-testing",
+      toolName: "Scientific Ad Testing",
+      input,
+      additionalInputs,
+      accountId,
+    }),
   });
 }
 
@@ -4371,9 +6212,17 @@ export async function runScientificAdTesting({ userId, input, additionalInputs, 
  * Ad Position Analyzer
  */
 export async function runAdPositionTool({ userId, input, additionalInputs, accountId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/ad-position-tool', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'ad-position-tool', toolName: 'Ad Position Analyzer', input, additionalInputs, accountId })
+  return apiFetch("/jobs/run_wait_result/p/f/tools/ad-position-tool", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "ad-position-tool",
+      toolName: "Ad Position Analyzer",
+      input,
+      additionalInputs,
+      accountId,
+    }),
   });
 }
 
@@ -4381,9 +6230,17 @@ export async function runAdPositionTool({ userId, input, additionalInputs, accou
  * Ad Rank Calculator
  */
 export async function runAdRankingTool({ userId, input, additionalInputs, accountId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/ad-ranking-tool', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'ad-ranking-tool', toolName: 'Ad Rank Calculator', input, additionalInputs, accountId })
+  return apiFetch("/jobs/run_wait_result/p/f/tools/ad-ranking-tool", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "ad-ranking-tool",
+      toolName: "Ad Rank Calculator",
+      input,
+      additionalInputs,
+      accountId,
+    }),
   });
 }
 
@@ -4391,9 +6248,17 @@ export async function runAdRankingTool({ userId, input, additionalInputs, accoun
  * Google Ads Keyword Planner
  */
 export async function runAdwordsKeywordTool({ userId, input, additionalInputs, accountId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/adwords-keyword-tool', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'adwords-keyword-tool', toolName: 'Google Ads Keyword Planner', input, additionalInputs, accountId })
+  return apiFetch("/jobs/run_wait_result/p/f/tools/adwords-keyword-tool", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "adwords-keyword-tool",
+      toolName: "Google Ads Keyword Planner",
+      input,
+      additionalInputs,
+      accountId,
+    }),
   });
 }
 
@@ -4401,9 +6266,17 @@ export async function runAdwordsKeywordTool({ userId, input, additionalInputs, a
  * CTR Optimization Tool
  */
 export async function runCtrOptimizer({ userId, input, additionalInputs, accountId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/ctr-optimizer', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'ctr-optimizer', toolName: 'CTR Optimization Tool', input, additionalInputs, accountId })
+  return apiFetch("/jobs/run_wait_result/p/f/tools/ctr-optimizer", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "ctr-optimizer",
+      toolName: "CTR Optimization Tool",
+      input,
+      additionalInputs,
+      accountId,
+    }),
   });
 }
 
@@ -4411,9 +6284,17 @@ export async function runCtrOptimizer({ userId, input, additionalInputs, account
  * Dynamic Keyword Insertion Tool
  */
 export async function runDkiTool({ userId, input, additionalInputs, accountId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/dki-tool', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'dki-tool', toolName: 'Dynamic Keyword Insertion Tool', input, additionalInputs, accountId })
+  return apiFetch("/jobs/run_wait_result/p/f/tools/dki-tool", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "dki-tool",
+      toolName: "Dynamic Keyword Insertion Tool",
+      input,
+      additionalInputs,
+      accountId,
+    }),
   });
 }
 
@@ -4421,9 +6302,17 @@ export async function runDkiTool({ userId, input, additionalInputs, accountId })
  * Google Trends for PPC
  */
 export async function runGoogleTrendsTool({ userId, input, additionalInputs, accountId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/google-trends-tool', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'google-trends-tool', toolName: 'Google Trends for PPC', input, additionalInputs, accountId })
+  return apiFetch("/jobs/run_wait_result/p/f/tools/google-trends-tool", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "google-trends-tool",
+      toolName: "Google Trends for PPC",
+      input,
+      additionalInputs,
+      accountId,
+    }),
   });
 }
 
@@ -4431,9 +6320,17 @@ export async function runGoogleTrendsTool({ userId, input, additionalInputs, acc
  * Keyword Grouping Tool
  */
 export async function runKeywordGroupingTool({ userId, input, additionalInputs, accountId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/keyword-grouping-tool', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'keyword-grouping-tool', toolName: 'Keyword Grouping Tool', input, additionalInputs, accountId })
+  return apiFetch("/jobs/run_wait_result/p/f/tools/keyword-grouping-tool", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "keyword-grouping-tool",
+      toolName: "Keyword Grouping Tool",
+      input,
+      additionalInputs,
+      accountId,
+    }),
   });
 }
 
@@ -4441,9 +6338,17 @@ export async function runKeywordGroupingTool({ userId, input, additionalInputs, 
  * Keyword Intent Analyzer
  */
 export async function runKeywordIntentAnalyzer({ userId, input, additionalInputs, accountId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/keyword-intent-analyzer', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'keyword-intent-analyzer', toolName: 'Keyword Intent Analyzer', input, additionalInputs, accountId })
+  return apiFetch("/jobs/run_wait_result/p/f/tools/keyword-intent-analyzer", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "keyword-intent-analyzer",
+      toolName: "Keyword Intent Analyzer",
+      input,
+      additionalInputs,
+      accountId,
+    }),
   });
 }
 
@@ -4451,9 +6356,17 @@ export async function runKeywordIntentAnalyzer({ userId, input, additionalInputs
  * Negative Keyword Builder
  */
 export async function runNegativeKeywordsTool({ userId, input, additionalInputs, accountId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/negative-keywords-tool', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'negative-keywords-tool', toolName: 'Negative Keyword Builder', input, additionalInputs, accountId })
+  return apiFetch("/jobs/run_wait_result/p/f/tools/negative-keywords-tool", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "negative-keywords-tool",
+      toolName: "Negative Keyword Builder",
+      input,
+      additionalInputs,
+      accountId,
+    }),
   });
 }
 
@@ -4461,9 +6374,17 @@ export async function runNegativeKeywordsTool({ userId, input, additionalInputs,
  * PPC Budget Calculator
  */
 export async function runPpcBudgetTool({ userId, input, additionalInputs, accountId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/ppc-budget-tool', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'ppc-budget-tool', toolName: 'PPC Budget Calculator', input, additionalInputs, accountId })
+  return apiFetch("/jobs/run_wait_result/p/f/tools/ppc-budget-tool", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "ppc-budget-tool",
+      toolName: "PPC Budget Calculator",
+      input,
+      additionalInputs,
+      accountId,
+    }),
   });
 }
 
@@ -4475,9 +6396,17 @@ export async function runPpcBudgetTool({ userId, input, additionalInputs, accoun
  * Facebook Ads Manager
  */
 export async function runFacebookAdsManager({ userId, input, additionalInputs, accountId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/facebook-ads-manager', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'facebook-ads-manager', toolName: 'Facebook Ads Manager', input, additionalInputs, accountId })
+  return apiFetch("/jobs/run_wait_result/p/f/tools/facebook-ads-manager", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "facebook-ads-manager",
+      toolName: "Facebook Ads Manager",
+      input,
+      additionalInputs,
+      accountId,
+    }),
   });
 }
 
@@ -4485,9 +6414,17 @@ export async function runFacebookAdsManager({ userId, input, additionalInputs, a
  * Facebook Ads Orchestrator
  */
 export async function runFacebookAdsOrchestrator({ userId, input, additionalInputs, accountId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/facebook-ads-orchestrator', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'facebook-ads-orchestrator', toolName: 'Facebook Ads Orchestrator', input, additionalInputs, accountId })
+  return apiFetch("/jobs/run_wait_result/p/f/tools/facebook-ads-orchestrator", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "facebook-ads-orchestrator",
+      toolName: "Facebook Ads Orchestrator",
+      input,
+      additionalInputs,
+      accountId,
+    }),
   });
 }
 
@@ -4495,19 +6432,40 @@ export async function runFacebookAdsOrchestrator({ userId, input, additionalInpu
  * Facebook Marketing Suite
  */
 export async function runFacebookMarketingSuite({ userId, input, additionalInputs, accountId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/facebook-marketing-suite', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'facebook-marketing-suite', toolName: 'Facebook Marketing Suite', input, additionalInputs, accountId })
+  return apiFetch("/jobs/run_wait_result/p/f/tools/facebook-marketing-suite", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "facebook-marketing-suite",
+      toolName: "Facebook Marketing Suite",
+      input,
+      additionalInputs,
+      accountId,
+    }),
   });
 }
 
 /**
  * Facebook Performance Dashboard
  */
-export async function runFacebookPerformanceDashboard({ userId, input, additionalInputs, accountId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/facebook-performance-dashboard', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'facebook-performance-dashboard', toolName: 'Facebook Performance Dashboard', input, additionalInputs, accountId })
+export async function runFacebookPerformanceDashboard({
+  userId,
+  input,
+  additionalInputs,
+  accountId,
+}) {
+  return apiFetch("/jobs/run_wait_result/p/f/tools/facebook-performance-dashboard", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "facebook-performance-dashboard",
+      toolName: "Facebook Performance Dashboard",
+      input,
+      additionalInputs,
+      accountId,
+    }),
   });
 }
 
@@ -4515,9 +6473,17 @@ export async function runFacebookPerformanceDashboard({ userId, input, additiona
  * Instagram Ai Automation
  */
 export async function runInstagramAiAutomation({ userId, input, additionalInputs, accountId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/instagram-ai-automation', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'instagram-ai-automation', toolName: 'Instagram Ai Automation', input, additionalInputs, accountId })
+  return apiFetch("/jobs/run_wait_result/p/f/tools/instagram-ai-automation", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "instagram-ai-automation",
+      toolName: "Instagram Ai Automation",
+      input,
+      additionalInputs,
+      accountId,
+    }),
   });
 }
 
@@ -4525,9 +6491,17 @@ export async function runInstagramAiAutomation({ userId, input, additionalInputs
  * Instagram Caption Generator
  */
 export async function runInstagramCaptionGenerator({ userId, input, additionalInputs, accountId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/instagram-caption-generator', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'instagram-caption-generator', toolName: 'Instagram Caption Generator', input, additionalInputs, accountId })
+  return apiFetch("/jobs/run_wait_result/p/f/tools/instagram-caption-generator", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "instagram-caption-generator",
+      toolName: "Instagram Caption Generator",
+      input,
+      additionalInputs,
+      accountId,
+    }),
   });
 }
 
@@ -4535,19 +6509,40 @@ export async function runInstagramCaptionGenerator({ userId, input, additionalIn
  * Instagram Content Scheduler
  */
 export async function runInstagramContentScheduler({ userId, input, additionalInputs, accountId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/instagram-content-scheduler', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'instagram-content-scheduler', toolName: 'Instagram Content Scheduler', input, additionalInputs, accountId })
+  return apiFetch("/jobs/run_wait_result/p/f/tools/instagram-content-scheduler", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "instagram-content-scheduler",
+      toolName: "Instagram Content Scheduler",
+      input,
+      additionalInputs,
+      accountId,
+    }),
   });
 }
 
 /**
  * Instagram Engagement Analyzer
  */
-export async function runInstagramEngagementAnalyzer({ userId, input, additionalInputs, accountId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/instagram-engagement-analyzer', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'instagram-engagement-analyzer', toolName: 'Instagram Engagement Analyzer', input, additionalInputs, accountId })
+export async function runInstagramEngagementAnalyzer({
+  userId,
+  input,
+  additionalInputs,
+  accountId,
+}) {
+  return apiFetch("/jobs/run_wait_result/p/f/tools/instagram-engagement-analyzer", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "instagram-engagement-analyzer",
+      toolName: "Instagram Engagement Analyzer",
+      input,
+      additionalInputs,
+      accountId,
+    }),
   });
 }
 
@@ -4555,9 +6550,17 @@ export async function runInstagramEngagementAnalyzer({ userId, input, additional
  * Instagram Influencer Finder
  */
 export async function runInstagramInfluencerFinder({ userId, input, additionalInputs, accountId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/instagram-influencer-finder', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'instagram-influencer-finder', toolName: 'Instagram Influencer Finder', input, additionalInputs, accountId })
+  return apiFetch("/jobs/run_wait_result/p/f/tools/instagram-influencer-finder", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "instagram-influencer-finder",
+      toolName: "Instagram Influencer Finder",
+      input,
+      additionalInputs,
+      accountId,
+    }),
   });
 }
 
@@ -4565,19 +6568,40 @@ export async function runInstagramInfluencerFinder({ userId, input, additionalIn
  * Instagram Management Tools
  */
 export async function runInstagramManagementTools({ userId, input, additionalInputs, accountId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/instagram-management-tools', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'instagram-management-tools', toolName: 'Instagram Management Tools', input, additionalInputs, accountId })
+  return apiFetch("/jobs/run_wait_result/p/f/tools/instagram-management-tools", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "instagram-management-tools",
+      toolName: "Instagram Management Tools",
+      input,
+      additionalInputs,
+      accountId,
+    }),
   });
 }
 
 /**
  * Instagram Marketing Platform
  */
-export async function runInstagramMarketingPlatform({ userId, input, additionalInputs, accountId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/instagram-marketing-platform', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'instagram-marketing-platform', toolName: 'Instagram Marketing Platform', input, additionalInputs, accountId })
+export async function runInstagramMarketingPlatform({
+  userId,
+  input,
+  additionalInputs,
+  accountId,
+}) {
+  return apiFetch("/jobs/run_wait_result/p/f/tools/instagram-marketing-platform", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "instagram-marketing-platform",
+      toolName: "Instagram Marketing Platform",
+      input,
+      additionalInputs,
+      accountId,
+    }),
   });
 }
 
@@ -4585,9 +6609,17 @@ export async function runInstagramMarketingPlatform({ userId, input, additionalI
  * Instagram Reels Optimizer
  */
 export async function runInstagramReelsOptimizer({ userId, input, additionalInputs, accountId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/instagram-reels-optimizer', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'instagram-reels-optimizer', toolName: 'Instagram Reels Optimizer', input, additionalInputs, accountId })
+  return apiFetch("/jobs/run_wait_result/p/f/tools/instagram-reels-optimizer", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "instagram-reels-optimizer",
+      toolName: "Instagram Reels Optimizer",
+      input,
+      additionalInputs,
+      accountId,
+    }),
   });
 }
 
@@ -4595,9 +6627,17 @@ export async function runInstagramReelsOptimizer({ userId, input, additionalInpu
  * Instagram Shopping Ads
  */
 export async function runInstagramShoppingAds({ userId, input, additionalInputs, accountId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/instagram-shopping-ads', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'instagram-shopping-ads', toolName: 'Instagram Shopping Ads', input, additionalInputs, accountId })
+  return apiFetch("/jobs/run_wait_result/p/f/tools/instagram-shopping-ads", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "instagram-shopping-ads",
+      toolName: "Instagram Shopping Ads",
+      input,
+      additionalInputs,
+      accountId,
+    }),
   });
 }
 
@@ -4605,9 +6645,17 @@ export async function runInstagramShoppingAds({ userId, input, additionalInputs,
  * Instagram Story Ads Manager
  */
 export async function runInstagramStoryAdsManager({ userId, input, additionalInputs, accountId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/instagram-story-ads-manager', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'instagram-story-ads-manager', toolName: 'Instagram Story Ads Manager', input, additionalInputs, accountId })
+  return apiFetch("/jobs/run_wait_result/p/f/tools/instagram-story-ads-manager", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "instagram-story-ads-manager",
+      toolName: "Instagram Story Ads Manager",
+      input,
+      additionalInputs,
+      accountId,
+    }),
   });
 }
 
@@ -4615,9 +6663,17 @@ export async function runInstagramStoryAdsManager({ userId, input, additionalInp
  * Meta Ai Comment Responder
  */
 export async function runMetaAiCommentResponder({ userId, input, additionalInputs, accountId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/meta-ai-comment-responder', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'meta-ai-comment-responder', toolName: 'Meta Ai Comment Responder', input, additionalInputs, accountId })
+  return apiFetch("/jobs/run_wait_result/p/f/tools/meta-ai-comment-responder", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "meta-ai-comment-responder",
+      toolName: "Meta Ai Comment Responder",
+      input,
+      additionalInputs,
+      accountId,
+    }),
   });
 }
 
@@ -4625,9 +6681,17 @@ export async function runMetaAiCommentResponder({ userId, input, additionalInput
  * Meta Attribution Tool
  */
 export async function runMetaAttributionTool({ userId, input, additionalInputs, accountId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/meta-attribution-tool', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'meta-attribution-tool', toolName: 'Meta Attribution Tool', input, additionalInputs, accountId })
+  return apiFetch("/jobs/run_wait_result/p/f/tools/meta-attribution-tool", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "meta-attribution-tool",
+      toolName: "Meta Attribution Tool",
+      input,
+      additionalInputs,
+      accountId,
+    }),
   });
 }
 
@@ -4635,9 +6699,17 @@ export async function runMetaAttributionTool({ userId, input, additionalInputs, 
  * Meta Audience Builder
  */
 export async function runMetaAudienceBuilder({ userId, input, additionalInputs, accountId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/meta-audience-builder', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'meta-audience-builder', toolName: 'Meta Audience Builder', input, additionalInputs, accountId })
+  return apiFetch("/jobs/run_wait_result/p/f/tools/meta-audience-builder", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "meta-audience-builder",
+      toolName: "Meta Audience Builder",
+      input,
+      additionalInputs,
+      accountId,
+    }),
   });
 }
 
@@ -4645,9 +6717,17 @@ export async function runMetaAudienceBuilder({ userId, input, additionalInputs, 
  * Meta Budget Optimizer
  */
 export async function runMetaBudgetOptimizer({ userId, input, additionalInputs, accountId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/meta-budget-optimizer', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'meta-budget-optimizer', toolName: 'Meta Budget Optimizer', input, additionalInputs, accountId })
+  return apiFetch("/jobs/run_wait_result/p/f/tools/meta-budget-optimizer", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "meta-budget-optimizer",
+      toolName: "Meta Budget Optimizer",
+      input,
+      additionalInputs,
+      accountId,
+    }),
   });
 }
 
@@ -4655,9 +6735,17 @@ export async function runMetaBudgetOptimizer({ userId, input, additionalInputs, 
  * Meta Campaign Analyzer
  */
 export async function runMetaCampaignAnalyzer({ userId, input, additionalInputs, accountId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/meta-campaign-analyzer', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'meta-campaign-analyzer', toolName: 'Meta Campaign Analyzer', input, additionalInputs, accountId })
+  return apiFetch("/jobs/run_wait_result/p/f/tools/meta-campaign-analyzer", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "meta-campaign-analyzer",
+      toolName: "Meta Campaign Analyzer",
+      input,
+      additionalInputs,
+      accountId,
+    }),
   });
 }
 
@@ -4665,9 +6753,17 @@ export async function runMetaCampaignAnalyzer({ userId, input, additionalInputs,
  * Meta Comment Manager
  */
 export async function runMetaCommentManager({ userId, input, additionalInputs, accountId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/meta-comment-manager', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'meta-comment-manager', toolName: 'Meta Comment Manager', input, additionalInputs, accountId })
+  return apiFetch("/jobs/run_wait_result/p/f/tools/meta-comment-manager", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "meta-comment-manager",
+      toolName: "Meta Comment Manager",
+      input,
+      additionalInputs,
+      accountId,
+    }),
   });
 }
 
@@ -4675,9 +6771,17 @@ export async function runMetaCommentManager({ userId, input, additionalInputs, a
  * Meta Conversion Tracker
  */
 export async function runMetaConversionTracker({ userId, input, additionalInputs, accountId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/meta-conversion-tracker', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'meta-conversion-tracker', toolName: 'Meta Conversion Tracker', input, additionalInputs, accountId })
+  return apiFetch("/jobs/run_wait_result/p/f/tools/meta-conversion-tracker", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "meta-conversion-tracker",
+      toolName: "Meta Conversion Tracker",
+      input,
+      additionalInputs,
+      accountId,
+    }),
   });
 }
 
@@ -4685,9 +6789,17 @@ export async function runMetaConversionTracker({ userId, input, additionalInputs
  * Meta Creative Studio
  */
 export async function runMetaCreativeStudio({ userId, input, additionalInputs, accountId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/meta-creative-studio', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'meta-creative-studio', toolName: 'Meta Creative Studio', input, additionalInputs, accountId })
+  return apiFetch("/jobs/run_wait_result/p/f/tools/meta-creative-studio", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "meta-creative-studio",
+      toolName: "Meta Creative Studio",
+      input,
+      additionalInputs,
+      accountId,
+    }),
   });
 }
 
@@ -4695,9 +6807,17 @@ export async function runMetaCreativeStudio({ userId, input, additionalInputs, a
  * Meta Placement Optimizer
  */
 export async function runMetaPlacementOptimizer({ userId, input, additionalInputs, accountId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/meta-placement-optimizer', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'meta-placement-optimizer', toolName: 'Meta Placement Optimizer', input, additionalInputs, accountId })
+  return apiFetch("/jobs/run_wait_result/p/f/tools/meta-placement-optimizer", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "meta-placement-optimizer",
+      toolName: "Meta Placement Optimizer",
+      input,
+      additionalInputs,
+      accountId,
+    }),
   });
 }
 
@@ -4705,9 +6825,17 @@ export async function runMetaPlacementOptimizer({ userId, input, additionalInput
  * Real Time Meta Optimizer
  */
 export async function runRealTimeMetaOptimizer({ userId, input, additionalInputs, accountId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/real-time-meta-optimizer', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'real-time-meta-optimizer', toolName: 'Real Time Meta Optimizer', input, additionalInputs, accountId })
+  return apiFetch("/jobs/run_wait_result/p/f/tools/real-time-meta-optimizer", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "real-time-meta-optimizer",
+      toolName: "Real Time Meta Optimizer",
+      input,
+      additionalInputs,
+      accountId,
+    }),
   });
 }
 
@@ -4715,9 +6843,17 @@ export async function runRealTimeMetaOptimizer({ userId, input, additionalInputs
  * Ad Copy Insights
  */
 export async function runAdCopyInsights({ userId, input, additionalInputs, accountId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/ad-copy-insights', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'ad-copy-insights', toolName: 'Ad Copy Insights', input, additionalInputs, accountId })
+  return apiFetch("/jobs/run_wait_result/p/f/tools/ad-copy-insights", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "ad-copy-insights",
+      toolName: "Ad Copy Insights",
+      input,
+      additionalInputs,
+      accountId,
+    }),
   });
 }
 
@@ -4725,9 +6861,17 @@ export async function runAdCopyInsights({ userId, input, additionalInputs, accou
  * Meta Ad Cost Calculator
  */
 export async function runMetaAdCostCalculator({ userId, input, additionalInputs, accountId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/meta-ad-cost-calculator', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'meta-ad-cost-calculator', toolName: 'Meta Ad Cost Calculator', input, additionalInputs, accountId })
+  return apiFetch("/jobs/run_wait_result/p/f/tools/meta-ad-cost-calculator", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "meta-ad-cost-calculator",
+      toolName: "Meta Ad Cost Calculator",
+      input,
+      additionalInputs,
+      accountId,
+    }),
   });
 }
 
@@ -4735,9 +6879,17 @@ export async function runMetaAdCostCalculator({ userId, input, additionalInputs,
  * Meta Ad Launcher
  */
 export async function runMetaAdLauncher({ userId, input, additionalInputs, accountId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/meta-ad-launcher', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'meta-ad-launcher', toolName: 'Meta Ad Launcher', input, additionalInputs, accountId })
+  return apiFetch("/jobs/run_wait_result/p/f/tools/meta-ad-launcher", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "meta-ad-launcher",
+      toolName: "Meta Ad Launcher",
+      input,
+      additionalInputs,
+      accountId,
+    }),
   });
 }
 
@@ -4745,9 +6897,17 @@ export async function runMetaAdLauncher({ userId, input, additionalInputs, accou
  * Ad Set Storyline
  */
 export async function runAdSetStoryline({ userId, input, additionalInputs, accountId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/ad-set-storyline', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'ad-set-storyline', toolName: 'Ad Set Storyline', input, additionalInputs, accountId })
+  return apiFetch("/jobs/run_wait_result/p/f/tools/ad-set-storyline", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "ad-set-storyline",
+      toolName: "Ad Set Storyline",
+      input,
+      additionalInputs,
+      accountId,
+    }),
   });
 }
 
@@ -4755,9 +6915,17 @@ export async function runAdSetStoryline({ userId, input, additionalInputs, accou
  * Ads Manager 2.0
  */
 export async function runMetaAdsManager2({ userId, input, additionalInputs, accountId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/meta-ads-manager-2', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'meta-ads-manager-2', toolName: 'Ads Manager 2.0', input, additionalInputs, accountId })
+  return apiFetch("/jobs/run_wait_result/p/f/tools/meta-ads-manager-2", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "meta-ads-manager-2",
+      toolName: "Ads Manager 2.0",
+      input,
+      additionalInputs,
+      accountId,
+    }),
   });
 }
 
@@ -4765,9 +6933,17 @@ export async function runMetaAdsManager2({ userId, input, additionalInputs, acco
  * Meta AI Copywriter
  */
 export async function runMetaAiCopywriter({ userId, input, additionalInputs, accountId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/meta-ai-copywriter', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'meta-ai-copywriter', toolName: 'Meta AI Copywriter', input, additionalInputs, accountId })
+  return apiFetch("/jobs/run_wait_result/p/f/tools/meta-ai-copywriter", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "meta-ai-copywriter",
+      toolName: "Meta AI Copywriter",
+      input,
+      additionalInputs,
+      accountId,
+    }),
   });
 }
 
@@ -4775,9 +6951,17 @@ export async function runMetaAiCopywriter({ userId, input, additionalInputs, acc
  * Meta AI Marketer
  */
 export async function runMetaAiMarketer({ userId, input, additionalInputs, accountId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/meta-ai-marketer', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'meta-ai-marketer', toolName: 'Meta AI Marketer', input, additionalInputs, accountId })
+  return apiFetch("/jobs/run_wait_result/p/f/tools/meta-ai-marketer", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "meta-ai-marketer",
+      toolName: "Meta AI Marketer",
+      input,
+      additionalInputs,
+      accountId,
+    }),
   });
 }
 
@@ -4785,9 +6969,17 @@ export async function runMetaAiMarketer({ userId, input, additionalInputs, accou
  * Meta Audience Launcher
  */
 export async function runMetaAudienceLauncher({ userId, input, additionalInputs, accountId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/meta-audience-launcher', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'meta-audience-launcher', toolName: 'Meta Audience Launcher', input, additionalInputs, accountId })
+  return apiFetch("/jobs/run_wait_result/p/f/tools/meta-audience-launcher", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "meta-audience-launcher",
+      toolName: "Meta Audience Launcher",
+      input,
+      additionalInputs,
+      accountId,
+    }),
   });
 }
 
@@ -4795,9 +6987,17 @@ export async function runMetaAudienceLauncher({ userId, input, additionalInputs,
  * Meta Audience Studio
  */
 export async function runMetaAudienceStudio({ userId, input, additionalInputs, accountId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/meta-audience-studio', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'meta-audience-studio', toolName: 'Meta Audience Studio', input, additionalInputs, accountId })
+  return apiFetch("/jobs/run_wait_result/p/f/tools/meta-audience-studio", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "meta-audience-studio",
+      toolName: "Meta Audience Studio",
+      input,
+      additionalInputs,
+      accountId,
+    }),
   });
 }
 
@@ -4805,9 +7005,17 @@ export async function runMetaAudienceStudio({ userId, input, additionalInputs, a
  * Meta Automated Reporting
  */
 export async function runMetaAutomatedReporting({ userId, input, additionalInputs, accountId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/meta-automated-reporting', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'meta-automated-reporting', toolName: 'Meta Automated Reporting', input, additionalInputs, accountId })
+  return apiFetch("/jobs/run_wait_result/p/f/tools/meta-automated-reporting", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "meta-automated-reporting",
+      toolName: "Meta Automated Reporting",
+      input,
+      additionalInputs,
+      accountId,
+    }),
   });
 }
 
@@ -4815,19 +7023,40 @@ export async function runMetaAutomatedReporting({ userId, input, additionalInput
  * Meta Automation Tactics
  */
 export async function runMetaAutomationTactics({ userId, input, additionalInputs, accountId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/meta-automation-tactics', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'meta-automation-tactics', toolName: 'Meta Automation Tactics', input, additionalInputs, accountId })
+  return apiFetch("/jobs/run_wait_result/p/f/tools/meta-automation-tactics", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "meta-automation-tactics",
+      toolName: "Meta Automation Tactics",
+      input,
+      additionalInputs,
+      accountId,
+    }),
   });
 }
 
 /**
  * Meta Autonomous Budget Optimizer
  */
-export async function runMetaAutonomousBudgetOptimizer({ userId, input, additionalInputs, accountId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/meta-autonomous-budget-optimizer', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'meta-autonomous-budget-optimizer', toolName: 'Meta Autonomous Budget Optimizer', input, additionalInputs, accountId })
+export async function runMetaAutonomousBudgetOptimizer({
+  userId,
+  input,
+  additionalInputs,
+  accountId,
+}) {
+  return apiFetch("/jobs/run_wait_result/p/f/tools/meta-autonomous-budget-optimizer", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "meta-autonomous-budget-optimizer",
+      toolName: "Meta Autonomous Budget Optimizer",
+      input,
+      additionalInputs,
+      accountId,
+    }),
   });
 }
 
@@ -4835,9 +7064,17 @@ export async function runMetaAutonomousBudgetOptimizer({ userId, input, addition
  * Meta Conversions API Setup
  */
 export async function runMetaConversionsApi({ userId, input, additionalInputs, accountId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/meta-conversions-api', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'meta-conversions-api', toolName: 'Meta Conversions API Setup', input, additionalInputs, accountId })
+  return apiFetch("/jobs/run_wait_result/p/f/tools/meta-conversions-api", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "meta-conversions-api",
+      toolName: "Meta Conversions API Setup",
+      input,
+      additionalInputs,
+      accountId,
+    }),
   });
 }
 
@@ -4845,9 +7082,17 @@ export async function runMetaConversionsApi({ userId, input, additionalInputs, a
  * Meta Creative Insights
  */
 export async function runMetaCreativeInsights({ userId, input, additionalInputs, accountId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/meta-creative-insights', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'meta-creative-insights', toolName: 'Meta Creative Insights', input, additionalInputs, accountId })
+  return apiFetch("/jobs/run_wait_result/p/f/tools/meta-creative-insights", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "meta-creative-insights",
+      toolName: "Meta Creative Insights",
+      input,
+      additionalInputs,
+      accountId,
+    }),
   });
 }
 
@@ -4855,9 +7100,17 @@ export async function runMetaCreativeInsights({ userId, input, additionalInputs,
  * Meta Custom Audiences Builder
  */
 export async function runMetaCustomAudiences({ userId, input, additionalInputs, accountId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/meta-custom-audiences', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'meta-custom-audiences', toolName: 'Meta Custom Audiences Builder', input, additionalInputs, accountId })
+  return apiFetch("/jobs/run_wait_result/p/f/tools/meta-custom-audiences", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "meta-custom-audiences",
+      toolName: "Meta Custom Audiences Builder",
+      input,
+      additionalInputs,
+      accountId,
+    }),
   });
 }
 
@@ -4865,9 +7118,17 @@ export async function runMetaCustomAudiences({ userId, input, additionalInputs, 
  * Meta Custom Automation
  */
 export async function runMetaCustomAutomation({ userId, input, additionalInputs, accountId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/meta-custom-automation', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'meta-custom-automation', toolName: 'Meta Custom Automation', input, additionalInputs, accountId })
+  return apiFetch("/jobs/run_wait_result/p/f/tools/meta-custom-automation", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "meta-custom-automation",
+      toolName: "Meta Custom Automation",
+      input,
+      additionalInputs,
+      accountId,
+    }),
   });
 }
 
@@ -4875,9 +7136,17 @@ export async function runMetaCustomAutomation({ userId, input, additionalInputs,
  * Meta Full Automation Suite
  */
 export async function runMetaFullAutomationSuite({ userId, input, additionalInputs, accountId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/meta-full-automation-suite', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'meta-full-automation-suite', toolName: 'Meta Full Automation Suite', input, additionalInputs, accountId })
+  return apiFetch("/jobs/run_wait_result/p/f/tools/meta-full-automation-suite", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "meta-full-automation-suite",
+      toolName: "Meta Full Automation Suite",
+      input,
+      additionalInputs,
+      accountId,
+    }),
   });
 }
 
@@ -4885,9 +7154,17 @@ export async function runMetaFullAutomationSuite({ userId, input, additionalInpu
  * Meta Ads Dashboard
  */
 export async function runMetaAdsDashboard({ userId, input, additionalInputs, accountId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/meta-ads-dashboard', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'meta-ads-dashboard', toolName: 'Meta Ads Dashboard', input, additionalInputs, accountId })
+  return apiFetch("/jobs/run_wait_result/p/f/tools/meta-ads-dashboard", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "meta-ads-dashboard",
+      toolName: "Meta Ads Dashboard",
+      input,
+      additionalInputs,
+      accountId,
+    }),
   });
 }
 
@@ -4895,9 +7172,17 @@ export async function runMetaAdsDashboard({ userId, input, additionalInputs, acc
  * Meta Target Audience Finder
  */
 export async function runMetaTargetAudienceFinder({ userId, input, additionalInputs, accountId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/meta-target-audience-finder', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'meta-target-audience-finder', toolName: 'Meta Target Audience Finder', input, additionalInputs, accountId })
+  return apiFetch("/jobs/run_wait_result/p/f/tools/meta-target-audience-finder", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "meta-target-audience-finder",
+      toolName: "Meta Target Audience Finder",
+      input,
+      additionalInputs,
+      accountId,
+    }),
   });
 }
 
@@ -4905,9 +7190,17 @@ export async function runMetaTargetAudienceFinder({ userId, input, additionalInp
  * Meta Hidden Insights
  */
 export async function runMetaHiddenInsights({ userId, input, additionalInputs, accountId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/meta-hidden-insights', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'meta-hidden-insights', toolName: 'Meta Hidden Insights', input, additionalInputs, accountId })
+  return apiFetch("/jobs/run_wait_result/p/f/tools/meta-hidden-insights", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "meta-hidden-insights",
+      toolName: "Meta Hidden Insights",
+      input,
+      additionalInputs,
+      accountId,
+    }),
   });
 }
 
@@ -4915,9 +7208,17 @@ export async function runMetaHiddenInsights({ userId, input, additionalInputs, a
  * Meta Cloud Tracking
  */
 export async function runMetaCloudTracking({ userId, input, additionalInputs, accountId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/meta-cloud-tracking', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'meta-cloud-tracking', toolName: 'Meta Cloud Tracking', input, additionalInputs, accountId })
+  return apiFetch("/jobs/run_wait_result/p/f/tools/meta-cloud-tracking", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "meta-cloud-tracking",
+      toolName: "Meta Cloud Tracking",
+      input,
+      additionalInputs,
+      accountId,
+    }),
   });
 }
 
@@ -4925,9 +7226,17 @@ export async function runMetaCloudTracking({ userId, input, additionalInputs, ac
  * Meta Smart Filter
  */
 export async function runMetaSmartFilter({ userId, input, additionalInputs, accountId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/meta-smart-filter', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'meta-smart-filter', toolName: 'Meta Smart Filter', input, additionalInputs, accountId })
+  return apiFetch("/jobs/run_wait_result/p/f/tools/meta-smart-filter", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "meta-smart-filter",
+      toolName: "Meta Smart Filter",
+      input,
+      additionalInputs,
+      accountId,
+    }),
   });
 }
 
@@ -4935,9 +7244,17 @@ export async function runMetaSmartFilter({ userId, input, additionalInputs, acco
  * Meta White Label
  */
 export async function runMetaWhiteLabel({ userId, input, additionalInputs, accountId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/meta-white-label', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'meta-white-label', toolName: 'Meta White Label', input, additionalInputs, accountId })
+  return apiFetch("/jobs/run_wait_result/p/f/tools/meta-white-label", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "meta-white-label",
+      toolName: "Meta White Label",
+      input,
+      additionalInputs,
+      accountId,
+    }),
   });
 }
 
@@ -4945,9 +7262,17 @@ export async function runMetaWhiteLabel({ userId, input, additionalInputs, accou
  * Instagram Bio Optimizer
  */
 export async function runInstagramBioOptimizer({ userId, input, additionalInputs, accountId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/instagram-bio-optimizer', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'instagram-bio-optimizer', toolName: 'Instagram Bio Optimizer', input, additionalInputs, accountId })
+  return apiFetch("/jobs/run_wait_result/p/f/tools/instagram-bio-optimizer", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "instagram-bio-optimizer",
+      toolName: "Instagram Bio Optimizer",
+      input,
+      additionalInputs,
+      accountId,
+    }),
   });
 }
 
@@ -4955,29 +7280,63 @@ export async function runInstagramBioOptimizer({ userId, input, additionalInputs
  * Instagram Hashtag Strategy
  */
 export async function runInstagramHashtagStrategy({ userId, input, additionalInputs, accountId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/instagram-hashtag-strategy', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'instagram-hashtag-strategy', toolName: 'Instagram Hashtag Strategy', input, additionalInputs, accountId })
+  return apiFetch("/jobs/run_wait_result/p/f/tools/instagram-hashtag-strategy", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "instagram-hashtag-strategy",
+      toolName: "Instagram Hashtag Strategy",
+      input,
+      additionalInputs,
+      accountId,
+    }),
   });
 }
 
 /**
  * Instagram Competitor Analyzer
  */
-export async function runInstagramCompetitorAnalyzer({ userId, input, additionalInputs, accountId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/instagram-competitor-analyzer', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'instagram-competitor-analyzer', toolName: 'Instagram Competitor Analyzer', input, additionalInputs, accountId })
+export async function runInstagramCompetitorAnalyzer({
+  userId,
+  input,
+  additionalInputs,
+  accountId,
+}) {
+  return apiFetch("/jobs/run_wait_result/p/f/tools/instagram-competitor-analyzer", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "instagram-competitor-analyzer",
+      toolName: "Instagram Competitor Analyzer",
+      input,
+      additionalInputs,
+      accountId,
+    }),
   });
 }
 
 /**
  * Instagram Ad Creative Generator
  */
-export async function runInstagramAdCreativeGenerator({ userId, input, additionalInputs, accountId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/instagram-ad-creative-generator', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'instagram-ad-creative-generator', toolName: 'Instagram Ad Creative Generator', input, additionalInputs, accountId })
+export async function runInstagramAdCreativeGenerator({
+  userId,
+  input,
+  additionalInputs,
+  accountId,
+}) {
+  return apiFetch("/jobs/run_wait_result/p/f/tools/instagram-ad-creative-generator", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "instagram-ad-creative-generator",
+      toolName: "Instagram Ad Creative Generator",
+      input,
+      additionalInputs,
+      accountId,
+    }),
   });
 }
 
@@ -4985,9 +7344,17 @@ export async function runInstagramAdCreativeGenerator({ userId, input, additiona
  * Instagram Growth Strategy
  */
 export async function runInstagramGrowthStrategy({ userId, input, additionalInputs, accountId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/instagram-growth-strategy', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'instagram-growth-strategy', toolName: 'Instagram Growth Strategy', input, additionalInputs, accountId })
+  return apiFetch("/jobs/run_wait_result/p/f/tools/instagram-growth-strategy", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "instagram-growth-strategy",
+      toolName: "Instagram Growth Strategy",
+      input,
+      additionalInputs,
+      accountId,
+    }),
   });
 }
 
@@ -4995,9 +7362,17 @@ export async function runInstagramGrowthStrategy({ userId, input, additionalInpu
  * Instagram Carousel Designer
  */
 export async function runInstagramCarouselDesigner({ userId, input, additionalInputs, accountId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/instagram-carousel-designer', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'instagram-carousel-designer', toolName: 'Instagram Carousel Designer', input, additionalInputs, accountId })
+  return apiFetch("/jobs/run_wait_result/p/f/tools/instagram-carousel-designer", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "instagram-carousel-designer",
+      toolName: "Instagram Carousel Designer",
+      input,
+      additionalInputs,
+      accountId,
+    }),
   });
 }
 
@@ -5009,9 +7384,17 @@ export async function runInstagramCarouselDesigner({ userId, input, additionalIn
  * Ai Paid Social Manager
  */
 export async function runAiPaidSocialManager({ userId, input, additionalInputs, accountId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/ai-paid-social-manager', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'ai-paid-social-manager', toolName: 'Ai Paid Social Manager', input, additionalInputs, accountId })
+  return apiFetch("/jobs/run_wait_result/p/f/tools/ai-paid-social-manager", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "ai-paid-social-manager",
+      toolName: "Ai Paid Social Manager",
+      input,
+      additionalInputs,
+      accountId,
+    }),
   });
 }
 
@@ -5019,9 +7402,17 @@ export async function runAiPaidSocialManager({ userId, input, additionalInputs, 
  * Caption Creator
  */
 export async function runCaptionCreator({ userId, input, additionalInputs, accountId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/caption-creator', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'caption-creator', toolName: 'Caption Creator', input, additionalInputs, accountId })
+  return apiFetch("/jobs/run_wait_result/p/f/tools/caption-creator", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "caption-creator",
+      toolName: "Caption Creator",
+      input,
+      additionalInputs,
+      accountId,
+    }),
   });
 }
 
@@ -5029,9 +7420,17 @@ export async function runCaptionCreator({ userId, input, additionalInputs, accou
  * Hashtag Generator
  */
 export async function runHashtagGenerator({ userId, input, additionalInputs, accountId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/hashtag-generator', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'hashtag-generator', toolName: 'Hashtag Generator', input, additionalInputs, accountId })
+  return apiFetch("/jobs/run_wait_result/p/f/tools/hashtag-generator", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "hashtag-generator",
+      toolName: "Hashtag Generator",
+      input,
+      additionalInputs,
+      accountId,
+    }),
   });
 }
 
@@ -5039,9 +7438,17 @@ export async function runHashtagGenerator({ userId, input, additionalInputs, acc
  * Linkedin Ad Copy Generator
  */
 export async function runLinkedinAdCopyGenerator({ userId, input, additionalInputs, accountId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/linkedin-ad-copy-generator', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'linkedin-ad-copy-generator', toolName: 'Linkedin Ad Copy Generator', input, additionalInputs, accountId })
+  return apiFetch("/jobs/run_wait_result/p/f/tools/linkedin-ad-copy-generator", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "linkedin-ad-copy-generator",
+      toolName: "Linkedin Ad Copy Generator",
+      input,
+      additionalInputs,
+      accountId,
+    }),
   });
 }
 
@@ -5049,9 +7456,17 @@ export async function runLinkedinAdCopyGenerator({ userId, input, additionalInpu
  * Marketing Calendar
  */
 export async function runMarketingCalendar({ userId, input, additionalInputs, accountId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/marketing-calendar', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'marketing-calendar', toolName: 'Marketing Calendar', input, additionalInputs, accountId })
+  return apiFetch("/jobs/run_wait_result/p/f/tools/marketing-calendar", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "marketing-calendar",
+      toolName: "Marketing Calendar",
+      input,
+      additionalInputs,
+      accountId,
+    }),
   });
 }
 
@@ -5059,9 +7474,17 @@ export async function runMarketingCalendar({ userId, input, additionalInputs, ac
  * Post Scheduler
  */
 export async function runPostScheduler({ userId, input, additionalInputs, accountId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/post-scheduler', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'post-scheduler', toolName: 'Post Scheduler', input, additionalInputs, accountId })
+  return apiFetch("/jobs/run_wait_result/p/f/tools/post-scheduler", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "post-scheduler",
+      toolName: "Post Scheduler",
+      input,
+      additionalInputs,
+      accountId,
+    }),
   });
 }
 
@@ -5069,9 +7492,17 @@ export async function runPostScheduler({ userId, input, additionalInputs, accoun
  * Social Analytics Dashboard
  */
 export async function runSocialAnalyticsDashboard({ userId, input, additionalInputs, accountId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/social-analytics-dashboard', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'social-analytics-dashboard', toolName: 'Social Analytics Dashboard', input, additionalInputs, accountId })
+  return apiFetch("/jobs/run_wait_result/p/f/tools/social-analytics-dashboard", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "social-analytics-dashboard",
+      toolName: "Social Analytics Dashboard",
+      input,
+      additionalInputs,
+      accountId,
+    }),
   });
 }
 
@@ -5079,9 +7510,17 @@ export async function runSocialAnalyticsDashboard({ userId, input, additionalInp
  * Social Hashtag Generator
  */
 export async function runSocialHashtagGenerator({ userId, input, additionalInputs, accountId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/social-hashtag-generator', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'social-hashtag-generator', toolName: 'Social Hashtag Generator', input, additionalInputs, accountId })
+  return apiFetch("/jobs/run_wait_result/p/f/tools/social-hashtag-generator", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "social-hashtag-generator",
+      toolName: "Social Hashtag Generator",
+      input,
+      additionalInputs,
+      accountId,
+    }),
   });
 }
 
@@ -5089,9 +7528,17 @@ export async function runSocialHashtagGenerator({ userId, input, additionalInput
  * Social Media Post Generator
  */
 export async function runSocialMediaPostGenerator({ userId, input, additionalInputs, accountId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/social-media-post-generator', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'social-media-post-generator', toolName: 'Social Media Post Generator', input, additionalInputs, accountId })
+  return apiFetch("/jobs/run_wait_result/p/f/tools/social-media-post-generator", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "social-media-post-generator",
+      toolName: "Social Media Post Generator",
+      input,
+      additionalInputs,
+      accountId,
+    }),
   });
 }
 
@@ -5099,9 +7546,17 @@ export async function runSocialMediaPostGenerator({ userId, input, additionalInp
  * Tiktok Ad Creator
  */
 export async function runTiktokAdCreator({ userId, input, additionalInputs, accountId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/tiktok-ad-creator', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'tiktok-ad-creator', toolName: 'Tiktok Ad Creator', input, additionalInputs, accountId })
+  return apiFetch("/jobs/run_wait_result/p/f/tools/tiktok-ad-creator", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "tiktok-ad-creator",
+      toolName: "Tiktok Ad Creator",
+      input,
+      additionalInputs,
+      accountId,
+    }),
   });
 }
 
@@ -5109,19 +7564,40 @@ export async function runTiktokAdCreator({ userId, input, additionalInputs, acco
  * Youtube Ad Script Writer
  */
 export async function runYoutubeAdScriptWriter({ userId, input, additionalInputs, accountId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/youtube-ad-script-writer', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'youtube-ad-script-writer', toolName: 'Youtube Ad Script Writer', input, additionalInputs, accountId })
+  return apiFetch("/jobs/run_wait_result/p/f/tools/youtube-ad-script-writer", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "youtube-ad-script-writer",
+      toolName: "Youtube Ad Script Writer",
+      input,
+      additionalInputs,
+      accountId,
+    }),
   });
 }
 
 /**
  * Youtube Description Generator
  */
-export async function runYoutubeDescriptionGenerator({ userId, input, additionalInputs, accountId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/youtube-description-generator', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'youtube-description-generator', toolName: 'Youtube Description Generator', input, additionalInputs, accountId })
+export async function runYoutubeDescriptionGenerator({
+  userId,
+  input,
+  additionalInputs,
+  accountId,
+}) {
+  return apiFetch("/jobs/run_wait_result/p/f/tools/youtube-description-generator", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "youtube-description-generator",
+      toolName: "Youtube Description Generator",
+      input,
+      additionalInputs,
+      accountId,
+    }),
   });
 }
 
@@ -5129,9 +7605,17 @@ export async function runYoutubeDescriptionGenerator({ userId, input, additional
  * Youtube Title Generator
  */
 export async function runYoutubeTitleGenerator({ userId, input, additionalInputs, accountId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/youtube-title-generator', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'youtube-title-generator', toolName: 'Youtube Title Generator', input, additionalInputs, accountId })
+  return apiFetch("/jobs/run_wait_result/p/f/tools/youtube-title-generator", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "youtube-title-generator",
+      toolName: "Youtube Title Generator",
+      input,
+      additionalInputs,
+      accountId,
+    }),
   });
 }
 
@@ -5143,9 +7627,17 @@ export async function runYoutubeTitleGenerator({ userId, input, additionalInputs
  * Academic Writer
  */
 export async function runAcademicWriter({ userId, input, additionalInputs, accountId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/academic-writer', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'academic-writer', toolName: 'Academic Writer', input, additionalInputs, accountId })
+  return apiFetch("/jobs/run_wait_result/p/f/tools/academic-writer", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "academic-writer",
+      toolName: "Academic Writer",
+      input,
+      additionalInputs,
+      accountId,
+    }),
   });
 }
 
@@ -5153,9 +7645,17 @@ export async function runAcademicWriter({ userId, input, additionalInputs, accou
  * Article Generator
  */
 export async function runArticleGenerator({ userId, input, additionalInputs, accountId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/article-generator', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'article-generator', toolName: 'Article Generator', input, additionalInputs, accountId })
+  return apiFetch("/jobs/run_wait_result/p/f/tools/article-generator", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "article-generator",
+      toolName: "Article Generator",
+      input,
+      additionalInputs,
+      accountId,
+    }),
   });
 }
 
@@ -5163,9 +7663,17 @@ export async function runArticleGenerator({ userId, input, additionalInputs, acc
  * Article Rewriter
  */
 export async function runArticleRewriter({ userId, input, additionalInputs, accountId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/article-rewriter', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'article-rewriter', toolName: 'Article Rewriter', input, additionalInputs, accountId })
+  return apiFetch("/jobs/run_wait_result/p/f/tools/article-rewriter", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "article-rewriter",
+      toolName: "Article Rewriter",
+      input,
+      additionalInputs,
+      accountId,
+    }),
   });
 }
 
@@ -5173,19 +7681,40 @@ export async function runArticleRewriter({ userId, input, additionalInputs, acco
  * Article Summarizer
  */
 export async function runArticleSummarizer({ userId, input, additionalInputs, accountId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/article-summarizer', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'article-summarizer', toolName: 'Article Summarizer', input, additionalInputs, accountId })
+  return apiFetch("/jobs/run_wait_result/p/f/tools/article-summarizer", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "article-summarizer",
+      toolName: "Article Summarizer",
+      input,
+      additionalInputs,
+      accountId,
+    }),
   });
 }
 
 /**
  * Backlink Outreach Email Generator
  */
-export async function runBacklinkOutreachEmailGenerator({ userId, input, additionalInputs, accountId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/backlink-outreach-email-generator', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'backlink-outreach-email-generator', toolName: 'Backlink Outreach Email Generator', input, additionalInputs, accountId })
+export async function runBacklinkOutreachEmailGenerator({
+  userId,
+  input,
+  additionalInputs,
+  accountId,
+}) {
+  return apiFetch("/jobs/run_wait_result/p/f/tools/backlink-outreach-email-generator", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "backlink-outreach-email-generator",
+      toolName: "Backlink Outreach Email Generator",
+      input,
+      additionalInputs,
+      accountId,
+    }),
   });
 }
 
@@ -5193,9 +7722,17 @@ export async function runBacklinkOutreachEmailGenerator({ userId, input, additio
  * Blog Conclusion Writer
  */
 export async function runBlogConclusionWriter({ userId, input, additionalInputs, accountId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/blog-conclusion-writer', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'blog-conclusion-writer', toolName: 'Blog Conclusion Writer', input, additionalInputs, accountId })
+  return apiFetch("/jobs/run_wait_result/p/f/tools/blog-conclusion-writer", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "blog-conclusion-writer",
+      toolName: "Blog Conclusion Writer",
+      input,
+      additionalInputs,
+      accountId,
+    }),
   });
 }
 
@@ -5203,9 +7740,17 @@ export async function runBlogConclusionWriter({ userId, input, additionalInputs,
  * Blog Intro Writer
  */
 export async function runBlogIntroWriter({ userId, input, additionalInputs, accountId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/blog-intro-writer', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'blog-intro-writer', toolName: 'Blog Intro Writer', input, additionalInputs, accountId })
+  return apiFetch("/jobs/run_wait_result/p/f/tools/blog-intro-writer", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "blog-intro-writer",
+      toolName: "Blog Intro Writer",
+      input,
+      additionalInputs,
+      accountId,
+    }),
   });
 }
 
@@ -5213,9 +7758,17 @@ export async function runBlogIntroWriter({ userId, input, additionalInputs, acco
  * Blog Outline Writer
  */
 export async function runBlogOutlineWriter({ userId, input, additionalInputs, accountId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/blog-outline-writer', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'blog-outline-writer', toolName: 'Blog Outline Writer', input, additionalInputs, accountId })
+  return apiFetch("/jobs/run_wait_result/p/f/tools/blog-outline-writer", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "blog-outline-writer",
+      toolName: "Blog Outline Writer",
+      input,
+      additionalInputs,
+      accountId,
+    }),
   });
 }
 
@@ -5223,9 +7776,17 @@ export async function runBlogOutlineWriter({ userId, input, additionalInputs, ac
  * Blog Post Ideas
  */
 export async function runBlogPostIdeas({ userId, input, additionalInputs, accountId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/blog-post-ideas', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'blog-post-ideas', toolName: 'Blog Post Ideas', input, additionalInputs, accountId })
+  return apiFetch("/jobs/run_wait_result/p/f/tools/blog-post-ideas", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "blog-post-ideas",
+      toolName: "Blog Post Ideas",
+      input,
+      additionalInputs,
+      accountId,
+    }),
   });
 }
 
@@ -5233,9 +7794,17 @@ export async function runBlogPostIdeas({ userId, input, additionalInputs, accoun
  * Blog Writer
  */
 export async function runBlogWriter({ userId, input, additionalInputs, accountId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/blog-writer', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'blog-writer', toolName: 'Blog Writer', input, additionalInputs, accountId })
+  return apiFetch("/jobs/run_wait_result/p/f/tools/blog-writer", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "blog-writer",
+      toolName: "Blog Writer",
+      input,
+      additionalInputs,
+      accountId,
+    }),
   });
 }
 
@@ -5243,9 +7812,17 @@ export async function runBlogWriter({ userId, input, additionalInputs, accountId
  * Case Study Writer
  */
 export async function runCaseStudyWriter({ userId, input, additionalInputs, accountId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/case-study-writer', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'case-study-writer', toolName: 'Case Study Writer', input, additionalInputs, accountId })
+  return apiFetch("/jobs/run_wait_result/p/f/tools/case-study-writer", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "case-study-writer",
+      toolName: "Case Study Writer",
+      input,
+      additionalInputs,
+      accountId,
+    }),
   });
 }
 
@@ -5253,20 +7830,35 @@ export async function runCaseStudyWriter({ userId, input, additionalInputs, acco
  * Content Gap Finder
  */
 export async function runContentGapFinder({ userId, input, additionalInputs, accountId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/content-gap-finder', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'content-gap-finder', toolName: 'Content Gap Finder', input, additionalInputs, accountId })
+  return apiFetch("/jobs/run_wait_result/p/f/tools/content-gap-finder", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "content-gap-finder",
+      toolName: "Content Gap Finder",
+      input,
+      additionalInputs,
+      accountId,
+    }),
   });
 }
-
 
 /**
  * Faq Generator
  */
 export async function runFaqGenerator({ userId, input, additionalInputs, accountId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/faq-generator', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'faq-generator', toolName: 'Faq Generator', input, additionalInputs, accountId })
+  return apiFetch("/jobs/run_wait_result/p/f/tools/faq-generator", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "faq-generator",
+      toolName: "Faq Generator",
+      input,
+      additionalInputs,
+      accountId,
+    }),
   });
 }
 
@@ -5274,9 +7866,17 @@ export async function runFaqGenerator({ userId, input, additionalInputs, account
  * Faq Schema Writer
  */
 export async function runFaqSchemaWriter({ userId, input, additionalInputs, accountId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/faq-schema-writer', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'faq-schema-writer', toolName: 'Faq Schema Writer', input, additionalInputs, accountId })
+  return apiFetch("/jobs/run_wait_result/p/f/tools/faq-schema-writer", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "faq-schema-writer",
+      toolName: "Faq Schema Writer",
+      input,
+      additionalInputs,
+      accountId,
+    }),
   });
 }
 
@@ -5284,19 +7884,40 @@ export async function runFaqSchemaWriter({ userId, input, additionalInputs, acco
  * Free Keyword Tools
  */
 export async function runFreeKeywordTools({ userId, input, additionalInputs, accountId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/free-keyword-tools', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'free-keyword-tools', toolName: 'Free Keyword Tools', input, additionalInputs, accountId })
+  return apiFetch("/jobs/run_wait_result/p/f/tools/free-keyword-tools", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "free-keyword-tools",
+      toolName: "Free Keyword Tools",
+      input,
+      additionalInputs,
+      accountId,
+    }),
   });
 }
 
 /**
  * Internal Linking Suggestions
  */
-export async function runInternalLinkingSuggestions({ userId, input, additionalInputs, accountId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/internal-linking-suggestions', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'internal-linking-suggestions', toolName: 'Internal Linking Suggestions', input, additionalInputs, accountId })
+export async function runInternalLinkingSuggestions({
+  userId,
+  input,
+  additionalInputs,
+  accountId,
+}) {
+  return apiFetch("/jobs/run_wait_result/p/f/tools/internal-linking-suggestions", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "internal-linking-suggestions",
+      toolName: "Internal Linking Suggestions",
+      input,
+      additionalInputs,
+      accountId,
+    }),
   });
 }
 
@@ -5304,9 +7925,17 @@ export async function runInternalLinkingSuggestions({ userId, input, additionalI
  * Keyword Cluster Generator
  */
 export async function runKeywordClusterGenerator({ userId, input, additionalInputs, accountId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/keyword-cluster-generator', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'keyword-cluster-generator', toolName: 'Keyword Cluster Generator', input, additionalInputs, accountId })
+  return apiFetch("/jobs/run_wait_result/p/f/tools/keyword-cluster-generator", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "keyword-cluster-generator",
+      toolName: "Keyword Cluster Generator",
+      input,
+      additionalInputs,
+      accountId,
+    }),
   });
 }
 
@@ -5314,9 +7943,17 @@ export async function runKeywordClusterGenerator({ userId, input, additionalInpu
  * Keyword Intent Detector
  */
 export async function runKeywordIntentDetector({ userId, input, additionalInputs, accountId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/keyword-intent-detector', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'keyword-intent-detector', toolName: 'Keyword Intent Detector', input, additionalInputs, accountId })
+  return apiFetch("/jobs/run_wait_result/p/f/tools/keyword-intent-detector", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "keyword-intent-detector",
+      toolName: "Keyword Intent Detector",
+      input,
+      additionalInputs,
+      accountId,
+    }),
   });
 }
 
@@ -5324,9 +7961,17 @@ export async function runKeywordIntentDetector({ userId, input, additionalInputs
  * Keyword Research Tool
  */
 export async function runKeywordResearchTool({ userId, input, additionalInputs, accountId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/keyword-research-tool', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'keyword-research-tool', toolName: 'Keyword Research Tool', input, additionalInputs, accountId })
+  return apiFetch("/jobs/run_wait_result/p/f/tools/keyword-research-tool", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "keyword-research-tool",
+      toolName: "Keyword Research Tool",
+      input,
+      additionalInputs,
+      accountId,
+    }),
   });
 }
 
@@ -5334,9 +7979,17 @@ export async function runKeywordResearchTool({ userId, input, additionalInputs, 
  * Long Tail Keyword Generator
  */
 export async function runLongTailKeywordGenerator({ userId, input, additionalInputs, accountId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/long-tail-keyword-generator', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'long-tail-keyword-generator', toolName: 'Long Tail Keyword Generator', input, additionalInputs, accountId })
+  return apiFetch("/jobs/run_wait_result/p/f/tools/long-tail-keyword-generator", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "long-tail-keyword-generator",
+      toolName: "Long Tail Keyword Generator",
+      input,
+      additionalInputs,
+      accountId,
+    }),
   });
 }
 
@@ -5344,22 +7997,35 @@ export async function runLongTailKeywordGenerator({ userId, input, additionalInp
  * Meta Description Generator
  */
 export async function runMetaDescriptionGenerator({ userId, input, additionalInputs, accountId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/meta-description-generator', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'meta-description-generator', toolName: 'Meta Description Generator', input, additionalInputs, accountId })
+  return apiFetch("/jobs/run_wait_result/p/f/tools/meta-description-generator", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "meta-description-generator",
+      toolName: "Meta Description Generator",
+      input,
+      additionalInputs,
+      accountId,
+    }),
   });
 }
-
-
-
 
 /**
  * Podcast Script Writer
  */
 export async function runPodcastScriptWriter({ userId, input, additionalInputs, accountId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/podcast-script-writer', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'podcast-script-writer', toolName: 'Podcast Script Writer', input, additionalInputs, accountId })
+  return apiFetch("/jobs/run_wait_result/p/f/tools/podcast-script-writer", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "podcast-script-writer",
+      toolName: "Podcast Script Writer",
+      input,
+      additionalInputs,
+      accountId,
+    }),
   });
 }
 
@@ -5367,32 +8033,53 @@ export async function runPodcastScriptWriter({ userId, input, additionalInputs, 
  * Press Release Generator
  */
 export async function runPressReleaseGenerator({ userId, input, additionalInputs, accountId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/press-release-generator', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'press-release-generator', toolName: 'Press Release Generator', input, additionalInputs, accountId })
+  return apiFetch("/jobs/run_wait_result/p/f/tools/press-release-generator", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "press-release-generator",
+      toolName: "Press Release Generator",
+      input,
+      additionalInputs,
+      accountId,
+    }),
   });
 }
-
 
 /**
  * Schema Generator
  */
 export async function runSchemaGenerator({ userId, input, additionalInputs, accountId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/schema-generator', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'schema-generator', toolName: 'Schema Generator', input, additionalInputs, accountId })
+  return apiFetch("/jobs/run_wait_result/p/f/tools/schema-generator", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "schema-generator",
+      toolName: "Schema Generator",
+      input,
+      additionalInputs,
+      accountId,
+    }),
   });
 }
-
-
 
 /**
  * Seo Title Generator
  */
 export async function runSeoTitleGenerator({ userId, input, additionalInputs, accountId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/seo-title-generator', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'seo-title-generator', toolName: 'Seo Title Generator', input, additionalInputs, accountId })
+  return apiFetch("/jobs/run_wait_result/p/f/tools/seo-title-generator", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "seo-title-generator",
+      toolName: "Seo Title Generator",
+      input,
+      additionalInputs,
+      accountId,
+    }),
   });
 }
 
@@ -5400,9 +8087,17 @@ export async function runSeoTitleGenerator({ userId, input, additionalInputs, ac
  * Serp Analyzer
  */
 export async function runSerpAnalyzer({ userId, input, additionalInputs, accountId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/serp-analyzer', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'serp-analyzer', toolName: 'Serp Analyzer', input, additionalInputs, accountId })
+  return apiFetch("/jobs/run_wait_result/p/f/tools/serp-analyzer", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "serp-analyzer",
+      toolName: "Serp Analyzer",
+      input,
+      additionalInputs,
+      accountId,
+    }),
   });
 }
 
@@ -5410,9 +8105,17 @@ export async function runSerpAnalyzer({ userId, input, additionalInputs, account
  * Webinar Script Writer
  */
 export async function runWebinarScriptWriter({ userId, input, additionalInputs, accountId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/webinar-script-writer', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'webinar-script-writer', toolName: 'Webinar Script Writer', input, additionalInputs, accountId })
+  return apiFetch("/jobs/run_wait_result/p/f/tools/webinar-script-writer", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "webinar-script-writer",
+      toolName: "Webinar Script Writer",
+      input,
+      additionalInputs,
+      accountId,
+    }),
   });
 }
 
@@ -5420,9 +8123,17 @@ export async function runWebinarScriptWriter({ userId, input, additionalInputs, 
  * Whitepaper Generator
  */
 export async function runWhitepaperGenerator({ userId, input, additionalInputs, accountId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/whitepaper-generator', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'whitepaper-generator', toolName: 'Whitepaper Generator', input, additionalInputs, accountId })
+  return apiFetch("/jobs/run_wait_result/p/f/tools/whitepaper-generator", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "whitepaper-generator",
+      toolName: "Whitepaper Generator",
+      input,
+      additionalInputs,
+      accountId,
+    }),
   });
 }
 
@@ -5434,9 +8145,17 @@ export async function runWhitepaperGenerator({ userId, input, additionalInputs, 
  * Ad Intelligence Software
  */
 export async function runAdIntelligenceSoftware({ userId, input, additionalInputs, accountId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/ad-intelligence-software', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'ad-intelligence-software', toolName: 'Ad Intelligence Software', input, additionalInputs, accountId })
+  return apiFetch("/jobs/run_wait_result/p/f/tools/ad-intelligence-software", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "ad-intelligence-software",
+      toolName: "Ad Intelligence Software",
+      input,
+      additionalInputs,
+      accountId,
+    }),
   });
 }
 
@@ -5444,9 +8163,17 @@ export async function runAdIntelligenceSoftware({ userId, input, additionalInput
  * Brand Safety Monitor
  */
 export async function runBrandSafetyMonitor({ userId, input, additionalInputs, accountId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/brand-safety-monitor', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'brand-safety-monitor', toolName: 'Brand Safety Monitor', input, additionalInputs, accountId })
+  return apiFetch("/jobs/run_wait_result/p/f/tools/brand-safety-monitor", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "brand-safety-monitor",
+      toolName: "Brand Safety Monitor",
+      input,
+      additionalInputs,
+      accountId,
+    }),
   });
 }
 
@@ -5454,9 +8181,17 @@ export async function runBrandSafetyMonitor({ userId, input, additionalInputs, a
  * Client Reporting Portal
  */
 export async function runClientReportingPortal({ userId, input, additionalInputs, accountId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/client-reporting-portal', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'client-reporting-portal', toolName: 'Client Reporting Portal', input, additionalInputs, accountId })
+  return apiFetch("/jobs/run_wait_result/p/f/tools/client-reporting-portal", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "client-reporting-portal",
+      toolName: "Client Reporting Portal",
+      input,
+      additionalInputs,
+      accountId,
+    }),
   });
 }
 
@@ -5464,9 +8199,17 @@ export async function runClientReportingPortal({ userId, input, additionalInputs
  * Competitive Benchmarking Ai
  */
 export async function runCompetitiveBenchmarkingAi({ userId, input, additionalInputs, accountId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/competitive-benchmarking-ai', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'competitive-benchmarking-ai', toolName: 'Competitive Benchmarking Ai', input, additionalInputs, accountId })
+  return apiFetch("/jobs/run_wait_result/p/f/tools/competitive-benchmarking-ai", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "competitive-benchmarking-ai",
+      toolName: "Competitive Benchmarking Ai",
+      input,
+      additionalInputs,
+      accountId,
+    }),
   });
 }
 
@@ -5474,9 +8217,17 @@ export async function runCompetitiveBenchmarkingAi({ userId, input, additionalIn
  * Competitor Analysis Tool
  */
 export async function runCompetitorAnalysisTool({ userId, input, additionalInputs, accountId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/competitor-analysis-tool', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'competitor-analysis-tool', toolName: 'Competitor Analysis Tool', input, additionalInputs, accountId })
+  return apiFetch("/jobs/run_wait_result/p/f/tools/competitor-analysis-tool", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "competitor-analysis-tool",
+      toolName: "Competitor Analysis Tool",
+      input,
+      additionalInputs,
+      accountId,
+    }),
   });
 }
 
@@ -5484,19 +8235,40 @@ export async function runCompetitorAnalysisTool({ userId, input, additionalInput
  * Conversion Path Analyzer
  */
 export async function runConversionPathAnalyzer({ userId, input, additionalInputs, accountId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/conversion-path-analyzer', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'conversion-path-analyzer', toolName: 'Conversion Path Analyzer', input, additionalInputs, accountId })
+  return apiFetch("/jobs/run_wait_result/p/f/tools/conversion-path-analyzer", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "conversion-path-analyzer",
+      toolName: "Conversion Path Analyzer",
+      input,
+      additionalInputs,
+      accountId,
+    }),
   });
 }
 
 /**
  * Customer Journey Intelligence
  */
-export async function runCustomerJourneyIntelligence({ userId, input, additionalInputs, accountId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/customer-journey-intelligence', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'customer-journey-intelligence', toolName: 'Customer Journey Intelligence', input, additionalInputs, accountId })
+export async function runCustomerJourneyIntelligence({
+  userId,
+  input,
+  additionalInputs,
+  accountId,
+}) {
+  return apiFetch("/jobs/run_wait_result/p/f/tools/customer-journey-intelligence", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "customer-journey-intelligence",
+      toolName: "Customer Journey Intelligence",
+      input,
+      additionalInputs,
+      accountId,
+    }),
   });
 }
 
@@ -5504,9 +8276,17 @@ export async function runCustomerJourneyIntelligence({ userId, input, additional
  * Engagement Calculator
  */
 export async function runEngagementCalculator({ userId, input, additionalInputs, accountId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/engagement-calculator', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'engagement-calculator', toolName: 'Engagement Calculator', input, additionalInputs, accountId })
+  return apiFetch("/jobs/run_wait_result/p/f/tools/engagement-calculator", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "engagement-calculator",
+      toolName: "Engagement Calculator",
+      input,
+      additionalInputs,
+      accountId,
+    }),
   });
 }
 
@@ -5514,9 +8294,17 @@ export async function runEngagementCalculator({ userId, input, additionalInputs,
  * Marketing Kpi Dashboard
  */
 export async function runMarketingKpiDashboard({ userId, input, additionalInputs, accountId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/marketing-kpi-dashboard', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'marketing-kpi-dashboard', toolName: 'Marketing Kpi Dashboard', input, additionalInputs, accountId })
+  return apiFetch("/jobs/run_wait_result/p/f/tools/marketing-kpi-dashboard", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "marketing-kpi-dashboard",
+      toolName: "Marketing Kpi Dashboard",
+      input,
+      additionalInputs,
+      accountId,
+    }),
   });
 }
 
@@ -5524,9 +8312,17 @@ export async function runMarketingKpiDashboard({ userId, input, additionalInputs
  * Multi Channel Attribution
  */
 export async function runMultiChannelAttribution({ userId, input, additionalInputs, accountId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/multi-channel-attribution', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'multi-channel-attribution', toolName: 'Multi Channel Attribution', input, additionalInputs, accountId })
+  return apiFetch("/jobs/run_wait_result/p/f/tools/multi-channel-attribution", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "multi-channel-attribution",
+      toolName: "Multi Channel Attribution",
+      input,
+      additionalInputs,
+      accountId,
+    }),
   });
 }
 
@@ -5534,9 +8330,17 @@ export async function runMultiChannelAttribution({ userId, input, additionalInpu
  * Performance Auto Alerts
  */
 export async function runPerformanceAutoAlerts({ userId, input, additionalInputs, accountId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/performance-auto-alerts', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'performance-auto-alerts', toolName: 'Performance Auto Alerts', input, additionalInputs, accountId })
+  return apiFetch("/jobs/run_wait_result/p/f/tools/performance-auto-alerts", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "performance-auto-alerts",
+      toolName: "Performance Auto Alerts",
+      input,
+      additionalInputs,
+      accountId,
+    }),
   });
 }
 
@@ -5544,19 +8348,40 @@ export async function runPerformanceAutoAlerts({ userId, input, additionalInputs
  * Performance Forecasting
  */
 export async function runPerformanceForecasting({ userId, input, additionalInputs, accountId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/performance-forecasting', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'performance-forecasting', toolName: 'Performance Forecasting', input, additionalInputs, accountId })
+  return apiFetch("/jobs/run_wait_result/p/f/tools/performance-forecasting", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "performance-forecasting",
+      toolName: "Performance Forecasting",
+      input,
+      additionalInputs,
+      accountId,
+    }),
   });
 }
 
 /**
  * Performance Intelligence Dashboard
  */
-export async function runPerformanceIntelligenceDashboard({ userId, input, additionalInputs, accountId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/performance-intelligence-dashboard', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'performance-intelligence-dashboard', toolName: 'Performance Intelligence Dashboard', input, additionalInputs, accountId })
+export async function runPerformanceIntelligenceDashboard({
+  userId,
+  input,
+  additionalInputs,
+  accountId,
+}) {
+  return apiFetch("/jobs/run_wait_result/p/f/tools/performance-intelligence-dashboard", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "performance-intelligence-dashboard",
+      toolName: "Performance Intelligence Dashboard",
+      input,
+      additionalInputs,
+      accountId,
+    }),
   });
 }
 
@@ -5564,9 +8389,17 @@ export async function runPerformanceIntelligenceDashboard({ userId, input, addit
  * Reporting Tools
  */
 export async function runReportingTools({ userId, input, additionalInputs, accountId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/reporting-tools', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'reporting-tools', toolName: 'Reporting Tools', input, additionalInputs, accountId })
+  return apiFetch("/jobs/run_wait_result/p/f/tools/reporting-tools", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "reporting-tools",
+      toolName: "Reporting Tools",
+      input,
+      additionalInputs,
+      accountId,
+    }),
   });
 }
 
@@ -5574,9 +8407,17 @@ export async function runReportingTools({ userId, input, additionalInputs, accou
  * Roas Prediction Platform
  */
 export async function runRoasPredictionPlatform({ userId, input, additionalInputs, accountId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/roas-prediction-platform', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'roas-prediction-platform', toolName: 'Roas Prediction Platform', input, additionalInputs, accountId })
+  return apiFetch("/jobs/run_wait_result/p/f/tools/roas-prediction-platform", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "roas-prediction-platform",
+      toolName: "Roas Prediction Platform",
+      input,
+      additionalInputs,
+      accountId,
+    }),
   });
 }
 
@@ -5584,9 +8425,17 @@ export async function runRoasPredictionPlatform({ userId, input, additionalInput
  * Roi Calculator
  */
 export async function runRoiCalculator({ userId, input, additionalInputs, accountId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/roi-calculator', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'roi-calculator', toolName: 'Roi Calculator', input, additionalInputs, accountId })
+  return apiFetch("/jobs/run_wait_result/p/f/tools/roi-calculator", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "roi-calculator",
+      toolName: "Roi Calculator",
+      input,
+      additionalInputs,
+      accountId,
+    }),
   });
 }
 
@@ -5594,9 +8443,17 @@ export async function runRoiCalculator({ userId, input, additionalInputs, accoun
  * Roi Intelligence Platform
  */
 export async function runRoiIntelligencePlatform({ userId, input, additionalInputs, accountId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/roi-intelligence-platform', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'roi-intelligence-platform', toolName: 'Roi Intelligence Platform', input, additionalInputs, accountId })
+  return apiFetch("/jobs/run_wait_result/p/f/tools/roi-intelligence-platform", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "roi-intelligence-platform",
+      toolName: "Roi Intelligence Platform",
+      input,
+      additionalInputs,
+      accountId,
+    }),
   });
 }
 
@@ -5604,9 +8461,17 @@ export async function runRoiIntelligencePlatform({ userId, input, additionalInpu
  * Unified Analytics Platform
  */
 export async function runUnifiedAnalyticsPlatform({ userId, input, additionalInputs, accountId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/unified-analytics-platform', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'unified-analytics-platform', toolName: 'Unified Analytics Platform', input, additionalInputs, accountId })
+  return apiFetch("/jobs/run_wait_result/p/f/tools/unified-analytics-platform", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "unified-analytics-platform",
+      toolName: "Unified Analytics Platform",
+      input,
+      additionalInputs,
+      accountId,
+    }),
   });
 }
 
@@ -5614,19 +8479,40 @@ export async function runUnifiedAnalyticsPlatform({ userId, input, additionalInp
  * Looker Studio Report Builder
  */
 export async function runDataStudioReporting({ userId, input, additionalInputs, accountId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/data-studio-reporting', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'data-studio-reporting', toolName: 'Looker Studio Report Builder', input, additionalInputs, accountId })
+  return apiFetch("/jobs/run_wait_result/p/f/tools/data-studio-reporting", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "data-studio-reporting",
+      toolName: "Looker Studio Report Builder",
+      input,
+      additionalInputs,
+      accountId,
+    }),
   });
 }
 
 /**
  * Performance Monitoring Dashboard
  */
-export async function runPpcPerformanceMonitoringTools({ userId, input, additionalInputs, accountId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/ppc-performance-monitoring-tools', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'ppc-performance-monitoring-tools', toolName: 'Performance Monitoring Dashboard', input, additionalInputs, accountId })
+export async function runPpcPerformanceMonitoringTools({
+  userId,
+  input,
+  additionalInputs,
+  accountId,
+}) {
+  return apiFetch("/jobs/run_wait_result/p/f/tools/ppc-performance-monitoring-tools", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "ppc-performance-monitoring-tools",
+      toolName: "Performance Monitoring Dashboard",
+      input,
+      additionalInputs,
+      accountId,
+    }),
   });
 }
 
@@ -5634,9 +8520,17 @@ export async function runPpcPerformanceMonitoringTools({ userId, input, addition
  * PPC Report Generator
  */
 export async function runPpcReportingSolution({ userId, input, additionalInputs, accountId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/ppc-reporting-solution', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'ppc-reporting-solution', toolName: 'PPC Report Generator', input, additionalInputs, accountId })
+  return apiFetch("/jobs/run_wait_result/p/f/tools/ppc-reporting-solution", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "ppc-reporting-solution",
+      toolName: "PPC Report Generator",
+      input,
+      additionalInputs,
+      accountId,
+    }),
   });
 }
 
@@ -5644,9 +8538,17 @@ export async function runPpcReportingSolution({ userId, input, additionalInputs,
  * Automated Reporting Suite
  */
 export async function runPpcReportingTools({ userId, input, additionalInputs, accountId }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/ppc-reporting-tools', {
-    method: 'POST', timeout: 180000,
-    body: JSON.stringify({ userId, toolSlug: 'ppc-reporting-tools', toolName: 'Automated Reporting Suite', input, additionalInputs, accountId })
+  return apiFetch("/jobs/run_wait_result/p/f/tools/ppc-reporting-tools", {
+    method: "POST",
+    timeout: 180000,
+    body: JSON.stringify({
+      userId,
+      toolSlug: "ppc-reporting-tools",
+      toolName: "Automated Reporting Suite",
+      input,
+      additionalInputs,
+      accountId,
+    }),
   });
 }
 
@@ -5662,9 +8564,9 @@ export async function runPpcReportingTools({ userId, input, additionalInputs, ac
  * @returns {Promise<Object>} { success, data: { dailyUsage[], platformBreakdown, topTools[], totalGenerations, totalCampaigns, aiInsight } }
  */
 export async function fetchChartData({ userId, dateRange, chartType }) {
-  return apiFetch('/jobs/run_wait_result/p/f/tools/worker-chart-data', {
-    method: 'POST',
+  return apiFetch("/jobs/run_wait_result/p/f/tools/worker-chart-data", {
+    method: "POST",
     timeout: 30000,
-    body: JSON.stringify({ userId, dateRange, chartType })
+    body: JSON.stringify({ userId, dateRange, chartType }),
   });
 }

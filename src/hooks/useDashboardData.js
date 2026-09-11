@@ -1,5 +1,5 @@
-import { useState, useEffect, useCallback } from 'react';
-import { fetchDashboardSummary } from '@/utils/api/windmill';
+import { useState, useEffect, useCallback } from "react";
+import { fetchDashboardSummary } from "@/utils/api/windmill";
 
 let cachedData = null;
 let cacheTime = 0;
@@ -15,7 +15,7 @@ export default function useDashboardData() {
     setError(null);
     try {
       const result = await fetchDashboardSummary();
-      if (result && typeof result === 'object') {
+      if (result && typeof result === "object") {
         cachedData = result;
         cacheTime = Date.now();
         setData(result);
@@ -29,7 +29,7 @@ export default function useDashboardData() {
 
   useEffect(() => {
     // Only fetch when ad accounts are connected (check localStorage)
-    const connected = localStorage.getItem('fb_ads_connected') === 'true';
+    const connected = localStorage.getItem("fb_ads_connected") === "true";
     if (connected && (!cachedData || Date.now() - cacheTime > CACHE_TTL)) {
       refresh();
     }

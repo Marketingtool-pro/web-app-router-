@@ -1,13 +1,18 @@
-import PropTypes from 'prop-types';
-import { useState, useRef, useEffect, createElement, useMemo } from 'react';
+import PropTypes from "prop-types";
+import { useState, useRef, useEffect, createElement, useMemo } from "react";
 
 // @mui
-import Box from '@mui/material/Box';
+import Box from "@mui/material/Box";
 
 // @project
-import Loader from '@/components/PageLoader';
+import Loader from "@/components/PageLoader";
 
-export default function LazySection({ sections, fallback = <Loader />, offset = '0px', placeholderHeight = 400 }) {
+export default function LazySection({
+  sections,
+  fallback = <Loader />,
+  offset = "0px",
+  placeholderHeight = 400,
+}) {
   const sectionList = useMemo(() => (Array.isArray(sections) ? sections : [sections]), [sections]);
   const [isVisible, setIsVisible] = useState(false);
   const [loadedComponents, setLoadedComponents] = useState(Array(sectionList.length).fill(null));
@@ -18,12 +23,12 @@ export default function LazySection({ sections, fallback = <Loader />, offset = 
       ([entry]) => {
         if (entry.isIntersecting && !isVisible) {
           setIsVisible(true);
-          Promise.all(sectionList.map((section) => section.importFunc().then((module) => module.default))).then((components) =>
-            setLoadedComponents(components)
-          );
+          Promise.all(
+            sectionList.map((section) => section.importFunc().then((module) => module.default)),
+          ).then((components) => setLoadedComponents(components));
         }
       },
-      { rootMargin: offset, threshold: 0.1 }
+      { rootMargin: offset, threshold: 0.1 },
     );
 
     if (ref.current) observer.observe(ref.current);
@@ -34,7 +39,9 @@ export default function LazySection({ sections, fallback = <Loader />, offset = 
   return (
     <Box ref={ref} sx={{ minHeight: placeholderHeight }}>
       {isVisible && loadedComponents.every((component) => component)
-        ? sectionList.map((section, index) => createElement(loadedComponents[index], { key: index, ...section.props }))
+        ? sectionList.map((section, index) =>
+            createElement(loadedComponents[index], { key: index, ...section.props }),
+          )
         : isVisible && fallback}
     </Box>
   );
@@ -45,5 +52,5 @@ LazySection.propTypes = {
   fallback: PropTypes.node,
   Loader: PropTypes.any,
   offset: PropTypes.string,
-  placeholderHeight: PropTypes.number
+  placeholderHeight: PropTypes.number,
 };

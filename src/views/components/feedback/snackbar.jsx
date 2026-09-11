@@ -1,11 +1,11 @@
 // @mui
-import Grid from '@mui/material/Grid';
-import Button from '@mui/material/Button';
-import Typography from '@mui/material/Typography';
+import Grid from "@mui/material/Grid";
+import Button from "@mui/material/Button";
+import Typography from "@mui/material/Typography";
 
 // @project
-import ComponentsWrapper from '@/components/ComponentsWrapper';
-import PresentationCard from '@/components/cards/PresentationCard';
+import ComponentsWrapper from "@/components/ComponentsWrapper";
+import PresentationCard from "@/components/cards/PresentationCard";
 import {
   ColorVariants,
   CustomComponent,
@@ -17,9 +17,9 @@ import {
   PositioningSnackbar,
   PreventDuplicate,
   SnackBarAction,
-  TransitionBar
-} from '@/sections/components/snackbar';
-import { openSnackbar } from '@/states/snackbar';
+  TransitionBar,
+} from "@/sections/components/snackbar";
+import { openSnackbar } from "@/states/snackbar";
 
 // @types
 
@@ -38,9 +38,9 @@ export default function FeedbackSnackbar() {
                   onClick={() =>
                     openSnackbar({
                       open: true,
-                      message: 'This is a default message',
-                      variant: 'alert',
-                      severity: 'primary'
+                      message: "This is a default message",
+                      variant: "alert",
+                      severity: "primary",
                     })
                   }
                 >
@@ -54,9 +54,9 @@ export default function FeedbackSnackbar() {
                   onClick={() =>
                     openSnackbar({
                       open: true,
-                      message: 'This is a secondary message',
-                      variant: 'alert',
-                      severity: 'secondary'
+                      message: "This is a secondary message",
+                      variant: "alert",
+                      severity: "secondary",
                     })
                   }
                 >
@@ -70,9 +70,9 @@ export default function FeedbackSnackbar() {
                   onClick={() =>
                     openSnackbar({
                       open: true,
-                      message: 'This is a success message',
-                      variant: 'alert',
-                      severity: 'success'
+                      message: "This is a success message",
+                      variant: "alert",
+                      severity: "success",
                     })
                   }
                 >
@@ -86,9 +86,9 @@ export default function FeedbackSnackbar() {
                   onClick={() =>
                     openSnackbar({
                       open: true,
-                      message: 'This is a warning message',
-                      variant: 'alert',
-                      severity: 'warning'
+                      message: "This is a warning message",
+                      variant: "alert",
+                      severity: "warning",
                     })
                   }
                 >
@@ -102,9 +102,9 @@ export default function FeedbackSnackbar() {
                   onClick={() =>
                     openSnackbar({
                       open: true,
-                      message: 'This is a info message',
-                      variant: 'alert',
-                      severity: 'info'
+                      message: "This is a info message",
+                      variant: "alert",
+                      severity: "info",
                     })
                   }
                 >
@@ -118,9 +118,9 @@ export default function FeedbackSnackbar() {
                   onClick={() =>
                     openSnackbar({
                       open: true,
-                      message: 'This is a error message',
-                      variant: 'alert',
-                      severity: 'error'
+                      message: "This is a error message",
+                      variant: "alert",
+                      severity: "error",
                     })
                   }
                 >
@@ -139,10 +139,10 @@ export default function FeedbackSnackbar() {
                   onClick={() =>
                     openSnackbar({
                       open: true,
-                      message: 'This is a default message',
-                      variant: 'alert',
-                      alert: { variant: 'outlined' },
-                      severity: 'primary'
+                      message: "This is a default message",
+                      variant: "alert",
+                      alert: { variant: "outlined" },
+                      severity: "primary",
                     })
                   }
                 >
@@ -156,10 +156,10 @@ export default function FeedbackSnackbar() {
                   onClick={() =>
                     openSnackbar({
                       open: true,
-                      message: 'This is a secondary message',
-                      variant: 'alert',
-                      alert: { variant: 'outlined' },
-                      severity: 'secondary'
+                      message: "This is a secondary message",
+                      variant: "alert",
+                      alert: { variant: "outlined" },
+                      severity: "secondary",
                     })
                   }
                 >
@@ -173,10 +173,10 @@ export default function FeedbackSnackbar() {
                   onClick={() =>
                     openSnackbar({
                       open: true,
-                      message: 'This is a success message',
-                      variant: 'alert',
-                      alert: { variant: 'outlined' },
-                      severity: 'success'
+                      message: "This is a success message",
+                      variant: "alert",
+                      alert: { variant: "outlined" },
+                      severity: "success",
                     })
                   }
                 >
@@ -190,10 +190,10 @@ export default function FeedbackSnackbar() {
                   onClick={() =>
                     openSnackbar({
                       open: true,
-                      message: 'This is a warning message',
-                      variant: 'alert',
-                      alert: { variant: 'outlined' },
-                      severity: 'warning'
+                      message: "This is a warning message",
+                      variant: "alert",
+                      alert: { variant: "outlined" },
+                      severity: "warning",
                     })
                   }
                 >
@@ -207,10 +207,10 @@ export default function FeedbackSnackbar() {
                   onClick={() =>
                     openSnackbar({
                       open: true,
-                      message: 'This is a info message',
-                      variant: 'alert',
-                      alert: { variant: 'outlined' },
-                      severity: 'info'
+                      message: "This is a info message",
+                      variant: "alert",
+                      alert: { variant: "outlined" },
+                      severity: "info",
                     })
                   }
                 >
@@ -224,10 +224,10 @@ export default function FeedbackSnackbar() {
                   onClick={() =>
                     openSnackbar({
                       open: true,
-                      message: 'This is a error message',
-                      variant: 'alert',
-                      alert: { variant: 'outlined' },
-                      severity: 'error'
+                      message: "This is a error message",
+                      variant: "alert",
+                      alert: { variant: "outlined" },
+                      severity: "error",
                     })
                   }
                 >
@@ -246,10 +246,10 @@ export default function FeedbackSnackbar() {
                   onClick={() =>
                     openSnackbar({
                       open: true,
-                      message: 'This is a default message',
-                      variant: 'alert',
-                      severity: 'primary',
-                      close: true
+                      message: "This is a default message",
+                      variant: "alert",
+                      severity: "primary",
+                      close: true,
                     })
                   }
                 >
@@ -263,10 +263,10 @@ export default function FeedbackSnackbar() {
                   onClick={() =>
                     openSnackbar({
                       open: true,
-                      message: 'This is a secondary message',
-                      variant: 'alert',
-                      severity: 'secondary',
-                      close: true
+                      message: "This is a secondary message",
+                      variant: "alert",
+                      severity: "secondary",
+                      close: true,
                     })
                   }
                 >
@@ -280,10 +280,10 @@ export default function FeedbackSnackbar() {
                   onClick={() =>
                     openSnackbar({
                       open: true,
-                      message: 'This is a success message',
-                      variant: 'alert',
-                      severity: 'success',
-                      close: true
+                      message: "This is a success message",
+                      variant: "alert",
+                      severity: "success",
+                      close: true,
                     })
                   }
                 >
@@ -297,10 +297,10 @@ export default function FeedbackSnackbar() {
                   onClick={() =>
                     openSnackbar({
                       open: true,
-                      message: 'This is a warning message',
-                      variant: 'alert',
-                      severity: 'warning',
-                      close: true
+                      message: "This is a warning message",
+                      variant: "alert",
+                      severity: "warning",
+                      close: true,
                     })
                   }
                 >
@@ -314,10 +314,10 @@ export default function FeedbackSnackbar() {
                   onClick={() =>
                     openSnackbar({
                       open: true,
-                      message: 'This is a info message',
-                      variant: 'alert',
-                      severity: 'info',
-                      close: true
+                      message: "This is a info message",
+                      variant: "alert",
+                      severity: "info",
+                      close: true,
                     })
                   }
                 >
@@ -331,10 +331,10 @@ export default function FeedbackSnackbar() {
                   onClick={() =>
                     openSnackbar({
                       open: true,
-                      message: 'This is a error message',
-                      variant: 'alert',
-                      severity: 'error',
-                      close: true
+                      message: "This is a error message",
+                      variant: "alert",
+                      severity: "error",
+                      close: true,
                     })
                   }
                 >
@@ -353,12 +353,12 @@ export default function FeedbackSnackbar() {
                   onClick={() =>
                     openSnackbar({
                       open: true,
-                      message: 'This is a default message',
-                      variant: 'alert',
-                      alert: { variant: 'outlined' },
-                      severity: 'primary',
+                      message: "This is a default message",
+                      variant: "alert",
+                      alert: { variant: "outlined" },
+                      severity: "primary",
                       actionButton: true,
-                      close: true
+                      close: true,
                     })
                   }
                 >
@@ -372,12 +372,12 @@ export default function FeedbackSnackbar() {
                   onClick={() =>
                     openSnackbar({
                       open: true,
-                      message: 'This is a secondary message',
-                      variant: 'alert',
-                      alert: { variant: 'outlined' },
-                      severity: 'secondary',
+                      message: "This is a secondary message",
+                      variant: "alert",
+                      alert: { variant: "outlined" },
+                      severity: "secondary",
                       actionButton: true,
-                      close: true
+                      close: true,
                     })
                   }
                 >
@@ -391,12 +391,12 @@ export default function FeedbackSnackbar() {
                   onClick={() =>
                     openSnackbar({
                       open: true,
-                      message: 'This is a success message',
-                      variant: 'alert',
-                      alert: { variant: 'outlined' },
-                      severity: 'success',
+                      message: "This is a success message",
+                      variant: "alert",
+                      alert: { variant: "outlined" },
+                      severity: "success",
                       actionButton: true,
-                      close: true
+                      close: true,
                     })
                   }
                 >
@@ -410,12 +410,12 @@ export default function FeedbackSnackbar() {
                   onClick={() =>
                     openSnackbar({
                       open: true,
-                      message: 'This is a warning message',
-                      variant: 'alert',
-                      alert: { variant: 'outlined' },
-                      severity: 'warning',
+                      message: "This is a warning message",
+                      variant: "alert",
+                      alert: { variant: "outlined" },
+                      severity: "warning",
                       actionButton: true,
-                      close: true
+                      close: true,
                     })
                   }
                 >
@@ -429,12 +429,12 @@ export default function FeedbackSnackbar() {
                   onClick={() =>
                     openSnackbar({
                       open: true,
-                      message: 'This is a info message',
-                      variant: 'alert',
-                      alert: { variant: 'outlined' },
-                      severity: 'info',
+                      message: "This is a info message",
+                      variant: "alert",
+                      alert: { variant: "outlined" },
+                      severity: "info",
                       actionButton: true,
-                      close: true
+                      close: true,
                     })
                   }
                 >
@@ -448,12 +448,12 @@ export default function FeedbackSnackbar() {
                   onClick={() =>
                     openSnackbar({
                       open: true,
-                      message: 'This is a error message',
-                      variant: 'alert',
-                      alert: { variant: 'outlined' },
-                      severity: 'error',
+                      message: "This is a error message",
+                      variant: "alert",
+                      alert: { variant: "outlined" },
+                      severity: "error",
                       actionButton: true,
-                      close: true
+                      close: true,
                     })
                   }
                 >
@@ -472,9 +472,9 @@ export default function FeedbackSnackbar() {
                   onClick={() =>
                     openSnackbar({
                       open: true,
-                      anchorOrigin: { vertical: 'top', horizontal: 'left' },
-                      message: 'This is a Top-Left message!',
-                      close: true
+                      anchorOrigin: { vertical: "top", horizontal: "left" },
+                      message: "This is a Top-Left message!",
+                      close: true,
                     })
                   }
                 >
@@ -487,9 +487,9 @@ export default function FeedbackSnackbar() {
                   onClick={() =>
                     openSnackbar({
                       open: true,
-                      anchorOrigin: { vertical: 'top', horizontal: 'center' },
-                      message: 'This is a Top-Center message!',
-                      close: true
+                      anchorOrigin: { vertical: "top", horizontal: "center" },
+                      message: "This is a Top-Center message!",
+                      close: true,
                     })
                   }
                 >
@@ -502,9 +502,9 @@ export default function FeedbackSnackbar() {
                   onClick={() =>
                     openSnackbar({
                       open: true,
-                      anchorOrigin: { vertical: 'top', horizontal: 'right' },
-                      message: 'This is a Top-Right message!',
-                      close: true
+                      anchorOrigin: { vertical: "top", horizontal: "right" },
+                      message: "This is a Top-Right message!",
+                      close: true,
                     })
                   }
                 >
@@ -517,9 +517,9 @@ export default function FeedbackSnackbar() {
                   onClick={() =>
                     openSnackbar({
                       open: true,
-                      anchorOrigin: { vertical: 'bottom', horizontal: 'right' },
-                      message: 'This is a Bottom-Right message!',
-                      close: true
+                      anchorOrigin: { vertical: "bottom", horizontal: "right" },
+                      message: "This is a Bottom-Right message!",
+                      close: true,
                     })
                   }
                 >
@@ -532,9 +532,9 @@ export default function FeedbackSnackbar() {
                   onClick={() =>
                     openSnackbar({
                       open: true,
-                      anchorOrigin: { vertical: 'bottom', horizontal: 'center' },
-                      message: 'This is a Bottom-Center message!',
-                      close: true
+                      anchorOrigin: { vertical: "bottom", horizontal: "center" },
+                      message: "This is a Bottom-Center message!",
+                      close: true,
                     })
                   }
                 >
@@ -547,9 +547,9 @@ export default function FeedbackSnackbar() {
                   onClick={() =>
                     openSnackbar({
                       open: true,
-                      anchorOrigin: { vertical: 'bottom', horizontal: 'left' },
-                      message: 'This is a Bottom-Left message!',
-                      close: true
+                      anchorOrigin: { vertical: "bottom", horizontal: "left" },
+                      message: "This is a Bottom-Left message!",
+                      close: true,
                     })
                   }
                 >
@@ -568,9 +568,9 @@ export default function FeedbackSnackbar() {
                   onClick={() =>
                     openSnackbar({
                       open: true,
-                      message: 'This is a Fade message!',
-                      transition: 'Fade',
-                      close: true
+                      message: "This is a Fade message!",
+                      transition: "Fade",
+                      close: true,
                     })
                   }
                 >
@@ -583,9 +583,9 @@ export default function FeedbackSnackbar() {
                   onClick={() =>
                     openSnackbar({
                       open: true,
-                      message: 'This is a Slide-Left message!',
-                      transition: 'SlideLeft',
-                      close: true
+                      message: "This is a Slide-Left message!",
+                      transition: "SlideLeft",
+                      close: true,
                     })
                   }
                 >
@@ -598,9 +598,9 @@ export default function FeedbackSnackbar() {
                   onClick={() =>
                     openSnackbar({
                       open: true,
-                      message: 'This is a Slide-Up message!',
-                      transition: 'SlideUp',
-                      close: true
+                      message: "This is a Slide-Up message!",
+                      transition: "SlideUp",
+                      close: true,
                     })
                   }
                 >
@@ -613,9 +613,9 @@ export default function FeedbackSnackbar() {
                   onClick={() =>
                     openSnackbar({
                       open: true,
-                      message: 'This is a Slide-Right message!',
-                      transition: 'SlideRight',
-                      close: true
+                      message: "This is a Slide-Right message!",
+                      transition: "SlideRight",
+                      close: true,
                     })
                   }
                 >
@@ -628,9 +628,9 @@ export default function FeedbackSnackbar() {
                   onClick={() =>
                     openSnackbar({
                       open: true,
-                      message: 'This is a Slide-Down message!',
-                      transition: 'SlideDown',
-                      close: true
+                      message: "This is a Slide-Down message!",
+                      transition: "SlideDown",
+                      close: true,
                     })
                   }
                 >
@@ -643,9 +643,9 @@ export default function FeedbackSnackbar() {
                   onClick={() =>
                     openSnackbar({
                       open: true,
-                      message: 'This is a Grow message!',
-                      transition: 'Grow',
-                      close: true
+                      message: "This is a Grow message!",
+                      transition: "Grow",
+                      close: true,
                     })
                   }
                 >

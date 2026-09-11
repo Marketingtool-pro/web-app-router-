@@ -9,40 +9,40 @@
  * `npm run dev` is unchanged for local work; this file only backs `npm start`.
  */
 
-import { createServer } from 'node:http';
-import { createReadStream, promises as fsp } from 'node:fs';
-import path from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { createServer } from "node:http";
+import { createReadStream, promises as fsp } from "node:fs";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
-const ROOT = path.resolve(HERE, 'dist');
-const INDEX = 'index.html';
-const PORT = Number.parseInt(process.env.PORT ?? '8080', 10);
-const HOST = '0.0.0.0';
+const ROOT = path.resolve(HERE, "dist");
+const INDEX = "index.html";
+const PORT = Number.parseInt(process.env.PORT ?? "8080", 10);
+const HOST = "0.0.0.0";
 
 const TYPES = new Map([
-  ['.html', 'text/html; charset=utf-8'],
-  ['.js', 'text/javascript; charset=utf-8'],
-  ['.mjs', 'text/javascript; charset=utf-8'],
-  ['.css', 'text/css; charset=utf-8'],
-  ['.json', 'application/json; charset=utf-8'],
-  ['.map', 'application/json; charset=utf-8'],
-  ['.svg', 'image/svg+xml'],
-  ['.png', 'image/png'],
-  ['.jpg', 'image/jpeg'],
-  ['.jpeg', 'image/jpeg'],
-  ['.gif', 'image/gif'],
-  ['.webp', 'image/webp'],
-  ['.avif', 'image/avif'],
-  ['.ico', 'image/x-icon'],
-  ['.woff', 'font/woff'],
-  ['.woff2', 'font/woff2'],
-  ['.ttf', 'font/ttf'],
-  ['.otf', 'font/otf'],
-  ['.txt', 'text/plain; charset=utf-8'],
-  ['.xml', 'application/xml; charset=utf-8'],
-  ['.wasm', 'application/wasm'],
-  ['.webmanifest', 'application/manifest+json']
+  [".html", "text/html; charset=utf-8"],
+  [".js", "text/javascript; charset=utf-8"],
+  [".mjs", "text/javascript; charset=utf-8"],
+  [".css", "text/css; charset=utf-8"],
+  [".json", "application/json; charset=utf-8"],
+  [".map", "application/json; charset=utf-8"],
+  [".svg", "image/svg+xml"],
+  [".png", "image/png"],
+  [".jpg", "image/jpeg"],
+  [".jpeg", "image/jpeg"],
+  [".gif", "image/gif"],
+  [".webp", "image/webp"],
+  [".avif", "image/avif"],
+  [".ico", "image/x-icon"],
+  [".woff", "font/woff"],
+  [".woff2", "font/woff2"],
+  [".ttf", "font/ttf"],
+  [".otf", "font/otf"],
+  [".txt", "text/plain; charset=utf-8"],
+  [".xml", "application/xml; charset=utf-8"],
+  [".wasm", "application/wasm"],
+  [".webmanifest", "application/manifest+json"],
 ]);
 
 /**
@@ -61,12 +61,12 @@ function safeResolve(requestPath) {
   } catch {
     return null;
   }
-  if (decoded.includes('\0')) return null;
+  if (decoded.includes("\0")) return null;
 
   const segments = [];
-  for (const raw of decoded.split('/')) {
-    if (raw === '' || raw === '.') continue;
-    if (raw === '..') return null;
+  for (const raw of decoded.split("/")) {
+    if (raw === "" || raw === ".") continue;
+    if (raw === "..") return null;
     if (!/^[A-Za-z0-9._@()+ ,~-]+$/.test(raw)) return null;
     segments.push(raw);
   }
@@ -86,11 +86,11 @@ async function fileAt(candidate) {
   }
 }
 
-const ASSETS = path.join(ROOT, 'assets') + path.sep;
+const ASSETS = path.join(ROOT, "assets") + path.sep;
 
 const server = createServer(async (req, res) => {
-  if (req.method !== 'GET' && req.method !== 'HEAD') {
-    res.writeHead(405, { allow: 'GET, HEAD' });
+  if (req.method !== "GET" && req.method !== "HEAD") {
+    res.writeHead(405, { allow: "GET, HEAD" });
     res.end();
     return;
   }
@@ -98,11 +98,11 @@ const server = createServer(async (req, res) => {
   // Plain string split rather than `new URL(...)`: this server never sees an
   // origin, so a dummy base URL would add nothing but a plaintext-protocol
   // literal for scanners to trip over.
-  const pathname = (req.url ?? '/').split('?')[0].split('#')[0];
+  const pathname = (req.url ?? "/").split("?")[0].split("#")[0];
 
-  if (pathname === '/healthz') {
-    res.writeHead(200, { 'content-type': 'text/plain; charset=utf-8' });
-    res.end('ok');
+  if (pathname === "/healthz") {
+    res.writeHead(200, { "content-type": "text/plain; charset=utf-8" });
+    res.end("ok");
     return;
   }
 
@@ -114,31 +114,31 @@ const server = createServer(async (req, res) => {
     // Anything that looks like a file is a genuine 404; everything else is a
     // client-side route and has to be answered with the SPA shell.
     if (/\.[A-Za-z0-9]+$/.test(pathname)) {
-      res.writeHead(404, { 'content-type': 'text/plain; charset=utf-8' });
-      res.end('Not found');
+      res.writeHead(404, { "content-type": "text/plain; charset=utf-8" });
+      res.end("Not found");
       return;
     }
     file = await fileAt(path.join(ROOT, INDEX));
     if (!file) {
-      res.writeHead(500, { 'content-type': 'text/plain; charset=utf-8' });
-      res.end('Build output is missing: run `npm run build` first.');
+      res.writeHead(500, { "content-type": "text/plain; charset=utf-8" });
+      res.end("Build output is missing: run `npm run build` first.");
       return;
     }
   }
 
   res.writeHead(200, {
-    'content-type': TYPES.get(path.extname(file).toLowerCase()) ?? 'application/octet-stream',
-    'x-content-type-options': 'nosniff',
-    'cache-control': file.startsWith(ASSETS) ? 'public, max-age=31536000, immutable' : 'no-cache'
+    "content-type": TYPES.get(path.extname(file).toLowerCase()) ?? "application/octet-stream",
+    "x-content-type-options": "nosniff",
+    "cache-control": file.startsWith(ASSETS) ? "public, max-age=31536000, immutable" : "no-cache",
   });
 
-  if (req.method === 'HEAD') {
+  if (req.method === "HEAD") {
     res.end();
     return;
   }
 
   const stream = createReadStream(file);
-  stream.on('error', () => res.destroy());
+  stream.on("error", () => res.destroy());
   stream.pipe(res);
 });
 
@@ -146,6 +146,6 @@ server.listen(PORT, HOST, () => {
   console.log(`web-app-router serving ${ROOT} on ${HOST}:${PORT}`);
 });
 
-for (const signal of ['SIGTERM', 'SIGINT']) {
+for (const signal of ["SIGTERM", "SIGINT"]) {
   process.on(signal, () => server.close(() => process.exit(0)));
 }

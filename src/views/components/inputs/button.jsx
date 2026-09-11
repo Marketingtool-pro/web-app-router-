@@ -1,9 +1,9 @@
 // @mui
-import Grid from '@mui/material/Grid';
-import Stack from '@mui/material/Stack';
+import Grid from "@mui/material/Grid";
+import Stack from "@mui/material/Stack";
 
 // @project
-import ComponentsWrapper from '@/components/ComponentsWrapper';
+import ComponentsWrapper from "@/components/ComponentsWrapper";
 import {
   BasicButton,
   BasicIconButton,
@@ -13,8 +13,8 @@ import {
   DisabledIconButton,
   IconButtonSize,
   Size,
-  WithIcon
-} from '@/sections/components/button';
+  WithIcon,
+} from "@/sections/components/button";
 
 /***************************  INPUTS - BUTTON  ***************************/
 

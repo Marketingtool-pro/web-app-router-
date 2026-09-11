@@ -1,6 +1,6 @@
 // @project
-import ComponentsWrapper from '@/components/ComponentsWrapper';
-import { PersonTable } from '@/sections/components/table';
+import ComponentsWrapper from "@/components/ComponentsWrapper";
+import { PersonTable } from "@/sections/components/table";
 
 /***************************  COMPONENT - TABLE  ***************************/
 

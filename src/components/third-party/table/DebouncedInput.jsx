@@ -1,17 +1,25 @@
-import PropTypes from 'prop-types';
-import { useEffect, useState } from 'react';
+import PropTypes from "prop-types";
+import { useEffect, useState } from "react";
 
 // @mui
-import { useTheme } from '@mui/material/styles';
-import InputAdornment from '@mui/material/InputAdornment';
-import OutlinedInput from '@mui/material/OutlinedInput';
+import { useTheme } from "@mui/material/styles";
+import InputAdornment from "@mui/material/InputAdornment";
+import OutlinedInput from "@mui/material/OutlinedInput";
 
 // @assets
-import { IconSearch } from '@tabler/icons-react';
+import { IconSearch } from "@tabler/icons-react";
 
 /***************************  REACT TABLE - DEBOUNCED INPUT  ***************************/
 
-export default function DebouncedInput({ value: initialValue, onValueChange, debounce = 500, size, startAdornment, borderless, ...props }) {
+export default function DebouncedInput({
+  value: initialValue,
+  onValueChange,
+  debounce = 500,
+  size,
+  startAdornment,
+  borderless,
+  ...props
+}) {
   const theme = useTheme();
 
   const [value, setValue] = useState(initialValue);
@@ -43,7 +51,9 @@ export default function DebouncedInput({ value: initialValue, onValueChange, deb
         )
       }
       {...(size && { size })}
-      {...(borderless && { slotProps: { root: { sx: { boxShadow: 'unset' } }, notchedOutline: { sx: { border: 0 } } } })}
+      {...(borderless && {
+        slotProps: { root: { sx: { boxShadow: "unset" } }, notchedOutline: { sx: { border: 0 } } },
+      })}
     />
   );
 }
@@ -55,5 +65,5 @@ DebouncedInput.propTypes = {
   size: PropTypes.any,
   startAdornment: PropTypes.any,
   borderless: PropTypes.bool,
-  props: PropTypes.any
+  props: PropTypes.any,
 };

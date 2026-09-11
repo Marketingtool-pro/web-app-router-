@@ -1,7 +1,7 @@
 // @project
-import { withAlpha } from '@/utils/colorUtils';
+import { withAlpha } from "@/utils/colorUtils";
 
-const colors = ['primary', 'secondary', 'success', 'error', 'warning', 'info'];
+const colors = ["primary", "secondary", "success", "error", "warning", "info"];
 
 /***************************  COMPONENT - SLIDER  ***************************/
 
@@ -12,25 +12,31 @@ export default function Slider(theme) {
     return {
       props: { color },
       style: {
-        '& .MuiSlider-track': {
-          ...theme.applyStyles('dark', { backgroundColor: paletteColor.light, borderColor: paletteColor.light })
+        "& .MuiSlider-track": {
+          ...theme.applyStyles("dark", {
+            backgroundColor: paletteColor.light,
+            borderColor: paletteColor.light,
+          }),
         },
-        '& .MuiSlider-thumb': {
+        "& .MuiSlider-thumb": {
           borderColor: paletteColor.main,
-          ...theme.applyStyles('dark', { borderColor: paletteColor.light }),
-          '&:focus, &:hover, &.Mui-focusVisible': {
-            boxShadow: `0px 0px 0px 4px ${withAlpha(paletteColor.main, 0.2)}`
+          ...theme.applyStyles("dark", { borderColor: paletteColor.light }),
+          "&:focus, &:hover, &.Mui-focusVisible": {
+            boxShadow: `0px 0px 0px 4px ${withAlpha(paletteColor.main, 0.2)}`,
           },
-          '&:active': {
-            boxShadow: `0px 0px 0px 8px ${withAlpha(paletteColor.main, 0.5)}`
-          }
+          "&:active": {
+            boxShadow: `0px 0px 0px 8px ${withAlpha(paletteColor.main, 0.5)}`,
+          },
         },
-        '& .MuiSlider-valueLabel': {
+        "& .MuiSlider-valueLabel": {
           color: paletteColor.darker,
           backgroundColor: paletteColor.lighter,
-          ...theme.applyStyles('dark', { color: theme.vars.palette.background.default, backgroundColor: paletteColor.light })
-        }
-      }
+          ...theme.applyStyles("dark", {
+            color: theme.vars.palette.background.default,
+            backgroundColor: paletteColor.light,
+          }),
+        },
+      },
     };
   });
 
@@ -38,19 +44,19 @@ export default function Slider(theme) {
     MuiSlider: {
       styleOverrides: {
         track: {
-          height: 6
+          height: 6,
         },
         thumb: {
           width: 10,
           height: 10,
           border: `2px solid ${theme.vars.palette.primary.main}`,
-          backgroundColor: theme.vars.palette.background.default
+          backgroundColor: theme.vars.palette.background.default,
         },
         rail: {
           height: 8,
           opacity: 1,
           color: theme.vars.palette.grey[100],
-          ...theme.applyStyles('dark', { color: theme.vars.palette.grey[300] })
+          ...theme.applyStyles("dark", { color: theme.vars.palette.grey[300] }),
         },
         valueLabel: {
           ...theme.typography.caption,
@@ -58,28 +64,28 @@ export default function Slider(theme) {
           padding: 6,
           borderRadius: 8,
           top: -12,
-          '&:before': {
+          "&:before": {
             width: 10,
-            height: 10
-          }
+            height: 10,
+          },
         },
         root: {
           variants: [...colorVariants],
-          '&.Mui-disabled': {
-            '& .MuiSlider-rail': {
-              opacity: 0.25
+          "&.Mui-disabled": {
+            "& .MuiSlider-rail": {
+              opacity: 0.25,
             },
-            '& .MuiSlider-track': {
+            "& .MuiSlider-track": {
               backgroundColor: theme.vars.palette.action.disabled,
-              borderColor: 'transparent'
+              borderColor: "transparent",
             },
-            '& .MuiSlider-thumb': {
-              border: '2px solid',
-              borderColor: theme.vars.palette.action.disabled
-            }
-          }
-        }
-      }
-    }
+            "& .MuiSlider-thumb": {
+              border: "2px solid",
+              borderColor: theme.vars.palette.action.disabled,
+            },
+          },
+        },
+      },
+    },
   };
 }

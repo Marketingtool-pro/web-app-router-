@@ -1,33 +1,33 @@
-import PropTypes from 'prop-types';
+import PropTypes from "prop-types";
 
 // @mui
-import { styled, useTheme } from '@mui/material/styles';
-import Box from '@mui/material/Box';
+import { styled, useTheme } from "@mui/material/styles";
+import Box from "@mui/material/Box";
 
 // @third-party
-import MainSimpleBar from 'simplebar-react';
-import { BrowserView, MobileView } from 'react-device-detect';
+import MainSimpleBar from "simplebar-react";
+import { BrowserView, MobileView } from "react-device-detect";
 
 // @project
-import { ThemeDirection } from '@/config';
-import { withAlpha } from '@/utils/colorUtils';
+import { ThemeDirection } from "@/config";
+import { withAlpha } from "@/utils/colorUtils";
 
 // root style
-const RootStyle = styled(BrowserView)({ flexGrow: 1, height: '100%', overflow: 'hidden' });
+const RootStyle = styled(BrowserView)({ flexGrow: 1, height: "100%", overflow: "hidden" });
 
 // scroll bar wrapper
 const SimpleBarStyle = styled(MainSimpleBar)(({ theme }) => ({
-  maxHeight: '100%',
-  '& .simplebar-scrollbar': {
-    '&:before': {
+  maxHeight: "100%",
+  "& .simplebar-scrollbar": {
+    "&:before": {
       background: withAlpha(theme.vars.palette.grey[500], 0.48),
-      ...theme.applyStyles('dark', { background: withAlpha(theme.vars.palette.grey[200], 0.48) })
+      ...theme.applyStyles("dark", { background: withAlpha(theme.vars.palette.grey[200], 0.48) }),
     },
-    '&.simplebar-visible:before': { opacity: 1 }
+    "&.simplebar-visible:before": { opacity: 1 },
   },
-  '& .simplebar-track.simplebar-vertical': { width: 10 },
-  '& .simplebar-track.simplebar-horizontal .simplebar-scrollbar': { height: 6 },
-  '& .simplebar-mask': { zIndex: 'inherit' }
+  "& .simplebar-track.simplebar-vertical": { width: 10 },
+  "& .simplebar-track.simplebar-horizontal .simplebar-scrollbar": { height: 6 },
+  "& .simplebar-mask": { zIndex: "inherit" },
 }));
 
 /***************************  SIMPLE SCROLL BAR   ***************************/
@@ -41,14 +41,14 @@ export default function SimpleBar({ children, sx, ...other }) {
         <SimpleBarStyle
           clickOnTrack={false}
           sx={sx}
-          data-simplebar-direction={theme.direction === ThemeDirection.RTL ? 'rtl' : 'ltr'}
+          data-simplebar-direction={theme.direction === ThemeDirection.RTL ? "rtl" : "ltr"}
           {...other}
         >
           {children}
         </SimpleBarStyle>
       </RootStyle>
       <MobileView>
-        <Box sx={{ overflowX: 'auto', ...sx }} {...other}>
+        <Box sx={{ overflowX: "auto", ...sx }} {...other}>
           {children}
         </Box>
       </MobileView>

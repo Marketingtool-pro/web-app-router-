@@ -1,14 +1,14 @@
-const colors = ['primary', 'secondary', 'success', 'error', 'warning', 'info'];
+const colors = ["primary", "secondary", "success", "error", "warning", "info"];
 
 /***************************  SWITCH - SIZE  ***************************/
 
 function getSizeStyle(size) {
   switch (size) {
-    case 'small':
+    case "small":
       return { width: 34, height: 20, base: 14, thumb: 16, trackRadius: 16 };
-    case 'large':
+    case "large":
       return { width: 42, height: 24, base: 18, thumb: 20, trackRadius: 16 };
-    case 'medium':
+    case "medium":
     default:
       return { width: 38, height: 22, base: 16, thumb: 18, trackRadius: 16 };
   }
@@ -20,19 +20,19 @@ function switchStyle(size) {
   return {
     width: sizes.width,
     height: sizes.height,
-    '& .MuiSwitch-switchBase': {
+    "& .MuiSwitch-switchBase": {
       padding: 2,
-      '&.Mui-checked': {
-        transform: `translateX(${sizes.base}px)`
-      }
+      "&.Mui-checked": {
+        transform: `translateX(${sizes.base}px)`,
+      },
     },
-    '& .MuiSwitch-thumb': {
+    "& .MuiSwitch-thumb": {
       width: sizes.thumb,
-      height: sizes.thumb
+      height: sizes.thumb,
     },
-    '& .MuiSwitch-track': {
-      borderRadius: sizes.trackRadius
-    }
+    "& .MuiSwitch-track": {
+      borderRadius: sizes.trackRadius,
+    },
   };
 }
 
@@ -45,19 +45,19 @@ export default function Switch(theme) {
     return {
       props: { color },
       style: {
-        '& .MuiSwitch-switchBase': {
-          '&.Mui-checked': {
-            '& ~ .MuiSwitch-track': {
+        "& .MuiSwitch-switchBase": {
+          "&.Mui-checked": {
+            "& ~ .MuiSwitch-track": {
               backgroundColor: paletteColor.main,
-              ...theme.applyStyles('dark', { backgroundColor: paletteColor.light })
-            }
+              ...theme.applyStyles("dark", { backgroundColor: paletteColor.light }),
+            },
           },
-          '&:not(.Mui-checked) ~ .MuiSwitch-track': {
+          "&:not(.Mui-checked) ~ .MuiSwitch-track": {
             backgroundColor: theme.vars.palette.secondary.lighter,
-            ...theme.applyStyles('dark', { backgroundColor: theme.vars.palette.grey[700] })
-          }
-        }
-      }
+            ...theme.applyStyles("dark", { backgroundColor: theme.vars.palette.grey[700] }),
+          },
+        },
+      },
     };
   });
 
@@ -67,49 +67,55 @@ export default function Switch(theme) {
         root: {
           color: theme.vars.palette.text.primary,
           padding: 0,
-          display: 'flex',
-          ...switchStyle('medium'),
-          variants: [...colorVariants]
+          display: "flex",
+          ...switchStyle("medium"),
+          variants: [...colorVariants],
         },
         track: {
           opacity: 1,
           backgroundColor: theme.vars.palette.secondary.lighter,
-          boxSizing: 'border-box'
+          boxSizing: "border-box",
         },
         thumb: {
-          borderRadius: '50%',
-          transition: theme.transitions.create(['width'], {
-            duration: 200
-          })
+          borderRadius: "50%",
+          transition: theme.transitions.create(["width"], {
+            duration: 200,
+          }),
         },
         switchBase: {
-          '&.Mui-checked': {
+          "&.Mui-checked": {
             color: theme.vars.palette.background.default,
-            '& ~ .MuiSwitch-track': {
-              opacity: 1
+            "& ~ .MuiSwitch-track": {
+              opacity: 1,
             },
-            '&.Mui-disabled': {
+            "&.Mui-disabled": {
               color: theme.vars.palette.background.paper,
-              '~.MuiSwitch-track': {
-                opacity: 0.1
-              }
-            }
-          },
-          '&.Mui-disabled': {
-            color: theme.vars.palette.background.paper,
-            '~.MuiSwitch-track': {
-              opacity: 0.3
+              "~.MuiSwitch-track": {
+                opacity: 0.1,
+              },
             },
-            cursor: 'not-allowed',
-            pointerEvents: 'auto',
-            '&:hover': {
-              backgroundColor: 'transparent'
-            }
-          }
+          },
+          "&.Mui-disabled": {
+            color: theme.vars.palette.background.paper,
+            "~.MuiSwitch-track": {
+              opacity: 0.3,
+            },
+            cursor: "not-allowed",
+            pointerEvents: "auto",
+            "&:hover": {
+              backgroundColor: "transparent",
+            },
+          },
         },
-        sizeLarge: { ...switchStyle('large'), '& ~ .MuiFormControlLabel-label': theme.typography.body1 },
-        sizeSmall: { ...switchStyle('small'), '& ~ .MuiFormControlLabel-label': theme.typography.body2 }
-      }
-    }
+        sizeLarge: {
+          ...switchStyle("large"),
+          "& ~ .MuiFormControlLabel-label": theme.typography.body1,
+        },
+        sizeSmall: {
+          ...switchStyle("small"),
+          "& ~ .MuiFormControlLabel-label": theme.typography.body2,
+        },
+      },
+    },
   };
 }

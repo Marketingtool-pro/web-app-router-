@@ -1,6 +1,6 @@
-import { ID } from 'appwrite';
-import { appwriteAccount } from '@/utils/auth-client/appwrite';
-import { AUTH_USER_KEY } from '@/config';
+import { ID } from "appwrite";
+import { appwriteAccount } from "@/utils/auth-client/appwrite";
+import { AUTH_USER_KEY } from "@/config";
 
 /***************************  APPWRITE - LOGIN  ***************************/
 
@@ -18,9 +18,9 @@ export async function login(formData) {
     id: user.$id,
     email: user.email,
     access_token: jwtResponse.jwt,
-    firstname: user.name?.split(' ')[0] || '',
-    lastname: user.name?.split(' ').slice(1).join(' ') || '',
-    role: user.labels?.includes('admin') ? 'admin' : 'user'
+    firstname: user.name?.split(" ")[0] || "",
+    lastname: user.name?.split(" ").slice(1).join(" ") || "",
+    role: user.labels?.includes("admin") ? "admin" : "user",
   };
 }
 
@@ -34,30 +34,35 @@ export async function getUser() {
   const jwtResponse = await appwriteAccount.createJWT();
   const stored = localStorage.getItem(AUTH_USER_KEY);
   const existing = stored ? JSON.parse(stored) : {};
-  localStorage.setItem(AUTH_USER_KEY, JSON.stringify({
-    ...existing,
-    id: user.$id,
-    email: user.email,
-    access_token: jwtResponse.jwt
-  }));
+  localStorage.setItem(
+    AUTH_USER_KEY,
+    JSON.stringify({
+      ...existing,
+      id: user.$id,
+      email: user.email,
+      access_token: jwtResponse.jwt,
+    }),
+  );
 
   return {
     id: user.$id,
     email: user.email,
-    name: user.name || '',
-    firstname: user.name?.split(' ')[0] || '',
-    lastname: user.name?.split(' ').slice(1).join(' ') || '',
-    role: user.labels?.includes('admin') ? 'admin' : 'user',
-    contact: prefs.contact || user.phone || '',
-    dialcode: prefs.dialCode || '+1',
-    avatar: prefs.avatar || ''
+    name: user.name || "",
+    firstname: user.name?.split(" ")[0] || "",
+    lastname: user.name?.split(" ").slice(1).join(" ") || "",
+    role: user.labels?.includes("admin") ? "admin" : "user",
+    contact: prefs.contact || user.phone || "",
+    dialcode: prefs.dialCode || "+1",
+    avatar: prefs.avatar || "",
   };
 }
 
 /***************************  APPWRITE - SIGN UP  ***************************/
 
 export async function signUp(formData) {
-  const name = [formData.firstname, formData.lastname].filter(Boolean).join(' ') || formData.email.split('@')[0];
+  const name =
+    [formData.firstname, formData.lastname].filter(Boolean).join(" ") ||
+    formData.email.split("@")[0];
 
   await appwriteAccount.create(ID.unique(), formData.email, formData.password, name);
 
@@ -70,8 +75,8 @@ export async function signUp(formData) {
     id: user.$id,
     email: user.email,
     access_token: jwtResponse.jwt,
-    firstname: formData.firstname || '',
-    lastname: formData.lastname || ''
+    firstname: formData.firstname || "",
+    lastname: formData.lastname || "",
   };
 }
 
@@ -101,11 +106,11 @@ export async function forgotPassword(formData) {
 
 export async function resetPassword(formData) {
   const params = new URLSearchParams(window.location.search);
-  const userId = params.get('userId');
-  const secret = params.get('secret');
+  const userId = params.get("userId");
+  const secret = params.get("secret");
 
   if (!userId || !secret) {
-    throw new Error('Invalid recovery link. Please request a new password reset.');
+    throw new Error("Invalid recovery link. Please request a new password reset.");
   }
 
   await appwriteAccount.updateRecovery(userId, secret, formData.password);
@@ -116,7 +121,7 @@ export async function resetPassword(formData) {
 
 export async function signOut() {
   try {
-    await appwriteAccount.deleteSession('current');
+    await appwriteAccount.deleteSession("current");
   } catch {
     // Session may already be expired
   }
@@ -124,5 +129,14 @@ export async function signOut() {
   return { status: 200 };
 }
 
-const appwriteAuth = { login, getUser, signUp, verifyOtp, resend, forgotPassword, resetPassword, signOut };
+const appwriteAuth = {
+  login,
+  getUser,
+  signUp,
+  verifyOtp,
+  resend,
+  forgotPassword,
+  resetPassword,
+  signOut,
+};
 export default appwriteAuth;

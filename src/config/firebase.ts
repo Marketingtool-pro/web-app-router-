@@ -9,11 +9,11 @@ const firebaseConfig = {
   storageBucket: "marketing-tool-484720.firebasestorage.app",
   messagingSenderId: "911925145433",
   appId: "1:911925145433:web:18d502cd9b2c2d5c112648",
-  measurementId: "G-EDY5FPHF3N"
+  measurementId: "G-EDY5FPHF3N",
 };
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
-const analytics = typeof window !== 'undefined' ? getAnalytics(app) : null;
+const analytics = typeof window !== "undefined" ? getAnalytics(app) : null;
 
 export { app, analytics };

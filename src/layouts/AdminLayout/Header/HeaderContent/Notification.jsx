@@ -1,41 +1,48 @@
-import { Activity, Fragment, useState } from 'react';
+import { Activity, Fragment, useState } from "react";
 
 // @mui
-import { keyframes, useTheme } from '@mui/material/styles';
-import useMediaQuery from '@mui/material/useMediaQuery';
-import Badge from '@mui/material/Badge';
-import Button from '@mui/material/Button';
-import CardHeader from '@mui/material/CardHeader';
-import CardContent from '@mui/material/CardContent';
-import CardActions from '@mui/material/CardActions';
-import ClickAwayListener from '@mui/material/ClickAwayListener';
-import Fade from '@mui/material/Fade';
-import IconButton from '@mui/material/IconButton';
-import List from '@mui/material/List';
-import ListItemButton from '@mui/material/ListItemButton';
-import ListItemText from '@mui/material/ListItemText';
-import ListSubheader from '@mui/material/ListSubheader';
-import Popper from '@mui/material/Popper';
-import Stack from '@mui/material/Stack';
-import Box from '@mui/material/Box';
+import { keyframes, useTheme } from "@mui/material/styles";
+import useMediaQuery from "@mui/material/useMediaQuery";
+import Badge from "@mui/material/Badge";
+import Button from "@mui/material/Button";
+import CardHeader from "@mui/material/CardHeader";
+import CardContent from "@mui/material/CardContent";
+import CardActions from "@mui/material/CardActions";
+import ClickAwayListener from "@mui/material/ClickAwayListener";
+import Fade from "@mui/material/Fade";
+import IconButton from "@mui/material/IconButton";
+import List from "@mui/material/List";
+import ListItemButton from "@mui/material/ListItemButton";
+import ListItemText from "@mui/material/ListItemText";
+import ListSubheader from "@mui/material/ListSubheader";
+import Popper from "@mui/material/Popper";
+import Stack from "@mui/material/Stack";
+import Box from "@mui/material/Box";
 
 // @third-party
-import { AnimatePresence, motion } from 'motion/react';
+import { AnimatePresence, motion } from "motion/react";
 
 // @project
-import { ThemeDirection } from '@/config';
-import EmptyNotification from '@/components/header/empty-state/EmptyNotification';
-import MainCard from '@/components/MainCard';
-import NotificationItem from '@/components/NotificationItem';
-import { varSlide } from '@/components/third-party/motion/animate/dialog';
-import SimpleBar from '@/components/third-party/SimpleBar';
+import { ThemeDirection } from "@/config";
+import EmptyNotification from "@/components/header/empty-state/EmptyNotification";
+import MainCard from "@/components/MainCard";
+import NotificationItem from "@/components/NotificationItem";
+import { varSlide } from "@/components/third-party/motion/animate/dialog";
+import SimpleBar from "@/components/third-party/SimpleBar";
 
 // @assets
-import { IconBell, IconCode, IconChevronDown, IconGitBranch, IconNote, IconGps } from '@tabler/icons-react';
+import {
+  IconBell,
+  IconCode,
+  IconChevronDown,
+  IconGitBranch,
+  IconNote,
+  IconGps,
+} from "@tabler/icons-react";
 
-import avatar1 from '@/assets/images/users/avatar-1.png';
-import avatar4 from '@/assets/images/users/avatar-4.png';
-import avatar5 from '@/assets/images/users/avatar-5.png';
+import avatar1 from "@/assets/images/users/avatar-1.png";
+import avatar4 from "@/assets/images/users/avatar-4.png";
+import avatar5 from "@/assets/images/users/avatar-5.png";
 
 const swing = keyframes`
   20% {
@@ -59,7 +66,7 @@ const swing = keyframes`
 
 export default function Notification() {
   const theme = useTheme();
-  const downSM = useMediaQuery(theme.breakpoints.down('sm'));
+  const downSM = useMediaQuery(theme.breakpoints.down("sm"));
 
   const [anchorEl, setAnchorEl] = useState(null);
   const [innerAnchorEl, setInnerAnchorEl] = useState(null);
@@ -68,86 +75,93 @@ export default function Notification() {
 
   const open = Boolean(anchorEl);
   const innerOpen = Boolean(innerAnchorEl);
-  const id = open ? 'notification-action-popper' : undefined;
-  const innerId = innerOpen ? 'notification-inner-popper' : undefined;
+  const id = open ? "notification-action-popper" : undefined;
+  const innerId = innerOpen ? "notification-inner-popper" : undefined;
   const buttonStyle = { borderRadius: 2, p: 1 };
 
-  const listcontent = ['All notification', 'Users', 'Account', 'Language', 'Role & Permission', 'Setting'];
+  const listcontent = [
+    "All notification",
+    "Users",
+    "Account",
+    "Language",
+    "Role & Permission",
+    "Setting",
+  ];
 
   const [notifications, setNotifications] = useState([
     {
-      avatar: { alt: 'Travis Howard', src: avatar1 },
+      avatar: { alt: "Travis Howard", src: avatar1 },
       badge: <IconCode size={14} />,
-      title: 'New Feature Deployed · Code Review Needed',
-      subTitle: 'Brenda Skiles',
-      dateTime: 'Jul 9'
+      title: "New Feature Deployed · Code Review Needed",
+      subTitle: "Brenda Skiles",
+      dateTime: "Jul 9",
     },
     {
       avatar: <IconGitBranch />,
       title: 'New Branch Created - "feature-user-auth"',
-      subTitle: 'Michael Carter',
-      dateTime: 'Jul 10',
-      isSeen: true
+      subTitle: "Michael Carter",
+      dateTime: "Jul 10",
+      isSeen: true,
     },
     {
       avatar: <IconGitBranch />,
       title: 'Pull Request Opened "fix-dashboard-bug"',
-      subTitle: 'Sophia Green',
-      dateTime: 'Jul 11'
+      subTitle: "Sophia Green",
+      dateTime: "Jul 11",
     },
     {
-      avatar: { alt: 'Travis Howard', src: avatar4 },
+      avatar: { alt: "Travis Howard", src: avatar4 },
       badge: <IconNote size={14} />,
-      title: 'Admin Approval · Document Submission Accepted',
-      subTitle: 'Salvatore Bogan',
-      dateTime: 'Jul 15',
-      isSeen: true
+      title: "Admin Approval · Document Submission Accepted",
+      subTitle: "Salvatore Bogan",
+      dateTime: "Jul 15",
+      isSeen: true,
     },
     {
       avatar: <IconGps />,
-      title: 'Location Access Request, Pending Your Approval',
-      subTitle: 'System Notification',
-      dateTime: 'Jul 24',
-      isSeen: true
-    }
+      title: "Location Access Request, Pending Your Approval",
+      subTitle: "System Notification",
+      dateTime: "Jul 24",
+      isSeen: true,
+    },
   ]);
 
   const [notifications2, setNotifications2] = useState([
     {
-      avatar: { alt: 'Travis Howard', src: avatar1 },
+      avatar: { alt: "Travis Howard", src: avatar1 },
       badge: <IconCode size={14} />,
-      title: 'Code Review Requested · Feature Deployment',
-      subTitle: 'Brenda Skiles',
-      dateTime: 'Jul 9'
+      title: "Code Review Requested · Feature Deployment",
+      subTitle: "Brenda Skiles",
+      dateTime: "Jul 9",
     },
     {
       avatar: <IconGps />,
-      title: 'Location Access Granted [Security Update]',
-      subTitle: 'System Notification',
-      dateTime: 'Jul 24',
-      isSeen: true
+      title: "Location Access Granted [Security Update]",
+      subTitle: "System Notification",
+      dateTime: "Jul 24",
+      isSeen: true,
     },
     {
-      avatar: { alt: 'Alice Smith', src: avatar5 },
+      avatar: { alt: "Alice Smith", src: avatar5 },
       badge: <IconNote size={14} />,
-      title: 'Document Submission Approval Received',
-      subTitle: 'Salvatore Bogan',
-      dateTime: 'Aug 12',
-      isSeen: true
+      title: "Document Submission Approval Received",
+      subTitle: "Salvatore Bogan",
+      dateTime: "Aug 12",
+      isSeen: true,
     },
     {
-      avatar: { alt: 'Travis Howard', src: avatar1 },
+      avatar: { alt: "Travis Howard", src: avatar1 },
       badge: <IconCode size={14} />,
-      title: 'New Commit Pushed · Review Changes',
-      subTitle: 'Brenda Skiles',
-      dateTime: 'Jul 9'
+      title: "New Commit Pushed · Review Changes",
+      subTitle: "Brenda Skiles",
+      dateTime: "Jul 9",
     },
     {
       avatar: <IconGps />,
-      title: 'Unusual Login Attempt [Verify Activity]',
-      subTitle: 'Security Alert',
-      dateTime: 'Jul 24'
-    }
+      title: "Unusual Login Attempt [Verify Activity]",
+      subTitle: "Security Alert",
+      dateTime: "Jul 24",
+    },
   ]);
 
   const handleActionClick = (event) => {
@@ -160,8 +174,12 @@ export default function Notification() {
 
   // Function to mark all notifications as read
   const handleMarkAllAsRead = () => {
-    setNotifications((prevNotifications) => prevNotifications.map((notification) => ({ ...notification, isSeen: true })));
-    setNotifications2((prevNotifications2) => prevNotifications2.map((notification) => ({ ...notification, isSeen: true })));
+    setNotifications((prevNotifications) =>
+      prevNotifications.map((notification) => ({ ...notification, isSeen: true })),
+    );
+    setNotifications2((prevNotifications2) =>
+      prevNotifications2.map((notification) => ({ ...notification, isSeen: true })),
+    );
     setAllRead(true);
   };
 
@@ -179,14 +197,23 @@ export default function Notification() {
         size="small"
         onClick={handleActionClick}
         aria-label="show notifications"
-        {...(notifications.length !== 0 && !allRead && { sx: { '& svg': { animation: `${swing} 1s ease infinite` } } })}
+        {...(notifications.length !== 0 &&
+          !allRead && { sx: { "& svg": { animation: `${swing} 1s ease infinite` } } })}
       >
         <Badge
           color="error"
           variant="dot"
           invisible={allRead || notifications.length === 0}
           slotProps={{
-            badge: { sx: { height: 6, minWidth: 6, top: 4, right: 4, border: `1px solid ${theme.vars.palette.background.default}` } }
+            badge: {
+              sx: {
+                height: 6,
+                minWidth: 6,
+                top: 4,
+                right: 4,
+                border: `1px solid ${theme.vars.palette.background.default}`,
+              },
+            },
           }}
         >
           <IconBell size={16} />
@@ -194,20 +221,32 @@ export default function Notification() {
       </IconButton>
 
       <AnimatePresence>
-        <Activity mode={open ? 'visible' : 'hidden'}>
+        <Activity mode={open ? "visible" : "hidden"}>
           <Popper
             placement="bottom-end"
             id={id}
             open={open}
             anchorEl={anchorEl}
             popperOptions={{
-              modifiers: [{ name: 'offset', options: { offset: [downSM ? (theme.direction === ThemeDirection.RTL ? -45 : 45) : 0, 8] } }]
+              modifiers: [
+                {
+                  name: "offset",
+                  options: {
+                    offset: [downSM ? (theme.direction === ThemeDirection.RTL ? -45 : 45) : 0, 8],
+                  },
+                },
+              ],
             }}
             transition
           >
             {({ TransitionProps }) => (
               <Fade in={open} {...TransitionProps}>
-                <motion.div variants={varSlide('slideInDown', { distance: 20 })} initial="initial" animate="animate" exit="exit">
+                <motion.div
+                  variants={varSlide("slideInDown", { distance: 20 })}
+                  initial="initial"
+                  animate="animate"
+                  exit="exit"
+                >
                   <MainCard
                     sx={{
                       borderRadius: 2,
@@ -215,7 +254,7 @@ export default function Notification() {
                       width: 1,
                       minWidth: { xs: 352, sm: 240 },
                       maxWidth: { xs: 352, md: 420 },
-                      p: 0
+                      p: 0,
                     }}
                   >
                     <ClickAwayListener onClickAway={() => setAnchorEl(null)}>
@@ -223,11 +262,11 @@ export default function Notification() {
                         <CardHeader
                           sx={{ p: 1 }}
                           title={
-                            <Stack direction="row" sx={{ gap: 1, justifyContent: 'space-between' }}>
+                            <Stack direction="row" sx={{ gap: 1, justifyContent: "space-between" }}>
                               <Button
                                 color="secondary"
                                 size="small"
-                                sx={{ typography: 'h6' }}
+                                sx={{ typography: "h6" }}
                                 endIcon={<IconChevronDown size={16} />}
                                 onClick={handleInnerActionClick}
                               >
@@ -239,15 +278,33 @@ export default function Notification() {
                                 open={innerOpen}
                                 anchorEl={innerAnchorEl}
                                 transition
-                                popperOptions={{ modifiers: [{ name: 'preventOverflow', options: { boundary: 'clippingParents' } }] }}
+                                popperOptions={{
+                                  modifiers: [
+                                    {
+                                      name: "preventOverflow",
+                                      options: { boundary: "clippingParents" },
+                                    },
+                                  ],
+                                }}
                               >
                                 {({ TransitionProps }) => (
                                   <Fade in={innerOpen} {...TransitionProps}>
-                                    <MainCard sx={{ borderRadius: 2, boxShadow: theme.vars.customShadows.tooltip, minWidth: 156, p: 0.5 }}>
+                                    <MainCard
+                                      sx={{
+                                        borderRadius: 2,
+                                        boxShadow: theme.vars.customShadows.tooltip,
+                                        minWidth: 156,
+                                        p: 0.5,
+                                      }}
+                                    >
                                       <ClickAwayListener onClickAway={() => setInnerAnchorEl(null)}>
                                         <List disablePadding>
                                           {listcontent.map((item, index) => (
-                                            <ListItemButton key={index} sx={buttonStyle} onClick={handleInnerActionClick}>
+                                            <ListItemButton
+                                              key={index}
+                                              sx={buttonStyle}
+                                              onClick={handleInnerActionClick}
+                                            >
                                               <ListItemText>{item}</ListItemText>
                                             </ListItemButton>
                                           ))}
@@ -257,8 +314,13 @@ export default function Notification() {
                                   </Fade>
                                 )}
                               </Popper>
-                              <Activity mode={!showEmpty ? 'visible' : 'hidden'}>
-                                <Button color="primary" size="small" onClick={handleMarkAllAsRead} disabled={allRead}>
+                              <Activity mode={!showEmpty ? "visible" : "hidden"}>
+                                <Button
+                                  color="primary"
+                                  size="small"
+                                  onClick={handleMarkAllAsRead}
+                                  disabled={allRead}
+                                >
                                   Mark All as Read
                                 </Button>
                               </Activity>
@@ -269,12 +331,18 @@ export default function Notification() {
                           <EmptyNotification />
                         ) : (
                           <Fragment>
-                            <CardContent sx={{ px: 0.5, py: 2, '&:last-child': { pb: 2 } }}>
+                            <CardContent sx={{ px: 0.5, py: 2, "&:last-child": { pb: 2 } }}>
                               <SimpleBar sx={{ maxHeight: 405, height: 1 }}>
                                 <List disablePadding>
                                   <ListSubheader
                                     disableSticky
-                                    sx={{ color: 'text.disabled', typography: 'caption', py: 0.5, px: 1, mb: 0.5 }}
+                                    sx={{
+                                      color: "text.disabled",
+                                      typography: "caption",
+                                      py: 0.5,
+                                      px: 1,
+                                      mb: 0.5,
+                                    }}
                                   >
                                     Last 7 Days
                                   </ListSubheader>
@@ -282,7 +350,9 @@ export default function Notification() {
                                     <ListItemButton key={index} sx={buttonStyle}>
                                       <NotificationItem
                                         avatar={notification.avatar}
-                                        {...(notification.badge && { badgeAvatar: { children: notification.badge } })}
+                                        {...(notification.badge && {
+                                          badgeAvatar: { children: notification.badge },
+                                        })}
                                         title={notification.title}
                                         subTitle={notification.subTitle}
                                         dateTime={notification.dateTime}
@@ -292,7 +362,14 @@ export default function Notification() {
                                   ))}
                                   <ListSubheader
                                     disableSticky
-                                    sx={{ color: 'text.disabled', typography: 'caption', py: 0.5, px: 1, mb: 0.5, mt: 1.5 }}
+                                    sx={{
+                                      color: "text.disabled",
+                                      typography: "caption",
+                                      py: 0.5,
+                                      px: 1,
+                                      mb: 0.5,
+                                      mt: 1.5,
+                                    }}
                                   >
                                     Older
                                   </ListSubheader>
@@ -300,7 +377,9 @@ export default function Notification() {
                                     <ListItemButton key={index} sx={buttonStyle}>
                                       <NotificationItem
                                         avatar={notification.avatar}
-                                        {...(notification.badge && { badgeAvatar: { children: notification.badge } })}
+                                        {...(notification.badge && {
+                                          badgeAvatar: { children: notification.badge },
+                                        })}
                                         title={notification.title}
                                         subTitle={notification.subTitle}
                                         dateTime={notification.dateTime}

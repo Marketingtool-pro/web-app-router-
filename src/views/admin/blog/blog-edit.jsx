@@ -1,26 +1,26 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from "react";
 
 // @mui
-import Button from '@mui/material/Button';
-import IconButton from '@mui/material/IconButton';
-import Stack from '@mui/material/Stack';
-import Typography from '@mui/material/Typography';
+import Button from "@mui/material/Button";
+import IconButton from "@mui/material/IconButton";
+import Stack from "@mui/material/Stack";
+import Typography from "@mui/material/Typography";
 
 // @third-party
-import { enqueueSnackbar } from 'notistack';
+import { enqueueSnackbar } from "notistack";
 
 // @project
-import ItemNotFound from '@/components/ItemNotFound';
-import Loader from '@/components/Loader';
-import PageAnimateWrapper from '@/components/PageAnimateWrapper';
+import ItemNotFound from "@/components/ItemNotFound";
+import Loader from "@/components/Loader";
+import PageAnimateWrapper from "@/components/PageAnimateWrapper";
 
-import { BlogPost } from '@/sections/blog';
-import { getBlog } from '@/sections/blog/api';
-import { handlerBreadcrumbs } from '@/states/breadcrumbs';
-import { useRouter } from '@/utils/navigation';
+import { BlogPost } from "@/sections/blog";
+import { getBlog } from "@/sections/blog/api";
+import { handlerBreadcrumbs } from "@/states/breadcrumbs";
+import { useRouter } from "@/utils/navigation";
 
 // @assets
-import { IconArrowLeft, IconEye } from '@tabler/icons-react';
+import { IconArrowLeft, IconEye } from "@tabler/icons-react";
 
 /***************************  BLOGS - EDIT  ***************************/
 
@@ -47,7 +47,7 @@ export default function BlogEdit() {
     const { data, error } = await getBlog(id);
 
     if (data) setBlog(data);
-    if (error) enqueueSnackbar(error, { variant: 'error' });
+    if (error) enqueueSnackbar(error, { variant: "error" });
     setIsProcessing(false);
     return;
   };
@@ -55,7 +55,7 @@ export default function BlogEdit() {
   useEffect(() => {
     if (!id) return;
 
-    handlerBreadcrumbs(`/blog/edit/${id}`, [{ title: 'blog', url: '/blog' }, { title: 'edit' }]);
+    handlerBreadcrumbs(`/blog/edit/${id}`, [{ title: "blog", url: "/blog" }, { title: "edit" }]);
     fetchBlogData();
     // eslint-disable-next-line
   }, [id]);
@@ -64,15 +64,25 @@ export default function BlogEdit() {
 
   return (
     <Stack sx={{ gap: { xs: 2, sm: 3 } }}>
-      <Stack direction="row" sx={{ justifyContent: 'space-between' }}>
-        <Stack direction="row" sx={{ gap: 1.5, alignItems: 'center' }}>
-          <IconButton onClick={handleButtonClick} color="secondary" variant="outlined" aria-label="back">
+      <Stack direction="row" sx={{ justifyContent: "space-between" }}>
+        <Stack direction="row" sx={{ gap: 1.5, alignItems: "center" }}>
+          <IconButton
+            onClick={handleButtonClick}
+            color="secondary"
+            variant="outlined"
+            aria-label="back"
+          >
             <IconArrowLeft />
           </IconButton>
           <Typography variant="h6">Edit Blog & post</Typography>
         </Stack>
         {blog && (
-          <Button variant="outlined" color="secondary" startIcon={<IconEye size={16} />} onClick={handleClick}>
+          <Button
+            variant="outlined"
+            color="secondary"
+            startIcon={<IconEye size={16} />}
+            onClick={handleClick}
+          >
             Preview
           </Button>
         )}
@@ -81,7 +91,10 @@ export default function BlogEdit() {
         {blog ? (
           <BlogPost {...{ setPreview, preview, ref: previewRef, blogData: blog }} />
         ) : (
-          <ItemNotFound heading="Blog Not Found" caption="The blog you are looking for does not exist or may have been removed." />
+          <ItemNotFound
+            heading="Blog Not Found"
+            caption="The blog you are looking for does not exist or may have been removed."
+          />
         )}
       </PageAnimateWrapper>
     </Stack>

@@ -1,16 +1,16 @@
 // @project
-import { AuthRole } from '@/enum';
-import axiosServices from '@/utils/axios';
-import { generateId } from '@/utils/common';
+import { AuthRole } from "@/enum";
+import axiosServices from "@/utils/axios";
+import { generateId } from "@/utils/common";
 
 function handleAxiosError(error) {
   const axiosError = error;
 
   if (axiosError.response) {
-    return new Error(axiosError.response.data?.message || 'Request failed.');
+    return new Error(axiosError.response.data?.message || "Request failed.");
   }
 
-  return new Error(axiosError.message || 'Server error');
+  return new Error(axiosError.message || "Server error");
 }
 
 /***************************  JWT - LOGIN  ***************************/
@@ -19,9 +19,9 @@ export async function login(formData) {
   return new Promise(async (resolve, reject) => {
     try {
       // Example API call — update URL and data fields as per your backend.
-      const response = await axiosServices.post('/api/account/login', {
+      const response = await axiosServices.post("/api/account/login", {
         email: formData.email,
-        password: formData.password
+        password: formData.password,
       });
 
       const data = response.data;
@@ -29,8 +29,8 @@ export async function login(formData) {
       // Map response fields based on your backend structure.
       resolve({
         id: data.user?.id,
-        email: data.user?.email || '',
-        access_token: data.serviceToken
+        email: data.user?.email || "",
+        access_token: data.serviceToken,
       });
     } catch (error) {
       reject(handleAxiosError(error));
@@ -44,18 +44,18 @@ export async function getUser() {
   return new Promise(async (resolve, reject) => {
     try {
       // Example API call — update URL as per your backend.
-      const response = await axiosServices.get('/api/account/me');
+      const response = await axiosServices.get("/api/account/me");
       const data = response.data;
 
       // Map response fields based on your backend structure.
       resolve({
         id: data.user.id,
-        email: data.user.email || '',
+        email: data.user.email || "",
         role: AuthRole.USER,
-        contact: '123456789',
-        dialcode: '+1',
-        firstname: 'John',
-        lastname: 'Charly'
+        contact: "123456789",
+        dialcode: "+1",
+        firstname: "John",
+        lastname: "Charly",
       });
     } catch (error) {
       reject(handleAxiosError(error));
@@ -71,12 +71,12 @@ export async function signUp(formData) {
       const id = generateId();
 
       // Example API call — update URL and data fields as per your backend.
-      await axiosServices.post('/api/account/register', {
+      await axiosServices.post("/api/account/register", {
         id,
         email: formData.email,
         password: formData.password,
         firstName: formData.firstname,
-        lastName: formData.lastname
+        lastName: formData.lastname,
       });
       resolve({ status: 200 });
     } catch (error) {
@@ -91,7 +91,7 @@ export async function verifyOtp(formData) {
   return new Promise(async (resolve, reject) => {
     try {
       // Replace this with your actual API call to verify OTP
-      console.log('verifyOtp', formData);
+      console.log("verifyOtp", formData);
       resolve({ status: 200 });
     } catch (error) {
       reject(handleAxiosError(error));
@@ -105,7 +105,7 @@ export async function resend(formData) {
   return new Promise(async (resolve, reject) => {
     try {
       // Replace this with your actual API call to resend OTP
-      console.log('resendOtp', formData);
+      console.log("resendOtp", formData);
       resolve({ status: 200 });
     } catch (error) {
       reject(handleAxiosError(error));
@@ -119,7 +119,7 @@ export async function forgotPassword(formData) {
   return new Promise(async (resolve, reject) => {
     try {
       // Replace this with your actual API call to forgot password
-      console.log('forgotPassword', formData);
+      console.log("forgotPassword", formData);
       resolve({ status: 200 });
     } catch (error) {
       reject(handleAxiosError(error));
@@ -133,7 +133,7 @@ export async function resetPassword(formData) {
   return new Promise(async (resolve, reject) => {
     try {
       // Replace this with your actual API call to reset password
-      console.log('resetPassword', formData);
+      console.log("resetPassword", formData);
       resolve({ status: 200 });
     } catch (error) {
       reject(handleAxiosError(error));
@@ -148,12 +148,21 @@ export async function signOut() {
     try {
       resolve({ status: 200 });
     } catch {
-      reject(new Error('Server error'));
+      reject(new Error("Server error"));
     }
   });
 }
 
 // Export as a single object for easy import
-const jwtAuth = { login, getUser, signUp, verifyOtp, resend, forgotPassword, resetPassword, signOut };
+const jwtAuth = {
+  login,
+  getUser,
+  signUp,
+  verifyOtp,
+  resend,
+  forgotPassword,
+  resetPassword,
+  signOut,
+};
 
 export default jwtAuth;

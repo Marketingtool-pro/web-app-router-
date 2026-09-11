@@ -4,11 +4,11 @@ export default function ListItemText() {
   return {
     MuiListItemText: {
       defaultProps: {
-        slotProps: { primary: { variant: 'body2' } }
+        slotProps: { primary: { variant: "body2" } },
       },
       styleOverrides: {
-        root: { marginTop: 0, marginBottom: 0 }
-      }
-    }
+        root: { marginTop: 0, marginBottom: 0 },
+      },
+    },
   };
 }

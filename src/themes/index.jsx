@@ -1,18 +1,18 @@
-import PropTypes from 'prop-types';
-import { useMemo } from 'react';
+import PropTypes from "prop-types";
+import { useMemo } from "react";
 
 // @mui
-import { createTheme, ThemeProvider } from '@mui/material/styles';
-import CssBaseline from '@mui/material/CssBaseline';
+import { createTheme, ThemeProvider } from "@mui/material/styles";
+import CssBaseline from "@mui/material/CssBaseline";
 
 // @project
-import { CSS_VAR_PREFIX, DEFAULT_THEME_MODE } from '@/config';
-import CustomShadows from './custom-shadows';
-import { buildPalette } from './palette';
-import componentsOverride from './overrides';
-import typography from './typography';
+import { CSS_VAR_PREFIX, DEFAULT_THEME_MODE } from "@/config";
+import CustomShadows from "./custom-shadows";
+import { buildPalette } from "./palette";
+import componentsOverride from "./overrides";
+import typography from "./typography";
 
-import useConfig from '@/hooks/useConfig';
+import useConfig from "@/hooks/useConfig";
 
 // @types
 
@@ -20,7 +20,7 @@ import useConfig from '@/hooks/useConfig';
 
 export default function ThemeCustomization({ children }) {
   const {
-    state: { themeDirection }
+    state: { themeDirection },
   } = useConfig();
 
   const palette = useMemo(() => buildPalette(), []);
@@ -32,31 +32,36 @@ export default function ThemeCustomization({ children }) {
         sm: 768,
         md: 1024,
         lg: 1266,
-        xl: 1440
-      }
+        xl: 1440,
+      },
     },
     direction: themeDirection,
     colorSchemes: {
       light: {
         palette: palette.light,
-        customShadows: CustomShadows(palette.light)
+        customShadows: CustomShadows(palette.light),
       },
       dark: {
         palette: palette.dark,
-        customShadows: CustomShadows(palette.dark)
-      }
+        customShadows: CustomShadows(palette.dark),
+      },
     },
     cssVariables: {
       cssVarPrefix: CSS_VAR_PREFIX,
-      colorSchemeSelector: 'data-color-scheme'
+      colorSchemeSelector: "data-color-scheme",
     },
-    typography: typography()
+    typography: typography(),
   });
 
   theme.components = componentsOverride(theme);
 
   return (
-    <ThemeProvider disableTransitionOnChange theme={theme} modeStorageKey="theme-mode" defaultMode={DEFAULT_THEME_MODE}>
+    <ThemeProvider
+      disableTransitionOnChange
+      theme={theme}
+      modeStorageKey="theme-mode"
+      defaultMode={DEFAULT_THEME_MODE}
+    >
       <CssBaseline enableColorScheme />
       {children}
     </ThemeProvider>

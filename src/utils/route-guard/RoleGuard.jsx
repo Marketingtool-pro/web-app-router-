@@ -1,12 +1,12 @@
-import PropTypes from 'prop-types';
-import { useEffect, useState } from 'react';
+import PropTypes from "prop-types";
+import { useEffect, useState } from "react";
 
 // @project
-import PageLoader from '@/components/PageLoader';
-import PermissionDenied from '@/components/PermissionDenied';
-import useCurrentUser from '@/hooks/useCurrentUser';
-import menuItems from '@/menu';
-import { usePathname } from '@/utils/navigation';
+import PageLoader from "@/components/PageLoader";
+import PermissionDenied from "@/components/PermissionDenied";
+import useCurrentUser from "@/hooks/useCurrentUser";
+import menuItems from "@/menu";
+import { usePathname } from "@/utils/navigation";
 
 /***************************  ROLE GUARD  ***************************/
 
@@ -30,7 +30,7 @@ export default function RoleGuard({ children }) {
   const findMenu = () => {
     return new Promise((resolve) => {
       for (const menu of menuItems?.items) {
-        if (menu.type === 'group') {
+        if (menu.type === "group") {
           const matchedParents = findParentElements(menu.children || [], pathname);
           if (matchedParents) {
             resolve(matchedParents[0]); // Get the first matched parent item

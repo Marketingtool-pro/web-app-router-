@@ -1,7 +1,7 @@
-import PropTypes from 'prop-types';
+import PropTypes from "prop-types";
 // @mui
-import Stack from '@mui/material/Stack';
-import Typography from '@mui/material/Typography';
+import Stack from "@mui/material/Stack";
+import Typography from "@mui/material/Typography";
 
 /***************************  COMMON - TYPESET  ***************************/
 
@@ -16,7 +16,11 @@ export default function Typeset({ heading, caption, stackProps, headingProps, ca
         {heading}
       </Typography>
       {caption && (
-        <Typography variant="body2" {...captionPropsRest} sx={{ color: 'grey.700', ...captionPropsSx }}>
+        <Typography
+          variant="body2"
+          {...captionPropsRest}
+          sx={{ color: "grey.700", ...captionPropsSx }}
+        >
           {caption}
         </Typography>
       )}
@@ -29,5 +33,5 @@ Typeset.propTypes = {
   caption: PropTypes.string,
   stackProps: PropTypes.any,
   headingProps: PropTypes.any,
-  captionProps: PropTypes.any
+  captionProps: PropTypes.any,
 };

@@ -1,21 +1,21 @@
-import PropTypes from 'prop-types';
+import PropTypes from "prop-types";
 // @mui
-import { useTheme } from '@mui/material/styles';
-import Grid from '@mui/material/Grid';
-import Stack from '@mui/material/Stack';
-import Typography from '@mui/material/Typography';
+import { useTheme } from "@mui/material/styles";
+import Grid from "@mui/material/Grid";
+import Stack from "@mui/material/Stack";
+import Typography from "@mui/material/Typography";
 
 // @project
-import ComponentsWrapper from '@/components/ComponentsWrapper';
-import MainCard from '@/components/MainCard';
+import ComponentsWrapper from "@/components/ComponentsWrapper";
+import MainCard from "@/components/MainCard";
 
 /***************************  SHADOW TYPE - LIST  ***************************/
 
 const shadows = [
-  { label: 'Button Shadow', value: 'button' },
-  { label: 'Section Shadow', value: 'section' },
-  { label: 'Tooltip Shadow', value: 'tooltip' },
-  { label: 'Focus Shadow', value: 'focus' }
+  { label: "Button Shadow", value: "button" },
+  { label: "Section Shadow", value: "section" },
+  { label: "Tooltip Shadow", value: "tooltip" },
+  { label: "Focus Shadow", value: "focus" },
 ];
 
 /***************************  SHADOW - BOX  ***************************/
@@ -24,11 +24,19 @@ function ShadowBox({ label, value }) {
   const theme = useTheme();
 
   return (
-    <MainCard sx={{ p: 0.25, boxShadow: theme.vars.customShadows[value], bgcolor: 'grey.50', width: 1, border: 'none' }}>
-      <Stack sx={{ alignItems: 'center', justifyContent: 'center', height: 180 }}>
-        <Stack sx={{ gap: 1, alignItems: 'center' }}>
+    <MainCard
+      sx={{
+        p: 0.25,
+        boxShadow: theme.vars.customShadows[value],
+        bgcolor: "grey.50",
+        width: 1,
+        border: "none",
+      }}
+    >
+      <Stack sx={{ alignItems: "center", justifyContent: "center", height: 180 }}>
+        <Stack sx={{ gap: 1, alignItems: "center" }}>
           <Typography variant="h6">{`customShadows.${value}`}</Typography>
-          <Typography variant="caption" sx={{ color: 'text.secondary' }}>
+          <Typography variant="caption" sx={{ color: "text.secondary" }}>
             {label}
           </Typography>
         </Stack>

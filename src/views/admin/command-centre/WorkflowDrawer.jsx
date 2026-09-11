@@ -1,25 +1,25 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
-import { motion, AnimatePresence } from 'motion/react';
+import { useState, useEffect, useRef, useCallback } from "react";
+import { motion, AnimatePresence } from "motion/react";
 
 // @mui
-import Drawer from '@mui/material/Drawer';
-import Box from '@mui/material/Box';
-import Typography from '@mui/material/Typography';
-import Stack from '@mui/material/Stack';
-import Button from '@mui/material/Button';
-import IconButton from '@mui/material/IconButton';
-import TextField from '@mui/material/TextField';
-import Select from '@mui/material/Select';
-import MenuItem from '@mui/material/MenuItem';
-import FormControl from '@mui/material/FormControl';
-import InputLabel from '@mui/material/InputLabel';
-import Switch from '@mui/material/Switch';
-import FormControlLabel from '@mui/material/FormControlLabel';
-import Chip from '@mui/material/Chip';
-import Alert from '@mui/material/Alert';
-import LinearProgress from '@mui/material/LinearProgress';
-import Divider from '@mui/material/Divider';
-import CircularProgress from '@mui/material/CircularProgress';
+import Drawer from "@mui/material/Drawer";
+import Box from "@mui/material/Box";
+import Typography from "@mui/material/Typography";
+import Stack from "@mui/material/Stack";
+import Button from "@mui/material/Button";
+import IconButton from "@mui/material/IconButton";
+import TextField from "@mui/material/TextField";
+import Select from "@mui/material/Select";
+import MenuItem from "@mui/material/MenuItem";
+import FormControl from "@mui/material/FormControl";
+import InputLabel from "@mui/material/InputLabel";
+import Switch from "@mui/material/Switch";
+import FormControlLabel from "@mui/material/FormControlLabel";
+import Chip from "@mui/material/Chip";
+import Alert from "@mui/material/Alert";
+import LinearProgress from "@mui/material/LinearProgress";
+import Divider from "@mui/material/Divider";
+import CircularProgress from "@mui/material/CircularProgress";
 
 // @assets
 import {
@@ -33,13 +33,13 @@ import {
   IconRefresh,
   IconFileSpreadsheet,
   IconExternalLink,
-  IconClipboard
-} from '@tabler/icons-react';
+  IconClipboard,
+} from "@tabler/icons-react";
 
 // @project
-import { startWorkflowRun, getRunStatus } from '@/utils/api/windmill';
-import { useAuth } from '@/contexts/AuthContext';
-import { PLATFORM_CONFIG } from './workflows';
+import { startWorkflowRun, getRunStatus } from "@/utils/api/windmill";
+import { useAuth } from "@/contexts/AuthContext";
+import { PLATFORM_CONFIG } from "./workflows";
 
 /***************************  CONSTANTS  ***************************/
 
@@ -48,41 +48,41 @@ const POLL_INTERVAL = 2500;
 const MAX_POLL_TIME = 300000; // 5 min
 
 const glass = {
-  bg: 'rgba(14, 12, 21, 0.97)',
-  surface: 'rgba(255,255,255,0.03)',
-  surfaceHover: 'rgba(255,255,255,0.06)',
-  border: 'rgba(255,255,255,0.06)',
-  inputBg: 'rgba(255,255,255,0.04)',
-  inputBorder: 'rgba(255,255,255,0.10)',
-  inputHover: 'rgba(255,255,255,0.18)',
+  bg: "rgba(14, 12, 21, 0.97)",
+  surface: "rgba(255,255,255,0.03)",
+  surfaceHover: "rgba(255,255,255,0.06)",
+  border: "rgba(255,255,255,0.06)",
+  inputBg: "rgba(255,255,255,0.04)",
+  inputBorder: "rgba(255,255,255,0.10)",
+  inputHover: "rgba(255,255,255,0.18)",
 };
 
 const PHASE_COLORS = {
-  input: '#805AF5',
-  running: '#1BA2DB',
-  completed: '#3EB75E',
-  error: '#FF0003',
+  input: "#805AF5",
+  running: "#1BA2DB",
+  completed: "#3EB75E",
+  error: "#FF0003",
 };
 
 // Action type → icon + color
 const ACTION_ICONS = {
-  pause_keyword: { icon: IconPlayerPause, color: '#FFC876', label: 'Pause' },
-  lower_bid: { icon: IconArrowDown, color: '#1BA2DB', label: 'Lower Bid' },
-  raise_bid: { icon: IconArrowDown, color: '#3EB75E', label: 'Raise Bid', rotate: true },
-  pause_ad: { icon: IconPlayerPause, color: '#FFC876', label: 'Pause Ad' },
-  enable_ad: { icon: IconPlayerPlay, color: '#3EB75E', label: 'Enable' },
-  create: { icon: IconPlayerPlay, color: '#805AF5', label: 'Create' },
-  update: { icon: IconRefresh, color: '#1BA2DB', label: 'Update' },
+  pause_keyword: { icon: IconPlayerPause, color: "#FFC876", label: "Pause" },
+  lower_bid: { icon: IconArrowDown, color: "#1BA2DB", label: "Lower Bid" },
+  raise_bid: { icon: IconArrowDown, color: "#3EB75E", label: "Raise Bid", rotate: true },
+  pause_ad: { icon: IconPlayerPause, color: "#FFC876", label: "Pause Ad" },
+  enable_ad: { icon: IconPlayerPlay, color: "#3EB75E", label: "Enable" },
+  create: { icon: IconPlayerPlay, color: "#805AF5", label: "Create" },
+  update: { icon: IconRefresh, color: "#1BA2DB", label: "Update" },
 };
 
 /***************************  FIELD STYLES  ***************************/
 
 const fieldSx = {
-  '& .MuiOutlinedInput-root': {
+  "& .MuiOutlinedInput-root": {
     background: glass.inputBg,
-    '& fieldset': { borderColor: glass.inputBorder },
-    '&:hover fieldset': { borderColor: glass.inputHover },
-    '&.Mui-focused fieldset': { borderColor: 'primary.main' },
+    "& fieldset": { borderColor: glass.inputBorder },
+    "&:hover fieldset": { borderColor: glass.inputHover },
+    "&.Mui-focused fieldset": { borderColor: "primary.main" },
   },
 };
 
@@ -92,11 +92,11 @@ export default function WorkflowDrawer({ open, onClose, workflow, accounts }) {
   const { user } = useAuth();
 
   // Phase: input → running → completed → error
-  const [phase, setPhase] = useState('input');
+  const [phase, setPhase] = useState("input");
   const [formData, setFormData] = useState({});
   const [runId, setRunId] = useState(null);
   const [progress, setProgress] = useState(0);
-  const [statusText, setStatusText] = useState('');
+  const [statusText, setStatusText] = useState("");
   const [output, setOutput] = useState(null);
   const [error, setError] = useState(null);
   const [copied, setCopied] = useState(false);
@@ -112,7 +112,7 @@ export default function WorkflowDrawer({ open, onClose, workflow, accounts }) {
         if (field.default !== undefined) defaults[field.key] = field.default;
       });
       setFormData(defaults);
-      setPhase('input');
+      setPhase("input");
       setRunId(null);
       setProgress(0);
       setOutput(null);
@@ -140,24 +140,24 @@ export default function WorkflowDrawer({ open, onClose, workflow, accounts }) {
   const handleRun = async () => {
     // Validate required fields
     const missing = workflow.inputSchema.filter(
-      (f) => f.required && !formData[f.key] && formData[f.key] !== 0 && formData[f.key] !== false
+      (f) => f.required && !formData[f.key] && formData[f.key] !== 0 && formData[f.key] !== false,
     );
     if (missing.length > 0) {
-      setError(`Required: ${missing.map((f) => f.label).join(', ')}`);
+      setError(`Required: ${missing.map((f) => f.label).join(", ")}`);
       return;
     }
 
-    setPhase('running');
+    setPhase("running");
     setError(null);
     setProgress(0);
-    setStatusText('Queuing workflow...');
+    setStatusText("Queuing workflow...");
     startTimeRef.current = Date.now();
 
     try {
       const response = await startWorkflowRun({
         workflowId: workflow.id,
         inputs: formData,
-        userId: user?.id || 'anonymous',
+        userId: user?.id || "anonymous",
       });
 
       const rid = response?.run_id || response?.job_id;
@@ -165,14 +165,14 @@ export default function WorkflowDrawer({ open, onClose, workflow, accounts }) {
         // If response has output directly (sync execution)
         if (response?.output || response?.summary || response?.actions) {
           setOutput(response?.output || response);
-          setPhase('completed');
+          setPhase("completed");
           return;
         }
-        throw new Error('No run ID returned from server');
+        throw new Error("No run ID returned from server");
       }
 
       setRunId(rid);
-      setStatusText('Running...');
+      setStatusText("Running...");
       setProgress(10);
 
       // Start polling
@@ -181,46 +181,46 @@ export default function WorkflowDrawer({ open, onClose, workflow, accounts }) {
           const status = await getRunStatus({ runId: rid });
           const elapsed = Date.now() - startTimeRef.current;
 
-          if (status?.status === 'completed') {
+          if (status?.status === "completed") {
             clearInterval(pollRef.current);
             pollRef.current = null;
             setProgress(100);
-            setStatusText('Completed');
+            setStatusText("Completed");
             setOutput(status.output_json || status.output || status);
-            setPhase('completed');
-          } else if (status?.status === 'failed') {
+            setPhase("completed");
+          } else if (status?.status === "failed") {
             clearInterval(pollRef.current);
             pollRef.current = null;
-            setError(status.error || 'Workflow failed');
-            setPhase('error');
+            setError(status.error || "Workflow failed");
+            setPhase("error");
           } else {
             // Update progress based on elapsed time (smooth ramp to 90%)
             const pct = Math.min(90, 10 + (elapsed / MAX_POLL_TIME) * 80);
             setProgress(pct);
-            setStatusText(status?.status === 'running' ? 'Processing...' : 'Queued...');
+            setStatusText(status?.status === "running" ? "Processing..." : "Queued...");
           }
 
           // Timeout guard
           if (elapsed > MAX_POLL_TIME) {
             clearInterval(pollRef.current);
             pollRef.current = null;
-            setError('Workflow timed out after 5 minutes. It may still be running on the server.');
-            setPhase('error');
+            setError("Workflow timed out after 5 minutes. It may still be running on the server.");
+            setPhase("error");
           }
         } catch {
           // Polling error — don't kill it, just skip this tick
         }
       }, POLL_INTERVAL);
     } catch (err) {
-      setError(err.message || 'Failed to start workflow');
-      setPhase('error');
+      setError(err.message || "Failed to start workflow");
+      setPhase("error");
     }
   };
 
   // ── RESET ──────────────────────────────────────────────
   const handleReset = () => {
     if (pollRef.current) clearInterval(pollRef.current);
-    setPhase('input');
+    setPhase("input");
     setRunId(null);
     setProgress(0);
     setOutput(null);
@@ -229,7 +229,7 @@ export default function WorkflowDrawer({ open, onClose, workflow, accounts }) {
 
   // ── COPY OUTPUT ────────────────────────────────────────
   const handleCopy = () => {
-    const text = typeof output === 'string' ? output : JSON.stringify(output, null, 2);
+    const text = typeof output === "string" ? output : JSON.stringify(output, null, 2);
     navigator.clipboard.writeText(text);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
@@ -242,7 +242,7 @@ export default function WorkflowDrawer({ open, onClose, workflow, accounts }) {
 
   // Filter accounts by workflow platform
   const filteredAccounts = (accounts || []).filter((acc) => {
-    if (workflow.platform === 'both') return true;
+    if (workflow.platform === "both") return true;
     return acc.platform === workflow.platform;
   });
 
@@ -254,39 +254,46 @@ export default function WorkflowDrawer({ open, onClose, workflow, accounts }) {
       PaperProps={{
         sx: {
           width: DRAWER_WIDTH,
-          maxWidth: '100vw',
+          maxWidth: "100vw",
           background: glass.bg,
           borderLeft: `1px solid ${glass.border}`,
-          overflow: 'hidden',
+          overflow: "hidden",
         },
       }}
-      slotProps={{ backdrop: { sx: { bgcolor: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(4px)' } } }}
+      slotProps={{ backdrop: { sx: { bgcolor: "rgba(0,0,0,0.6)", backdropFilter: "blur(4px)" } } }}
     >
       {/* ── Accent bar ── */}
       <Box
         sx={{
           height: 3,
-          background: phase === 'running'
-            ? `linear-gradient(90deg, ${phaseColor}, #805AF5, ${phaseColor})`
-            : phaseColor,
-          backgroundSize: phase === 'running' ? '200% 100%' : 'auto',
-          animation: phase === 'running' ? 'shimmer 2s ease infinite' : 'none',
-          '@keyframes shimmer': {
-            '0%': { backgroundPosition: '-200% 0' },
-            '100%': { backgroundPosition: '200% 0' },
+          background:
+            phase === "running"
+              ? `linear-gradient(90deg, ${phaseColor}, #805AF5, ${phaseColor})`
+              : phaseColor,
+          backgroundSize: phase === "running" ? "200% 100%" : "auto",
+          animation: phase === "running" ? "shimmer 2s ease infinite" : "none",
+          "@keyframes shimmer": {
+            "0%": { backgroundPosition: "-200% 0" },
+            "100%": { backgroundPosition: "200% 0" },
           },
         }}
       />
 
       {/* ── Header ── */}
       <Box sx={{ px: 3, pt: 2.5, pb: 2, borderBottom: `1px solid ${glass.border}` }}>
-        <Stack direction="row" sx={{ alignItems: 'flex-start', justifyContent: 'space-between' }}>
-          <Stack direction="row" sx={{ alignItems: 'center', gap: 2, flex: 1 }}>
+        <Stack direction="row" sx={{ alignItems: "flex-start", justifyContent: "space-between" }}>
+          <Stack direction="row" sx={{ alignItems: "center", gap: 2, flex: 1 }}>
             <Box sx={{ width: 44, height: 44, flexShrink: 0 }}>
-              <img src={workflow.iconImage} alt="" width={44} height={44} style={{ objectFit: 'contain' }} />
+              <img
+                src={workflow.iconImage}
+                alt=""
+                width={44}
+                height={44}
+                style={{ objectFit: "contain" }}
+              />
             </Box>
             <Box>
-              <Stack direction="row" sx={{ alignItems: 'center', gap: 1, mb: 0.25 }}>
+              <Stack direction="row" sx={{ alignItems: "center", gap: 1, mb: 0.25 }}>
                 <Typography variant="h6" sx={{ fontWeight: 700 }}>
                   {workflow.title}
                 </Typography>
@@ -315,10 +322,10 @@ export default function WorkflowDrawer({ open, onClose, workflow, accounts }) {
       </Box>
 
       {/* ── Content ── */}
-      <Box sx={{ flex: 1, overflow: 'auto', px: 3, py: 2.5 }}>
+      <Box sx={{ flex: 1, overflow: "auto", px: 3, py: 2.5 }}>
         <AnimatePresence mode="wait">
           {/* ════════  INPUT PHASE  ════════ */}
-          {phase === 'input' && (
+          {phase === "input" && (
             <motion.div
               key="input"
               initial={{ opacity: 0, x: 20 }}
@@ -328,7 +335,7 @@ export default function WorkflowDrawer({ open, onClose, workflow, accounts }) {
             >
               <Stack spacing={2.5}>
                 {workflow.inputSchema.map((field) => {
-                  if (field.type === 'boolean') {
+                  if (field.type === "boolean") {
                     return (
                       <FormControlLabel
                         key={field.key}
@@ -348,28 +355,38 @@ export default function WorkflowDrawer({ open, onClose, workflow, accounts }) {
                     );
                   }
 
-                  if (field.type === 'account_select') {
+                  if (field.type === "account_select") {
                     return (
                       <Box key={field.key}>
-                        <InputLabel sx={{ mb: 0.75, color: 'text.secondary', fontSize: 13 }}>
-                          {field.label} {field.required && <span style={{ color: '#FF0003' }}>*</span>}
+                        <InputLabel sx={{ mb: 0.75, color: "text.secondary", fontSize: 13 }}>
+                          {field.label}{" "}
+                          {field.required && <span style={{ color: "#FF0003" }}>*</span>}
                         </InputLabel>
                         <FormControl fullWidth>
                           <Select
-                            value={formData[field.key] || ''}
+                            value={formData[field.key] || ""}
                             onChange={(e) => handleFieldChange(field.key, e.target.value)}
                             displayEmpty
                             size="small"
                             sx={fieldSx}
                           >
                             <MenuItem value="" disabled>
-                              {filteredAccounts.length === 0 ? 'No accounts connected' : 'Select account...'}
+                              {filteredAccounts.length === 0
+                                ? "No accounts connected"
+                                : "Select account..."}
                             </MenuItem>
                             {filteredAccounts.map((acc) => (
-                              <MenuItem key={acc.id || acc.account_id} value={acc.id || acc.account_id}>
+                              <MenuItem
+                                key={acc.id || acc.account_id}
+                                value={acc.id || acc.account_id}
+                              >
                                 {acc.name || acc.account_name || acc.id || acc.account_id}
                                 {acc.platform && (
-                                  <Typography component="span" variant="caption" sx={{ ml: 1, opacity: 0.5 }}>
+                                  <Typography
+                                    component="span"
+                                    variant="caption"
+                                    sx={{ ml: 1, opacity: 0.5 }}
+                                  >
                                     ({acc.platform})
                                   </Typography>
                                 )}
@@ -378,7 +395,10 @@ export default function WorkflowDrawer({ open, onClose, workflow, accounts }) {
                           </Select>
                         </FormControl>
                         {filteredAccounts.length === 0 && (
-                          <Typography variant="caption" sx={{ mt: 0.5, color: 'warning.main', display: 'block' }}>
+                          <Typography
+                            variant="caption"
+                            sx={{ mt: 0.5, color: "warning.main", display: "block" }}
+                          >
                             Connect an ad account via the popup above
                           </Typography>
                         )}
@@ -386,23 +406,28 @@ export default function WorkflowDrawer({ open, onClose, workflow, accounts }) {
                     );
                   }
 
-                  if (field.type === 'select') {
+                  if (field.type === "select") {
                     return (
                       <Box key={field.key}>
-                        <InputLabel sx={{ mb: 0.75, color: 'text.secondary', fontSize: 13 }}>
-                          {field.label} {field.required && <span style={{ color: '#FF0003' }}>*</span>}
+                        <InputLabel sx={{ mb: 0.75, color: "text.secondary", fontSize: 13 }}>
+                          {field.label}{" "}
+                          {field.required && <span style={{ color: "#FF0003" }}>*</span>}
                         </InputLabel>
                         <FormControl fullWidth>
                           <Select
-                            value={formData[field.key] || ''}
+                            value={formData[field.key] || ""}
                             onChange={(e) => handleFieldChange(field.key, e.target.value)}
                             displayEmpty
                             size="small"
                             sx={fieldSx}
                           >
-                            <MenuItem value="" disabled>Select...</MenuItem>
+                            <MenuItem value="" disabled>
+                              Select...
+                            </MenuItem>
                             {(field.options || []).map((opt) => (
-                              <MenuItem key={opt} value={opt}>{opt}</MenuItem>
+                              <MenuItem key={opt} value={opt}>
+                                {opt}
+                              </MenuItem>
                             ))}
                           </Select>
                         </FormControl>
@@ -413,14 +438,22 @@ export default function WorkflowDrawer({ open, onClose, workflow, accounts }) {
                   // text / number
                   return (
                     <Box key={field.key}>
-                      <InputLabel sx={{ mb: 0.75, color: 'text.secondary', fontSize: 13 }}>
-                        {field.label} {field.required && <span style={{ color: '#FF0003' }}>*</span>}
+                      <InputLabel sx={{ mb: 0.75, color: "text.secondary", fontSize: 13 }}>
+                        {field.label}{" "}
+                        {field.required && <span style={{ color: "#FF0003" }}>*</span>}
                       </InputLabel>
                       <TextField
-                        type={field.type === 'number' ? 'number' : 'text'}
-                        placeholder={field.placeholder || ''}
-                        value={formData[field.key] ?? (field.default !== undefined ? field.default : '')}
-                        onChange={(e) => handleFieldChange(field.key, field.type === 'number' ? e.target.value : e.target.value)}
+                        type={field.type === "number" ? "number" : "text"}
+                        placeholder={field.placeholder || ""}
+                        value={
+                          formData[field.key] ?? (field.default !== undefined ? field.default : "")
+                        }
+                        onChange={(e) =>
+                          handleFieldChange(
+                            field.key,
+                            field.type === "number" ? e.target.value : e.target.value,
+                          )
+                        }
                         fullWidth
                         size="small"
                         sx={fieldSx}
@@ -446,11 +479,11 @@ export default function WorkflowDrawer({ open, onClose, workflow, accounts }) {
                     borderRadius: 2,
                     fontWeight: 700,
                     fontSize: 15,
-                    background: 'linear-gradient(135deg, #805AF5 0%, #6B3FD4 100%)',
-                    boxShadow: '0 4px 20px rgba(128, 90, 245, 0.3)',
-                    '&:hover': {
-                      background: 'linear-gradient(135deg, #9B7BF7 0%, #805AF5 100%)',
-                      boxShadow: '0 6px 28px rgba(128, 90, 245, 0.45)',
+                    background: "linear-gradient(135deg, #805AF5 0%, #6B3FD4 100%)",
+                    boxShadow: "0 4px 20px rgba(128, 90, 245, 0.3)",
+                    "&:hover": {
+                      background: "linear-gradient(135deg, #9B7BF7 0%, #805AF5 100%)",
+                      boxShadow: "0 6px 28px rgba(128, 90, 245, 0.45)",
                     },
                   }}
                 >
@@ -461,7 +494,7 @@ export default function WorkflowDrawer({ open, onClose, workflow, accounts }) {
           )}
 
           {/* ════════  RUNNING PHASE  ════════ */}
-          {phase === 'running' && (
+          {phase === "running" && (
             <motion.div
               key="running"
               initial={{ opacity: 0, y: 20 }}
@@ -469,70 +502,75 @@ export default function WorkflowDrawer({ open, onClose, workflow, accounts }) {
               exit={{ opacity: 0, y: -20 }}
               transition={{ duration: 0.3 }}
             >
-              <Stack spacing={4} sx={{ alignItems: 'center', pt: 6, pb: 4 }}>
+              <Stack spacing={4} sx={{ alignItems: "center", pt: 6, pb: 4 }}>
                 {/* Pulse animation */}
-                <Box sx={{ position: 'relative', width: 80, height: 80 }}>
+                <Box sx={{ position: "relative", width: 80, height: 80 }}>
                   <Box
                     sx={{
-                      position: 'absolute',
+                      position: "absolute",
                       inset: 0,
-                      borderRadius: '50%',
+                      borderRadius: "50%",
                       border: `2px solid ${phaseColor}`,
-                      animation: 'pulse-ring 1.5s ease-out infinite',
-                      '@keyframes pulse-ring': {
-                        '0%': { transform: 'scale(0.8)', opacity: 1 },
-                        '100%': { transform: 'scale(1.6)', opacity: 0 },
+                      animation: "pulse-ring 1.5s ease-out infinite",
+                      "@keyframes pulse-ring": {
+                        "0%": { transform: "scale(0.8)", opacity: 1 },
+                        "100%": { transform: "scale(1.6)", opacity: 0 },
                       },
                     }}
                   />
                   <Box
                     sx={{
-                      position: 'absolute',
+                      position: "absolute",
                       inset: 0,
-                      borderRadius: '50%',
+                      borderRadius: "50%",
                       border: `2px solid ${phaseColor}`,
-                      animation: 'pulse-ring 1.5s ease-out 0.5s infinite',
+                      animation: "pulse-ring 1.5s ease-out 0.5s infinite",
                     }}
                   />
                   <Box
                     sx={{
-                      position: 'absolute',
+                      position: "absolute",
                       inset: 10,
-                      borderRadius: '50%',
+                      borderRadius: "50%",
                       bgcolor: `${phaseColor}15`,
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
                     }}
                   >
                     <CircularProgress size={28} sx={{ color: phaseColor }} />
                   </Box>
                 </Box>
 
-                <Box sx={{ textAlign: 'center' }}>
+                <Box sx={{ textAlign: "center" }}>
                   <Typography variant="h6" sx={{ fontWeight: 700, mb: 0.5 }}>
                     {statusText}
                   </Typography>
                   <Typography variant="caption" color="text.secondary">
-                    {Math.floor((Date.now() - (startTimeRef.current || Date.now())) / 1000)}s elapsed
+                    {Math.floor((Date.now() - (startTimeRef.current || Date.now())) / 1000)}s
+                    elapsed
                   </Typography>
                 </Box>
 
-                <Box sx={{ width: '100%', maxWidth: 320 }}>
+                <Box sx={{ width: "100%", maxWidth: 320 }}>
                   <LinearProgress
                     variant="determinate"
                     value={progress}
                     sx={{
                       height: 6,
                       borderRadius: 3,
-                      bgcolor: 'rgba(255,255,255,0.06)',
-                      '& .MuiLinearProgress-bar': {
+                      bgcolor: "rgba(255,255,255,0.06)",
+                      "& .MuiLinearProgress-bar": {
                         borderRadius: 3,
                         background: `linear-gradient(90deg, ${phaseColor}, #805AF5)`,
                       },
                     }}
                   />
-                  <Typography variant="caption" color="text.secondary" sx={{ mt: 0.5, display: 'block', textAlign: 'center' }}>
+                  <Typography
+                    variant="caption"
+                    color="text.secondary"
+                    sx={{ mt: 0.5, display: "block", textAlign: "center" }}
+                  >
                     {Math.round(progress)}%
                   </Typography>
                 </Box>
@@ -541,7 +579,11 @@ export default function WorkflowDrawer({ open, onClose, workflow, accounts }) {
                   <Chip
                     label="DRY RUN — no changes will be applied"
                     size="small"
-                    sx={{ bgcolor: 'rgba(255, 200, 118, 0.12)', color: 'warning.main', fontWeight: 600 }}
+                    sx={{
+                      bgcolor: "rgba(255, 200, 118, 0.12)",
+                      color: "warning.main",
+                      fontWeight: 600,
+                    }}
                   />
                 )}
               </Stack>
@@ -549,7 +591,7 @@ export default function WorkflowDrawer({ open, onClose, workflow, accounts }) {
           )}
 
           {/* ════════  COMPLETED PHASE  ════════ */}
-          {phase === 'completed' && output && (
+          {phase === "completed" && output && (
             <motion.div
               key="completed"
               initial={{ opacity: 0, y: 20 }}
@@ -559,16 +601,19 @@ export default function WorkflowDrawer({ open, onClose, workflow, accounts }) {
             >
               <Stack spacing={3}>
                 {/* Status badge */}
-                <Stack direction="row" sx={{ alignItems: 'center', justifyContent: 'space-between' }}>
+                <Stack
+                  direction="row"
+                  sx={{ alignItems: "center", justifyContent: "space-between" }}
+                >
                   <Chip
                     icon={<IconCheck size={14} />}
-                    label={formData.dry_run ? 'Dry Run Complete' : 'Completed'}
+                    label={formData.dry_run ? "Dry Run Complete" : "Completed"}
                     size="small"
                     sx={{
-                      bgcolor: formData.dry_run ? 'rgba(255,200,118,0.12)' : 'rgba(62,183,94,0.12)',
-                      color: formData.dry_run ? 'warning.main' : 'success.main',
+                      bgcolor: formData.dry_run ? "rgba(255,200,118,0.12)" : "rgba(62,183,94,0.12)",
+                      color: formData.dry_run ? "warning.main" : "success.main",
                       fontWeight: 600,
-                      '& .MuiChip-icon': { color: 'inherit' },
+                      "& .MuiChip-icon": { color: "inherit" },
                     }}
                   />
                   <Stack direction="row" spacing={0.5}>
@@ -588,12 +633,22 @@ export default function WorkflowDrawer({ open, onClose, workflow, accounts }) {
                 )}
 
                 {/* ── SUMMARY KPIs ── */}
-                {output.summary && typeof output.summary === 'object' && (
+                {output.summary && typeof output.summary === "object" && (
                   <Box>
-                    <Typography variant="subtitle2" sx={{ fontWeight: 700, mb: 1.5, textTransform: 'uppercase', fontSize: 11, letterSpacing: 1, color: 'text.secondary' }}>
+                    <Typography
+                      variant="subtitle2"
+                      sx={{
+                        fontWeight: 700,
+                        mb: 1.5,
+                        textTransform: "uppercase",
+                        fontSize: 11,
+                        letterSpacing: 1,
+                        color: "text.secondary",
+                      }}
+                    >
                       Summary
                     </Typography>
-                    <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 1.5 }}>
+                    <Box sx={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 1.5 }}>
                       {Object.entries(output.summary).map(([key, value], i) => (
                         <motion.div
                           key={key}
@@ -609,14 +664,23 @@ export default function WorkflowDrawer({ open, onClose, workflow, accounts }) {
                               border: `1px solid ${glass.border}`,
                             }}
                           >
-                            <Typography variant="caption" color="text.secondary" sx={{ textTransform: 'capitalize' }}>
-                              {key.replace(/_/g, ' ')}
+                            <Typography
+                              variant="caption"
+                              color="text.secondary"
+                              sx={{ textTransform: "capitalize" }}
+                            >
+                              {key.replace(/_/g, " ")}
                             </Typography>
                             <Typography variant="h5" sx={{ fontWeight: 700, mt: 0.25 }}>
-                              {typeof value === 'number' && key.includes('spend') || key.includes('saving') || key.includes('budget') || key.includes('cost')
+                              {(typeof value === "number" && key.includes("spend")) ||
+                              key.includes("saving") ||
+                              key.includes("budget") ||
+                              key.includes("cost")
                                 ? `$${value.toLocaleString()}`
-                                : typeof value === 'boolean'
-                                  ? (value ? 'Yes' : 'No')
+                                : typeof value === "boolean"
+                                  ? value
+                                    ? "Yes"
+                                    : "No"
                                   : String(value)}
                             </Typography>
                           </Box>
@@ -629,12 +693,26 @@ export default function WorkflowDrawer({ open, onClose, workflow, accounts }) {
                 {/* ── ACTIONS LIST ── */}
                 {Array.isArray(output.actions) && output.actions.length > 0 && (
                   <Box>
-                    <Typography variant="subtitle2" sx={{ fontWeight: 700, mb: 1.5, textTransform: 'uppercase', fontSize: 11, letterSpacing: 1, color: 'text.secondary' }}>
+                    <Typography
+                      variant="subtitle2"
+                      sx={{
+                        fontWeight: 700,
+                        mb: 1.5,
+                        textTransform: "uppercase",
+                        fontSize: 11,
+                        letterSpacing: 1,
+                        color: "text.secondary",
+                      }}
+                    >
                       Actions ({output.actions.length})
                     </Typography>
                     <Stack spacing={1}>
                       {output.actions.map((action, i) => {
-                        const actionConf = ACTION_ICONS[action.type] || { icon: IconRefresh, color: '#805AF5', label: action.type };
+                        const actionConf = ACTION_ICONS[action.type] || {
+                          icon: IconRefresh,
+                          color: "#805AF5",
+                          label: action.type,
+                        };
                         const ActionIcon = actionConf.icon;
                         return (
                           <motion.div
@@ -649,8 +727,8 @@ export default function WorkflowDrawer({ open, onClose, workflow, accounts }) {
                                 borderRadius: 2,
                                 bgcolor: glass.surface,
                                 border: `1px solid ${glass.border}`,
-                                display: 'flex',
-                                alignItems: 'flex-start',
+                                display: "flex",
+                                alignItems: "flex-start",
                                 gap: 1.5,
                               }}
                             >
@@ -660,9 +738,9 @@ export default function WorkflowDrawer({ open, onClose, workflow, accounts }) {
                                   height: 28,
                                   borderRadius: 1.5,
                                   bgcolor: `${actionConf.color}15`,
-                                  display: 'flex',
-                                  alignItems: 'center',
-                                  justifyContent: 'center',
+                                  display: "flex",
+                                  alignItems: "center",
+                                  justifyContent: "center",
                                   flexShrink: 0,
                                   mt: 0.25,
                                 }}
@@ -670,16 +748,27 @@ export default function WorkflowDrawer({ open, onClose, workflow, accounts }) {
                                 <ActionIcon
                                   size={14}
                                   color={actionConf.color}
-                                  style={actionConf.rotate ? { transform: 'rotate(180deg)' } : undefined}
+                                  style={
+                                    actionConf.rotate ? { transform: "rotate(180deg)" } : undefined
+                                  }
                                 />
                               </Box>
                               <Box sx={{ flex: 1, minWidth: 0 }}>
-                                <Stack direction="row" sx={{ alignItems: 'center', gap: 1, mb: 0.25 }}>
-                                  <Typography variant="subtitle2" sx={{ fontWeight: 600, fontSize: 13 }}>
+                                <Stack
+                                  direction="row"
+                                  sx={{ alignItems: "center", gap: 1, mb: 0.25 }}
+                                >
+                                  <Typography
+                                    variant="subtitle2"
+                                    sx={{ fontWeight: 600, fontSize: 13 }}
+                                  >
                                     {actionConf.label}
                                   </Typography>
-                                  <Typography variant="caption" sx={{ opacity: 0.4, fontFamily: 'monospace', fontSize: 11 }}>
-                                    {action.entity || ''} {action.id || ''}
+                                  <Typography
+                                    variant="caption"
+                                    sx={{ opacity: 0.4, fontFamily: "monospace", fontSize: 11 }}
+                                  >
+                                    {action.entity || ""} {action.id || ""}
                                   </Typography>
                                 </Stack>
                                 {action.reason && (
@@ -687,8 +776,11 @@ export default function WorkflowDrawer({ open, onClose, workflow, accounts }) {
                                     {action.reason}
                                   </Typography>
                                 )}
-                                {(action.from !== undefined && action.to !== undefined) && (
-                                  <Typography variant="caption" sx={{ color: actionConf.color, display: 'block', mt: 0.25 }}>
+                                {action.from !== undefined && action.to !== undefined && (
+                                  <Typography
+                                    variant="caption"
+                                    sx={{ color: actionConf.color, display: "block", mt: 0.25 }}
+                                  >
                                     ${action.from} → ${action.to}
                                   </Typography>
                                 )}
@@ -704,13 +796,28 @@ export default function WorkflowDrawer({ open, onClose, workflow, accounts }) {
                 {/* ── WARNINGS ── */}
                 {Array.isArray(output.warnings) && output.warnings.length > 0 && (
                   <Box>
-                    <Typography variant="subtitle2" sx={{ fontWeight: 700, mb: 1.5, textTransform: 'uppercase', fontSize: 11, letterSpacing: 1, color: 'text.secondary' }}>
+                    <Typography
+                      variant="subtitle2"
+                      sx={{
+                        fontWeight: 700,
+                        mb: 1.5,
+                        textTransform: "uppercase",
+                        fontSize: 11,
+                        letterSpacing: 1,
+                        color: "text.secondary",
+                      }}
+                    >
                       Warnings
                     </Typography>
                     <Stack spacing={1}>
                       {output.warnings.map((warn, i) => (
-                        <Alert key={i} severity="warning" icon={<IconAlertTriangle size={16} />} sx={{ borderRadius: 2 }}>
-                          {typeof warn === 'string' ? warn : warn.message || JSON.stringify(warn)}
+                        <Alert
+                          key={i}
+                          severity="warning"
+                          icon={<IconAlertTriangle size={16} />}
+                          sx={{ borderRadius: 2 }}
+                        >
+                          {typeof warn === "string" ? warn : warn.message || JSON.stringify(warn)}
                         </Alert>
                       ))}
                     </Stack>
@@ -720,7 +827,17 @@ export default function WorkflowDrawer({ open, onClose, workflow, accounts }) {
                 {/* ── ARTIFACTS ── */}
                 {Array.isArray(output.artifacts) && output.artifacts.length > 0 && (
                   <Box>
-                    <Typography variant="subtitle2" sx={{ fontWeight: 700, mb: 1.5, textTransform: 'uppercase', fontSize: 11, letterSpacing: 1, color: 'text.secondary' }}>
+                    <Typography
+                      variant="subtitle2"
+                      sx={{
+                        fontWeight: 700,
+                        mb: 1.5,
+                        textTransform: "uppercase",
+                        fontSize: 11,
+                        letterSpacing: 1,
+                        color: "text.secondary",
+                      }}
+                    >
                       Downloads
                     </Typography>
                     <Stack spacing={1}>
@@ -736,13 +853,13 @@ export default function WorkflowDrawer({ open, onClose, workflow, accounts }) {
                             borderRadius: 2,
                             bgcolor: glass.surface,
                             border: `1px solid ${glass.border}`,
-                            display: 'flex',
-                            alignItems: 'center',
+                            display: "flex",
+                            alignItems: "center",
                             gap: 1.5,
-                            textDecoration: 'none',
-                            color: 'inherit',
-                            transition: 'background 0.2s',
-                            '&:hover': { bgcolor: glass.surfaceHover },
+                            textDecoration: "none",
+                            color: "inherit",
+                            transition: "background 0.2s",
+                            "&:hover": { bgcolor: glass.surfaceHover },
                           }}
                         >
                           <IconFileSpreadsheet size={18} color="#3EB75E" />
@@ -759,26 +876,36 @@ export default function WorkflowDrawer({ open, onClose, workflow, accounts }) {
                 {/* ── RAW OUTPUT FALLBACK ── */}
                 {!output.summary && !output.actions && (
                   <Box>
-                    <Typography variant="subtitle2" sx={{ fontWeight: 700, mb: 1.5, textTransform: 'uppercase', fontSize: 11, letterSpacing: 1, color: 'text.secondary' }}>
+                    <Typography
+                      variant="subtitle2"
+                      sx={{
+                        fontWeight: 700,
+                        mb: 1.5,
+                        textTransform: "uppercase",
+                        fontSize: 11,
+                        letterSpacing: 1,
+                        color: "text.secondary",
+                      }}
+                    >
                       Output
                     </Typography>
                     <Box
                       sx={{
-                        bgcolor: 'rgba(0,0,0,0.3)',
+                        bgcolor: "rgba(0,0,0,0.3)",
                         borderRadius: 2,
                         p: 2,
-                        fontFamily: 'monospace',
+                        fontFamily: "monospace",
                         fontSize: 12,
                         lineHeight: 1.7,
-                        whiteSpace: 'pre-wrap',
-                        wordBreak: 'break-word',
+                        whiteSpace: "pre-wrap",
+                        wordBreak: "break-word",
                         maxHeight: 400,
-                        overflow: 'auto',
+                        overflow: "auto",
                         border: `1px solid ${glass.border}`,
-                        color: 'text.primary',
+                        color: "text.primary",
                       }}
                     >
-                      {typeof output === 'string' ? output : JSON.stringify(output, null, 2)}
+                      {typeof output === "string" ? output : JSON.stringify(output, null, 2)}
                     </Box>
                   </Box>
                 )}
@@ -789,7 +916,7 @@ export default function WorkflowDrawer({ open, onClose, workflow, accounts }) {
                   variant="outlined"
                   onClick={handleReset}
                   startIcon={<IconRefresh size={16} />}
-                  sx={{ borderRadius: 2, borderColor: glass.inputBorder, color: 'text.secondary' }}
+                  sx={{ borderRadius: 2, borderColor: glass.inputBorder, color: "text.secondary" }}
                 >
                   Run Again
                 </Button>
@@ -798,7 +925,7 @@ export default function WorkflowDrawer({ open, onClose, workflow, accounts }) {
           )}
 
           {/* ════════  ERROR PHASE  ════════ */}
-          {phase === 'error' && (
+          {phase === "error" && (
             <motion.div
               key="error"
               initial={{ opacity: 0, y: 20 }}
@@ -808,7 +935,7 @@ export default function WorkflowDrawer({ open, onClose, workflow, accounts }) {
             >
               <Stack spacing={3} sx={{ pt: 4 }}>
                 <Alert severity="error" sx={{ borderRadius: 2 }}>
-                  {error || 'An unexpected error occurred'}
+                  {error || "An unexpected error occurred"}
                 </Alert>
 
                 <Stack direction="row" spacing={1.5}>
@@ -823,7 +950,11 @@ export default function WorkflowDrawer({ open, onClose, workflow, accounts }) {
                   <Button
                     variant="outlined"
                     onClick={handleClose}
-                    sx={{ borderRadius: 2, borderColor: glass.inputBorder, color: 'text.secondary' }}
+                    sx={{
+                      borderRadius: 2,
+                      borderColor: glass.inputBorder,
+                      color: "text.secondary",
+                    }}
                   >
                     Close
                   </Button>

@@ -1,27 +1,27 @@
-import PropTypes from 'prop-types';
+import PropTypes from "prop-types";
 // @mui
-import List from '@mui/material/List';
-import Typography from '@mui/material/Typography';
+import List from "@mui/material/List";
+import Typography from "@mui/material/Typography";
 
 // @project
-import NavCollapse from './NavCollapse';
-import NavItem from './NavItem';
-import useCurrentUser from '@/hooks/useCurrentUser';
+import NavCollapse from "./NavCollapse";
+import NavItem from "./NavItem";
+import useCurrentUser from "@/hooks/useCurrentUser";
 
 // @types
 
 // @style
 const groupDivider = {
-  '&:before': {
+  "&:before": {
     content: '""',
-    display: 'block',
-    position: 'absolute',
+    display: "block",
+    position: "absolute",
     top: 0,
     left: 16,
-    height: '1px',
+    height: "1px",
     width: 44,
-    bgcolor: 'divider'
-  }
+    bgcolor: "divider",
+  },
 };
 
 /***************************  MINI DRAWER - GROUP  ***************************/
@@ -39,9 +39,9 @@ export default function NavGroup({ item }) {
 
     // Render items based on the type
     switch (menuItem.type) {
-      case 'collapse':
+      case "collapse":
         return <NavCollapse key={menuItem.id} item={menuItem} />;
-      case 'item':
+      case "item":
         return <NavItem key={menuItem.id} item={menuItem} />;
       default:
         return (
@@ -53,7 +53,7 @@ export default function NavGroup({ item }) {
   };
 
   return (
-    <List component="div" sx={{ '&:not(:first-of-type)': groupDivider }}>
+    <List component="div" sx={{ "&:not(:first-of-type)": groupDivider }}>
       {item.children?.map((menuItem) => renderNavItem(menuItem))}
     </List>
   );

@@ -1,9 +1,15 @@
 // @mui
-import Grid from '@mui/material/Grid';
+import Grid from "@mui/material/Grid";
 
 // @project
-import ComponentsWrapper from '@/components/ComponentsWrapper';
-import { BasicRadio, ContentRadio, ColorRadio, LabelRadio, SizeRadio } from '@/sections/components/radio';
+import ComponentsWrapper from "@/components/ComponentsWrapper";
+import {
+  BasicRadio,
+  ContentRadio,
+  ColorRadio,
+  LabelRadio,
+  SizeRadio,
+} from "@/sections/components/radio";
 
 /***************************  INPUTS - RADIO  ***************************/
 

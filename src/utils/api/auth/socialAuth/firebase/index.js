@@ -1,14 +1,19 @@
 // @third-party
-import { FacebookAuthProvider, GoogleAuthProvider, onAuthStateChanged, signInWithPopup } from 'firebase/auth';
+import {
+  FacebookAuthProvider,
+  GoogleAuthProvider,
+  onAuthStateChanged,
+  signInWithPopup,
+} from "firebase/auth";
 
 // @project
-import { AuthRole } from '@/enum';
-import { firebaseAuth } from '@/utils/auth-client/firebase';
+import { AuthRole } from "@/enum";
+import { firebaseAuth } from "@/utils/auth-client/firebase";
 
 const googleProvider = new GoogleAuthProvider();
 const facebookProvider = new FacebookAuthProvider();
-facebookProvider.addScope('public_profile');
-facebookProvider.addScope('email');
+facebookProvider.addScope("public_profile");
+facebookProvider.addScope("email");
 
 /***************************  SOCIAL AUTH FIREBASE - LOGIN WITH GOOGLE  ***************************/
 
@@ -19,11 +24,11 @@ export async function loginWithGoogle() {
 
     return {
       id: result.user.uid,
-      email: result.user.email || '',
-      access_token: credential?.accessToken || ''
+      email: result.user.email || "",
+      access_token: credential?.accessToken || "",
     };
   } catch (error) {
-    throw new Error(error?.message || 'Server error');
+    throw new Error(error?.message || "Server error");
   }
 }
 
@@ -36,11 +41,11 @@ export async function loginWithFacebook() {
 
     return {
       id: result.user.uid,
-      email: result.user.email || '',
-      access_token: credential?.accessToken || ''
+      email: result.user.email || "",
+      access_token: credential?.accessToken || "",
     };
   } catch (error) {
-    throw new Error(error?.message || 'Server error');
+    throw new Error(error?.message || "Server error");
   }
 }
 
@@ -53,19 +58,19 @@ export function getUser() {
         if (user) {
           resolve({
             id: user.uid,
-            email: user.email || '',
+            email: user.email || "",
             role: AuthRole.USER,
-            contact: '123456789',
-            dialcode: '+1',
-            firstname: 'John',
-            lastname: 'Charly'
+            contact: "123456789",
+            dialcode: "+1",
+            firstname: "John",
+            lastname: "Charly",
           });
         } else {
-          reject(new Error('No user is signed in.'));
+          reject(new Error("No user is signed in."));
         }
       });
     } catch {
-      reject(new Error('Server error'));
+      reject(new Error("Server error"));
     }
   });
 }
@@ -77,7 +82,7 @@ export async function signOut() {
     await firebaseAuth.signOut();
     return { status: 200 };
   } catch {
-    throw new Error('Server error');
+    throw new Error("Server error");
   }
 }
 

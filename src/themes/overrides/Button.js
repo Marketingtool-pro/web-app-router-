@@ -1,130 +1,132 @@
 // @project
-import { withAlpha } from '@/utils/colorUtils';
-import { generateFocusStyle } from '@/utils/generateFocusStyle';
+import { withAlpha } from "@/utils/colorUtils";
+import { generateFocusStyle } from "@/utils/generateFocusStyle";
 
-const colors = ['primary', 'secondary', 'success', 'error', 'warning', 'info'];
+const colors = ["primary", "secondary", "success", "error", "warning", "info"];
 
 /***************************  OVERRIDES - BUTTON  ***************************/
 
 export default function Button(theme) {
   const boxShadow = {
     boxShadow: theme.vars.customShadows.button,
-    '&:hover': {
-      boxShadow: theme.vars.customShadows.button
-    }
+    "&:hover": {
+      boxShadow: theme.vars.customShadows.button,
+    },
   };
 
   const textColorVariants = colors.map((color) => {
     const paletteColor = theme.vars.palette[color];
 
-    if (color === 'secondary')
+    if (color === "secondary")
       return {
-        props: { variant: 'text', color: 'secondary' },
+        props: { variant: "text", color: "secondary" },
         style: {
-          color: theme.vars.palette.text.primary
-        }
+          color: theme.vars.palette.text.primary,
+        },
       };
 
     return {
-      props: { variant: 'text', color },
+      props: { variant: "text", color },
       style: {
-        ...theme.applyStyles('dark', { color: paletteColor.light })
-      }
+        ...theme.applyStyles("dark", { color: paletteColor.light }),
+      },
     };
   });
 
   const outlinedColorVariants = colors.map((color) => {
     const paletteColor = theme.vars.palette[color];
-    const isSecondary = color === 'secondary';
+    const isSecondary = color === "secondary";
 
     return {
-      props: { variant: 'outlined', color },
+      props: { variant: "outlined", color },
       style: {
         ...boxShadow,
         borderColor: paletteColor.lighter,
 
         ...(isSecondary && {
           borderColor: theme.vars.palette.divider,
-          color: theme.vars.palette.text.primary
+          color: theme.vars.palette.text.primary,
         }),
 
-        ...theme.applyStyles('dark', {
+        ...theme.applyStyles("dark", {
           color: isSecondary ? theme.vars.palette.text.primary : paletteColor.light,
-          borderColor: isSecondary ? theme.vars.palette.divider : withAlpha(paletteColor.light, 0.25)
-        })
-      }
+          borderColor: isSecondary
+            ? theme.vars.palette.divider
+            : withAlpha(paletteColor.light, 0.25),
+        }),
+      },
     };
   });
 
   return {
     MuiButton: {
       defaultProps: {
-        disableFocusRipple: true
+        disableFocusRipple: true,
       },
       styleOverrides: {
         root: {
           borderRadius: 8,
-          '&.Mui-disabled': {
-            cursor: 'not-allowed',
-            pointerEvents: 'auto',
-            '&:hover': {
-              backgroundColor: 'transparent',
-              '&.MuiButton-contained': {
-                backgroundColor: theme.vars.palette.action.disabledBackground
-              }
-            }
+          "&.Mui-disabled": {
+            cursor: "not-allowed",
+            pointerEvents: "auto",
+            "&:hover": {
+              backgroundColor: "transparent",
+              "&.MuiButton-contained": {
+                backgroundColor: theme.vars.palette.action.disabledBackground,
+              },
+            },
           },
-          '&:focus-visible': {
-            ...generateFocusStyle(theme.vars.palette.primary.main)
+          "&:focus-visible": {
+            ...generateFocusStyle(theme.vars.palette.primary.main),
           },
           // loading styles
-          '&.MuiButton-loading': {
-            '.MuiButton-loadingIndicator': { position: 'relative' },
+          "&.MuiButton-loading": {
+            ".MuiButton-loadingIndicator": { position: "relative" },
 
             // Styles specific to loadingPositionEnd
-            '&.MuiButton-loadingPositionEnd': {
-              '.MuiButton-loadingIndicator': { right: 'unset', marginLeft: 8 },
-              '.MuiButton-endIcon': { display: 'none' }
+            "&.MuiButton-loadingPositionEnd": {
+              ".MuiButton-loadingIndicator": { right: "unset", marginLeft: 8 },
+              ".MuiButton-endIcon": { display: "none" },
             },
 
             // Styles specific to loadingPositionStart
-            '&.MuiButton-loadingPositionStart': {
-              '.MuiButton-loadingIndicator': { left: 'unset', marginRight: 8 },
-              '.MuiButton-startIcon': { display: 'none' }
-            }
+            "&.MuiButton-loadingPositionStart": {
+              ".MuiButton-loadingIndicator": { left: "unset", marginRight: 8 },
+              ".MuiButton-startIcon": { display: "none" },
+            },
           },
-          variants: [...textColorVariants, ...outlinedColorVariants]
+          variants: [...textColorVariants, ...outlinedColorVariants],
         },
         contained: { ...boxShadow },
         startIcon: {
           marginLeft: 0,
-          marginRight: 4
+          marginRight: 4,
         },
         endIcon: {
-          marginLeft: 4
+          marginLeft: 4,
         },
         sizeSmall: {
           height: 36,
           fontSize: 12,
-          lineHeight: '16px',
+          lineHeight: "16px",
           letterSpacing: 0,
-          padding: 10
+          padding: 10,
         },
         sizeMedium: {
           height: 42,
           fontSize: 14,
-          lineHeight: '18px',
+          lineHeight: "18px",
           letterSpacing: 0,
-          padding: 12
+          padding: 12,
         },
         sizeLarge: {
           height: 48,
           fontSize: 16,
-          lineHeight: '20px',
+          lineHeight: "20px",
           letterSpacing: 0,
-          padding: '16px 18px'
-        }
-      }
-    }
+          padding: "16px 18px",
+        },
+      },
+    },
   };
 }

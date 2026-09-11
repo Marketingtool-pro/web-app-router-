@@ -1,4 +1,4 @@
-import toolsData from '@/data/tools.json';
+import toolsData from "@/data/tools.json";
 
 /***************************  TOOLS DATA SERVICE  ***************************/
 
@@ -31,7 +31,7 @@ export const categoryNames = categories.map((c) => c.name);
  * @param {number} [options.perPage] - Items per page (default 24)
  * @returns {{ tools: Array, total: number, totalPages: number, page: number }}
  */
-export function searchTools({ query = '', category = '', page = 1, perPage = 24 } = {}) {
+export function searchTools({ query = "", category = "", page = 1, perPage = 24 } = {}) {
   let filtered = toolsData;
 
   if (category) {
@@ -41,7 +41,10 @@ export function searchTools({ query = '', category = '', page = 1, perPage = 24 
   if (query) {
     const q = query.toLowerCase().trim();
     filtered = filtered.filter(
-      (t) => t.name.toLowerCase().includes(q) || t.description.toLowerCase().includes(q) || t.badge.toLowerCase().includes(q)
+      (t) =>
+        t.name.toLowerCase().includes(q) ||
+        t.description.toLowerCase().includes(q) ||
+        t.badge.toLowerCase().includes(q),
     );
   }
 

@@ -1,11 +1,11 @@
 // @mui
-import Grid from '@mui/material/Grid';
+import Grid from "@mui/material/Grid";
 
 // @project
-import ComponentsWrapper from '@/components/ComponentsWrapper';
-import PresentationCard from '@/components/cards/PresentationCard';
-import { TabsType } from '@/enum';
-import { Basic } from '@/sections/components/tabs';
+import ComponentsWrapper from "@/components/ComponentsWrapper";
+import PresentationCard from "@/components/cards/PresentationCard";
+import { TabsType } from "@/enum";
+import { Basic } from "@/sections/components/tabs";
 
 /***************************  NAVIGATION - TABS  ***************************/
 

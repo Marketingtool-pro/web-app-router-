@@ -1,10 +1,10 @@
-import PropTypes from 'prop-types';
-import { useEffect } from 'react';
+import PropTypes from "prop-types";
+import { useEffect } from "react";
 
 // @project
-import PageLoader from '@/components/PageLoader';
-import useCurrentUser from '@/hooks/useCurrentUser';
-import { usePathname, useRouter } from '@/utils/navigation';
+import PageLoader from "@/components/PageLoader";
+import useCurrentUser from "@/hooks/useCurrentUser";
+import { usePathname, useRouter } from "@/utils/navigation";
 
 /***************************  AUTH GUARD  ***************************/
 
@@ -17,10 +17,10 @@ export default function AuthGuard({ children }) {
     if (
       !isProcessing &&
       (!userData || Object.keys(userData).length === 0) &&
-      pathname !== '/login' &&
-      pathname !== '/social-auth-callback'
+      pathname !== "/login" &&
+      pathname !== "/social-auth-callback"
     ) {
-      router.replace('/login');
+      router.replace("/login");
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [userData, pathname, isProcessing]);

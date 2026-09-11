@@ -1,15 +1,15 @@
-import PropTypes from 'prop-types';
-import { useRef, useState } from 'react';
+import PropTypes from "prop-types";
+import { useRef, useState } from "react";
 
 // @mui
-import Stack from '@mui/material/Stack';
-import Typography from '@mui/material/Typography';
-import Box from '@mui/material/Box';
+import Stack from "@mui/material/Stack";
+import Typography from "@mui/material/Typography";
+import Box from "@mui/material/Box";
 
 /***************************  COLOR PICKER  ***************************/
 
 export default function ColorPicker({ label, defaultColor, viewOnly, onColorChange }) {
-  const [color, setColor] = useState(defaultColor || '#000000');
+  const [color, setColor] = useState(defaultColor || "#000000");
 
   const colorInputRef = useRef(null); // Reference to the color input element
 
@@ -25,9 +25,15 @@ export default function ColorPicker({ label, defaultColor, viewOnly, onColorChan
   };
 
   return (
-    <Stack position="relative" direction="row" sx={{ alignItems: 'center', gap: 1.5 }}>
+    <Stack position="relative" direction="row" sx={{ alignItems: "center", gap: 1.5 }}>
       <Box
-        sx={{ width: 46, height: 46, borderRadius: 2, bgcolor: color, ...(!viewOnly && { cursor: 'pointer' }) }}
+        sx={{
+          width: 46,
+          height: 46,
+          borderRadius: 2,
+          bgcolor: color,
+          ...(!viewOnly && { cursor: "pointer" }),
+        }}
         {...(!viewOnly && { onClick: handleClick })}
       />
       {!viewOnly && (
@@ -38,17 +44,17 @@ export default function ColorPicker({ label, defaultColor, viewOnly, onColorChan
           onChange={handleColorChange}
           aria-label="color picker"
           style={{
-            position: 'absolute',
+            position: "absolute",
             opacity: 0,
             width: 60,
             height: 60,
-            pointerEvents: 'none' // Prevent interaction directly
+            pointerEvents: "none", // Prevent interaction directly
           }}
         />
       )}
       <Stack sx={{ gap: 1 }}>
         {label && <Typography variant="body2">{label}</Typography>}
-        <Typography variant="body2" color="grey.700" sx={{ textTransform: 'uppercase' }}>
+        <Typography variant="body2" color="grey.700" sx={{ textTransform: "uppercase" }}>
           {color}
         </Typography>
       </Stack>
@@ -60,5 +66,5 @@ ColorPicker.propTypes = {
   label: PropTypes.string,
   defaultColor: PropTypes.string,
   viewOnly: PropTypes.bool,
-  onColorChange: PropTypes.func
+  onColorChange: PropTypes.func,
 };

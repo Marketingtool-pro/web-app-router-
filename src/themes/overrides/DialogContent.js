@@ -5,9 +5,9 @@ export default function DialogContent() {
     MuiDialogContent: {
       styleOverrides: {
         root: {
-          padding: '24px 16px'
-        }
-      }
-    }
+          padding: "24px 16px",
+        },
+      },
+    },
   };
 }

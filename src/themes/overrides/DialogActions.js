@@ -5,9 +5,9 @@ export default function DialogActions() {
     MuiDialogActions: {
       styleOverrides: {
         root: {
-          padding: 16
-        }
-      }
-    }
+          padding: 16,
+        },
+      },
+    },
   };
 }

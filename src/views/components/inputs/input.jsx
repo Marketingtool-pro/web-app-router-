@@ -1,8 +1,8 @@
 // @mui
-import Grid from '@mui/material/Grid';
+import Grid from "@mui/material/Grid";
 
 // @project
-import ComponentsWrapper from '@/components/ComponentsWrapper';
+import ComponentsWrapper from "@/components/ComponentsWrapper";
 import {
   AddressInput,
   CopyLinkInput,
@@ -12,8 +12,8 @@ import {
   IndustryInput,
   InputWithHelperText,
   TagInput,
-  VerificationCode
-} from '@/sections/components/input';
+  VerificationCode,
+} from "@/sections/components/input";
 
 /***************************  INPUTS - INPUT  ***************************/
 

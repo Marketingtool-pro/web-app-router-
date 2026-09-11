@@ -1,9 +1,9 @@
 // @mui
-import Grid from '@mui/material/Grid';
+import Grid from "@mui/material/Grid";
 
 // @assets
-import ComponentsWrapper from '@/components/ComponentsWrapper';
-import { BasicTooltip, IconTooltip, WithContentTooltip } from '@/sections/components/tooltip';
+import ComponentsWrapper from "@/components/ComponentsWrapper";
+import { BasicTooltip, IconTooltip, WithContentTooltip } from "@/sections/components/tooltip";
 
 /***************************  DATA DISPLAY - TOOLTIP  ***************************/
 

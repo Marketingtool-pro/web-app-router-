@@ -4,10 +4,10 @@ export default function PickersTextField() {
   return {
     MuiPickersTextField: {
       defaultProps: {
-        variant: 'outlined',
-        size: 'small',
-        color: 'primary'
-      }
-    }
+        variant: "outlined",
+        size: "small",
+        color: "primary",
+      },
+    },
   };
 }

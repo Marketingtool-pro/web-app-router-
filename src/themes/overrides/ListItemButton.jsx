@@ -5,19 +5,19 @@ export default function ListItemButton(theme) {
     MuiListItemButton: {
       styleOverrides: {
         root: {
-          padding: '10px 8px',
+          padding: "10px 8px",
           borderRadius: 4,
-          '&.Mui-selected': {
+          "&.Mui-selected": {
             backgroundColor: theme.vars.palette.primary.lighter,
-            '&:hover': { backgroundColor: theme.vars.palette.primary.light },
-            ...theme.applyStyles('dark', {
+            "&:hover": { backgroundColor: theme.vars.palette.primary.light },
+            ...theme.applyStyles("dark", {
               backgroundColor: theme.vars.palette.primary.main,
               color: theme.vars.palette.background.default,
-              '&:hover': { backgroundColor: theme.vars.palette.primary.light }
-            })
-          }
-        }
-      }
-    }
+              "&:hover": { backgroundColor: theme.vars.palette.primary.light },
+            }),
+          },
+        },
+      },
+    },
   };
 }

@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef } from "react";
 
 /***************************  MENU COLLAPSED - RECURSIVE FUNCTION  ***************************/
 
@@ -41,7 +41,14 @@ function setParentOpenedMenu(items, pathname, menuId, setSelected, setOpen) {
  * @param {SetState<HTMLElement>} setAnchorEl - Function to update the anchor element state.
  */
 
-export default function useMenuCollapse(menu, pathname, miniMenuOpened, setSelected, setOpen, setAnchorEl) {
+export default function useMenuCollapse(
+  menu,
+  pathname,
+  miniMenuOpened,
+  setSelected,
+  setOpen,
+  setAnchorEl,
+) {
   // The state setters and the mini-menu flag are read through a ref so that the effect
   // below can declare an exhaustive dependency list (route / menu shape only) without
   // re-running on every parent render. This keeps the original behaviour and removes the
@@ -51,7 +58,12 @@ export default function useMenuCollapse(menu, pathname, miniMenuOpened, setSelec
   latest.current = { miniMenuOpened, setSelected, setOpen, setAnchorEl };
 
   useEffect(() => {
-    const { miniMenuOpened: isMiniOpen, setSelected: select, setOpen: open, setAnchorEl: setAnchor } = latest.current;
+    const {
+      miniMenuOpened: isMiniOpen,
+      setSelected: select,
+      setOpen: open,
+      setAnchorEl: setAnchor,
+    } = latest.current;
 
     open(false); // Close the menu initially
 

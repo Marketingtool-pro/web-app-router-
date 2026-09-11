@@ -1,9 +1,9 @@
 // @mui
-import Grid from '@mui/material/Grid';
+import Grid from "@mui/material/Grid";
 
 // @project
-import ComponentsWrapper from '@/components/ComponentsWrapper';
-import { ColorAvatar, IconAvatar, ProfileAvatar, TextAvatar } from '@/sections/components/avatar';
+import ComponentsWrapper from "@/components/ComponentsWrapper";
+import { ColorAvatar, IconAvatar, ProfileAvatar, TextAvatar } from "@/sections/components/avatar";
 
 /***************************  DATA DISPLAY - AVATAR  ***************************/
 

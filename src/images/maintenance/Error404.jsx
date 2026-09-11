@@ -1,18 +1,26 @@
 // @mui
-import { useColorScheme, useTheme } from '@mui/material/styles';
+import { useColorScheme, useTheme } from "@mui/material/styles";
 
 // @project
-import { ThemeMode } from '@/config';
+import { ThemeMode } from "@/config";
 
 /***************************  IMAGE - ERROR 404  ***************************/
 
 export default function Error404() {
   const theme = useTheme();
   const { colorScheme } = useColorScheme();
-  const primaryColor = colorScheme === ThemeMode.DARK ? theme.vars.palette.primary.main : theme.vars.palette.primary.dark;
+  const primaryColor =
+    colorScheme === ThemeMode.DARK
+      ? theme.vars.palette.primary.main
+      : theme.vars.palette.primary.dark;
 
   return (
-    <svg viewBox="0 0 1344 550" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ width: '100%', height: 'auto' }}>
+    <svg
+      viewBox="0 0 1344 550"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      style={{ width: "100%", height: "auto" }}
+    >
       <path
         d="M0 384.577H111.687C126.213 384.577 137.988 396.352 137.988 410.878V514.822C137.988 532.731 152.506 547.249 170.415 547.249V547.249C188.324 547.249 202.842 532.731 202.842 514.822V275.35C202.842 257.346 217.437 242.751 235.441 242.751V242.751C253.446 242.751 268.041 257.346 268.041 275.351V451.95C268.041 468.239 281.246 481.445 297.536 481.445V481.445C313.825 481.445 327.031 468.239 327.031 451.95V400.239C327.031 391.589 334.042 384.577 342.692 384.577H387.014"
         stroke={primaryColor}
@@ -104,7 +112,13 @@ export default function Error404() {
           height="223"
           fill={theme.vars.palette.text.primary}
         >
-          <rect fill={theme.vars.palette.background.default} x="391" y="85" width="563" height="223" />
+          <rect
+            fill={theme.vars.palette.background.default}
+            x="391"
+            y="85"
+            width="563"
+            height="223"
+          />
           <path d="M496.11 303V259.974H391.878V215.13L465.204 90.9H534.894V225.432H570.042V259.974H534.894V303H496.11ZM428.844 225.432H496.11V115.746H490.656L428.844 220.584V225.432ZM671.772 307.242C646.724 307.242 626.625 300.374 611.475 286.638C596.325 272.7 588.75 251.692 588.75 223.614V170.286C588.75 143.016 596.325 122.311 611.475 108.171C626.625 93.829 646.724 86.658 671.772 86.658C697.022 86.658 717.121 93.829 732.069 108.171C747.219 122.311 754.794 143.016 754.794 170.286V223.614C754.794 251.692 747.219 272.7 732.069 286.638C717.121 300.374 697.022 307.242 671.772 307.242ZM671.772 272.7C686.922 272.7 698.032 268.559 705.102 260.277C712.374 251.995 716.01 240.178 716.01 224.826V168.468C716.01 152.914 711.97 141.198 703.89 133.32C696.012 125.24 685.306 121.2 671.772 121.2C657.834 121.2 646.926 125.341 639.048 133.623C631.372 141.905 627.534 153.52 627.534 168.468V224.826C627.534 240.784 631.17 252.803 638.442 260.883C645.916 268.761 657.026 272.7 671.772 272.7ZM879.156 303V259.974H774.924V215.13L848.25 90.9H917.94V225.432H953.088V259.974H917.94V303H879.156ZM811.89 225.432H879.156V115.746H873.702L811.89 220.584V225.432Z" />
         </mask>
         <path
@@ -117,11 +131,43 @@ export default function Error404() {
           mask="url(#path-18-outside-1_10063_23282)"
         />
       </g>
-      <path d="M662.5 185.637L650.5 197.637" stroke={primaryColor} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-      <path d="M650.5 185.637L662.5 197.637" stroke={primaryColor} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-      <path d="M693.5 185.637L681.5 197.637" stroke={primaryColor} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-      <path d="M681.5 185.637L693.5 197.637" stroke={primaryColor} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-      <line x1="653.5" y1="211.637" x2="689.5" y2="211.637" stroke={primaryColor} strokeWidth="2" strokeLinecap="round" />
+      <path
+        d="M662.5 185.637L650.5 197.637"
+        stroke={primaryColor}
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M650.5 185.637L662.5 197.637"
+        stroke={primaryColor}
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M693.5 185.637L681.5 197.637"
+        stroke={primaryColor}
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M681.5 185.637L693.5 197.637"
+        stroke={primaryColor}
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <line
+        x1="653.5"
+        y1="211.637"
+        x2="689.5"
+        y2="211.637"
+        stroke={primaryColor}
+        strokeWidth="2"
+        strokeLinecap="round"
+      />
       <mask id="path-25-inside-2_10063_23282" fill="white">
         <path d="M668.5 212.637H687.5V219.137C687.5 224.383 683.247 228.637 678 228.637C672.753 228.637 668.5 224.383 668.5 219.137V212.637Z" />
       </mask>
@@ -131,7 +177,12 @@ export default function Error404() {
         mask="url(#path-25-inside-2_10063_23282)"
       />
       <g filter="url(#filter1_d_10063_23282)">
-        <path d="M921.428 19C921.428 36.47 913.028 52.9675 904 67.412" stroke={primaryColor} strokeWidth="16.8316" strokeLinecap="round" />
+        <path
+          d="M921.428 19C921.428 36.47 913.028 52.9675 904 67.412"
+          stroke={primaryColor}
+          strokeWidth="16.8316"
+          strokeLinecap="round"
+        />
       </g>
       <g filter="url(#filter2_d_10063_23282)">
         <path
@@ -160,12 +211,25 @@ export default function Error404() {
           colorInterpolationFilters="sRGB"
         >
           <feFlood floodOpacity="0" result="BackgroundImageFix" />
-          <feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha" />
+          <feColorMatrix
+            in="SourceAlpha"
+            type="matrix"
+            values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0"
+            result="hardAlpha"
+          />
           <feOffset dx="7" dy="7" />
           <feComposite in2="hardAlpha" operator="out" />
-          <feColorMatrix type="matrix" values="0 0 0 0 0.566667 0 0 0 0 0.566667 0 0 0 0 0.566667 0 0 0 0.36 0" />
+          <feColorMatrix
+            type="matrix"
+            values="0 0 0 0 0.566667 0 0 0 0 0.566667 0 0 0 0 0.566667 0 0 0 0.36 0"
+          />
           <feBlend mode="normal" in2="BackgroundImageFix" result="effect1_dropShadow_10063_23282" />
-          <feBlend mode="normal" in="SourceGraphic" in2="effect1_dropShadow_10063_23282" result="shape" />
+          <feBlend
+            mode="normal"
+            in="SourceGraphic"
+            in2="effect1_dropShadow_10063_23282"
+            result="shape"
+          />
         </filter>
         <filter
           id="filter1_d_10063_23282"
@@ -177,12 +241,25 @@ export default function Error404() {
           colorInterpolationFilters="sRGB"
         >
           <feFlood floodOpacity="0" result="BackgroundImageFix" />
-          <feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha" />
+          <feColorMatrix
+            in="SourceAlpha"
+            type="matrix"
+            values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0"
+            result="hardAlpha"
+          />
           <feOffset dx="7" dy="7" />
           <feComposite in2="hardAlpha" operator="out" />
-          <feColorMatrix type="matrix" values="0 0 0 0 0.564706 0 0 0 0 0.564706 0 0 0 0 0.564706 0 0 0 0.36 0" />
+          <feColorMatrix
+            type="matrix"
+            values="0 0 0 0 0.564706 0 0 0 0 0.564706 0 0 0 0 0.564706 0 0 0 0.36 0"
+          />
           <feBlend mode="normal" in2="BackgroundImageFix" result="effect1_dropShadow_10063_23282" />
-          <feBlend mode="normal" in="SourceGraphic" in2="effect1_dropShadow_10063_23282" result="shape" />
+          <feBlend
+            mode="normal"
+            in="SourceGraphic"
+            in2="effect1_dropShadow_10063_23282"
+            result="shape"
+          />
         </filter>
         <filter
           id="filter2_d_10063_23282"
@@ -194,12 +271,25 @@ export default function Error404() {
           colorInterpolationFilters="sRGB"
         >
           <feFlood floodOpacity="0" result="BackgroundImageFix" />
-          <feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha" />
+          <feColorMatrix
+            in="SourceAlpha"
+            type="matrix"
+            values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0"
+            result="hardAlpha"
+          />
           <feOffset dx="7" dy="7" />
           <feComposite in2="hardAlpha" operator="out" />
-          <feColorMatrix type="matrix" values="0 0 0 0 0.564706 0 0 0 0 0.564706 0 0 0 0 0.564706 0 0 0 0.36 0" />
+          <feColorMatrix
+            type="matrix"
+            values="0 0 0 0 0.564706 0 0 0 0 0.564706 0 0 0 0 0.564706 0 0 0 0.36 0"
+          />
           <feBlend mode="normal" in2="BackgroundImageFix" result="effect1_dropShadow_10063_23282" />
-          <feBlend mode="normal" in="SourceGraphic" in2="effect1_dropShadow_10063_23282" result="shape" />
+          <feBlend
+            mode="normal"
+            in="SourceGraphic"
+            in2="effect1_dropShadow_10063_23282"
+            result="shape"
+          />
         </filter>
         <filter
           id="filter3_d_10063_23282"
@@ -211,12 +301,25 @@ export default function Error404() {
           colorInterpolationFilters="sRGB"
         >
           <feFlood floodOpacity="0" result="BackgroundImageFix" />
-          <feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha" />
+          <feColorMatrix
+            in="SourceAlpha"
+            type="matrix"
+            values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0"
+            result="hardAlpha"
+          />
           <feOffset dx="7" dy="7" />
           <feComposite in2="hardAlpha" operator="out" />
-          <feColorMatrix type="matrix" values="0 0 0 0 0.564706 0 0 0 0 0.564706 0 0 0 0 0.564706 0 0 0 0.36 0" />
+          <feColorMatrix
+            type="matrix"
+            values="0 0 0 0 0.564706 0 0 0 0 0.564706 0 0 0 0 0.564706 0 0 0 0.36 0"
+          />
           <feBlend mode="normal" in2="BackgroundImageFix" result="effect1_dropShadow_10063_23282" />
-          <feBlend mode="normal" in="SourceGraphic" in2="effect1_dropShadow_10063_23282" result="shape" />
+          <feBlend
+            mode="normal"
+            in="SourceGraphic"
+            in2="effect1_dropShadow_10063_23282"
+            result="shape"
+          />
         </filter>
       </defs>
     </svg>

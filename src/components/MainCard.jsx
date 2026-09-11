@@ -1,6 +1,6 @@
-import PropTypes from 'prop-types';
+import PropTypes from "prop-types";
 // @mui
-import Card from '@mui/material/Card';
+import Card from "@mui/material/Card";
 
 /***************************  MAIN CARD  ***************************/
 
@@ -9,12 +9,12 @@ export default function MainCard({ children, sx = {}, ref, ...others }) {
     p: { xs: 1.75, sm: 2.25, md: 3 },
     border: `1px solid ${theme.vars.palette.divider}`,
     borderRadius: 4,
-    boxShadow: theme.vars.customShadows.section
+    boxShadow: theme.vars.customShadows.section,
   });
 
   const combinedSx = (theme) => ({
     ...defaultSx(theme),
-    ...(typeof sx === 'function' ? sx(theme) : sx)
+    ...(typeof sx === "function" ? sx(theme) : sx),
   });
 
   return (
@@ -24,4 +24,9 @@ export default function MainCard({ children, sx = {}, ref, ...others }) {
   );
 }
 
-MainCard.propTypes = { children: PropTypes.any, sx: PropTypes.object, ref: PropTypes.any, others: PropTypes.any };
+MainCard.propTypes = {
+  children: PropTypes.any,
+  sx: PropTypes.object,
+  ref: PropTypes.any,
+  others: PropTypes.any,
+};

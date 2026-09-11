@@ -1,13 +1,13 @@
 // @third-party
-import { isAxiosError } from 'axios';
+import { isAxiosError } from "axios";
 
 function isErrorWithMessage(obj) {
-  return typeof obj === 'object' && obj !== null && 'error' in obj && typeof obj.error === 'string';
+  return typeof obj === "object" && obj !== null && "error" in obj && typeof obj.error === "string";
 }
 
 function extractErrorMessage(error) {
   if (isAxiosError(error)) {
-    return error.response?.data?.message || error.message || 'Request failed. Please try again.';
+    return error.response?.data?.message || error.message || "Request failed. Please try again.";
   }
 
   if (isErrorWithMessage(error)) {
@@ -18,7 +18,7 @@ function extractErrorMessage(error) {
     return error.message;
   }
 
-  return 'Something went wrong';
+  return "Something went wrong";
 }
 
 // ==============================|| ATTEMPT MIDDLEWARE ||============================== //

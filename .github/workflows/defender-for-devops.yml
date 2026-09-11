@@ -14,11 +14,11 @@ name: "Microsoft Defender For Devops"
 
 on:
   push:
-    branches: [ "main" ]
+    branches: ["main"]
   pull_request:
-    branches: [ "main" ]
+    branches: ["main"]
   schedule:
-    - cron: '19 16 * * 5'
+    - cron: "19 16 * * 5"
 
 # Default to read-only for anything not explicitly granted at job level.
 permissions:
@@ -40,17 +40,17 @@ jobs:
       security-events: write
 
     steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
-      - uses: actions/setup-dotnet@26b0ec14cb23fa6904739307f278c14f94c95bf1  # v5.4.0
+      - uses: actions/setup-dotnet@26b0ec14cb23fa6904739307f278c14f94c95bf1 # v5.4.0
         with:
           dotnet-version: 8.0.x
 
       - name: Run Microsoft Security DevOps
-        uses: microsoft/security-devops-action@08976cb623803b1b36d7112d4ff9f59eae704de0  # v1.12.0
+        uses: microsoft/security-devops-action@08976cb623803b1b36d7112d4ff9f59eae704de0 # v1.12.0
         id: msdo
 
       - name: Upload results to Security tab
-        uses: github/codeql-action/upload-sarif@b96794f015dfd88f77b49b1c93e0fa7110f94c63  # v4.38.0
+        uses: github/codeql-action/upload-sarif@b96794f015dfd88f77b49b1c93e0fa7110f94c63 # v4.38.0
         with:
           sarif_file: ${{ steps.msdo.outputs.sarifFile }}

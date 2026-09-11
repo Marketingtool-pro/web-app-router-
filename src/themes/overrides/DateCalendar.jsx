@@ -1,5 +1,5 @@
 // @icons
-import { IconChevronLeft, IconChevronRight } from '@tabler/icons-react';
+import { IconChevronLeft, IconChevronRight } from "@tabler/icons-react";
 
 /***************************  OVERRIDES - DATE CALENDAR  ***************************/
 
@@ -9,9 +9,9 @@ export default function DateCalendar() {
       defaultProps: {
         slots: {
           leftArrowIcon: IconChevronLeft,
-          rightArrowIcon: IconChevronRight
-        }
-      }
-    }
+          rightArrowIcon: IconChevronRight,
+        },
+      },
+    },
   };
 }

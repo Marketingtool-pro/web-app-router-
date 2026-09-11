@@ -1,28 +1,28 @@
-import { Activity, useEffect, useState } from 'react';
+import { Activity, useEffect, useState } from "react";
 
 // @mui
-import { useTheme } from '@mui/material/styles';
-import MuiBreadcrumbs from '@mui/material/Breadcrumbs';
-import Typography from '@mui/material/Typography';
+import { useTheme } from "@mui/material/styles";
+import MuiBreadcrumbs from "@mui/material/Breadcrumbs";
+import Typography from "@mui/material/Typography";
 
 // @third-party
-import { FormattedMessage } from 'react-intl';
+import { FormattedMessage } from "react-intl";
 
 // @project
-import RouterLink from '@/components/Link';
-import { APP_DEFAULT_PATH } from '@/config';
-import menuItems from '@/menu';
-import { useGetBreadcrumbsMaster } from '@/states/breadcrumbs';
-import { generateFocusStyle } from '@/utils/generateFocusStyle';
-import { usePathname } from '@/utils/navigation';
+import RouterLink from "@/components/Link";
+import { APP_DEFAULT_PATH } from "@/config";
+import menuItems from "@/menu";
+import { useGetBreadcrumbsMaster } from "@/states/breadcrumbs";
+import { generateFocusStyle } from "@/utils/generateFocusStyle";
+import { usePathname } from "@/utils/navigation";
 
 // @assets
-import { IconChevronRight } from '@tabler/icons-react';
+import { IconChevronRight } from "@tabler/icons-react";
 
 // @types
 
 // @data
-const homeBreadcrumb = { title: 'home', url: APP_DEFAULT_PATH };
+const homeBreadcrumb = { title: "home", url: APP_DEFAULT_PATH };
 
 /***************************  BREADCRUMBS  ***************************/
 
@@ -35,11 +35,15 @@ export default function Breadcrumbs() {
   const [activeItem, setActiveItem] = useState();
 
   useEffect(() => {
-    if (breadcrumbsMaster && breadcrumbsMaster.data?.length && breadcrumbsMaster.activePath === location) {
+    if (
+      breadcrumbsMaster &&
+      breadcrumbsMaster.data?.length &&
+      breadcrumbsMaster.activePath === location
+    ) {
       dataHandler(breadcrumbsMaster.data);
     } else {
       for (const menu of menuItems?.items) {
-        if (menu.type && menu.type === 'group') {
+        if (menu.type && menu.type === "group") {
           const matchedParents = findParentElements(menu.children || [], location);
           dataHandler(matchedParents || []);
           if (matchedParents) break;
@@ -90,17 +94,21 @@ export default function Breadcrumbs() {
             variant="body2"
             sx={{
               p: 0.5,
-              color: 'grey.700',
-              textDecoration: 'none',
-              ...(item.url && { cursor: 'pointer', ':hover': { color: 'primary.main' } }),
-              ':focus-visible': { outline: 'none', borderRadius: 0.25, ...generateFocusStyle(theme.vars.palette.primary.main) }
+              color: "grey.700",
+              textDecoration: "none",
+              ...(item.url && { cursor: "pointer", ":hover": { color: "primary.main" } }),
+              ":focus-visible": {
+                outline: "none",
+                borderRadius: 0.25,
+                ...generateFocusStyle(theme.vars.palette.primary.main),
+              },
             }}
             key={index}
           >
             <FormattedMessage id={item.title} />
           </Typography>
         ))}
-      <Activity mode={activeItem ? 'visible' : 'hidden'}>
+      <Activity mode={activeItem ? "visible" : "hidden"}>
         <Typography variant="body2" sx={{ p: 0.5 }}>
           <FormattedMessage id={activeItem?.title} />
         </Typography>

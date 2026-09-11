@@ -5,19 +5,19 @@ export default function Dialog(theme) {
     MuiDialog: {
       defaultProps: {
         PaperProps: { elevation: 0 },
-        closeAfterTransition: false
+        closeAfterTransition: false,
       },
       styleOverrides: {
         paper: {
           border: `1px solid ${theme.vars.palette.divider}`,
           borderRadius: 16,
-          margin: 8
+          margin: 8,
         },
         paperFullScreen: {
           margin: 0,
-          borderRadius: 0
-        }
-      }
-    }
+          borderRadius: 0,
+        },
+      },
+    },
   };
 }

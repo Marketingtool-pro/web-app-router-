@@ -1,31 +1,31 @@
 // @mui
-import Grid from '@mui/material/Grid';
-import Stack from '@mui/material/Stack';
+import Grid from "@mui/material/Grid";
+import Stack from "@mui/material/Stack";
 
 // @project
-import ComponentsWrapper from '@/components/ComponentsWrapper';
-import ProgressCard from '@/components/cards/ProgressCard';
-import VideoCard from '@/components/cards/VideoCard';
-import MainCard from '@/components/MainCard';
-import LinearProgressWithTarget from '@/components/progress/LinearProgressWithTarget';
-import { AnalyticsCards, OrderCard, TopReferrers, UpgradePlan } from '@/sections/components/card';
+import ComponentsWrapper from "@/components/ComponentsWrapper";
+import ProgressCard from "@/components/cards/ProgressCard";
+import VideoCard from "@/components/cards/VideoCard";
+import MainCard from "@/components/MainCard";
+import LinearProgressWithTarget from "@/components/progress/LinearProgressWithTarget";
+import { AnalyticsCards, OrderCard, TopReferrers, UpgradePlan } from "@/sections/components/card";
 
 // @types
 
 // @assets
-import posterImg from '@/assets/images/cards/poster.png';
-import videoSrc from '@/assets/videos/test.mp4';
+import posterImg from "@/assets/images/cards/poster.png";
+import videoSrc from "@/assets/videos/test.mp4";
 
 const targetProgressData = [
   { target: 70, achieved: 85, goal: 100 },
   { target: 120, achieved: 150, goal: 200 },
-  { target: 75, achieved: 60, goal: 100 }
+  { target: 75, achieved: 60, goal: 100 },
 ];
 
 const videoData = {
-  caption: 'Showcase and manage your video content with a sleek and responsive video card.',
+  caption: "Showcase and manage your video content with a sleek and responsive video card.",
   poster: posterImg,
-  videoSrc: videoSrc
+  videoSrc: videoSrc,
 };
 
 /***************************  COMPOENT - CARD  ***************************/
@@ -60,7 +60,7 @@ export default function Card() {
           <VideoCard {...videoData} />
         </Grid>
         <Grid size={{ xs: 12, sm: 6, lg: 3 }}>
-          <Stack direction={{ md: 'row', lg: 'column' }} sx={{ gap: 3, alignItems: 'flex-start' }}>
+          <Stack direction={{ md: "row", lg: "column" }} sx={{ gap: 3, alignItems: "flex-start" }}>
             <UpgradePlan />
             <OrderCard />
           </Stack>

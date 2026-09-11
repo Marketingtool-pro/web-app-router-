@@ -1,9 +1,16 @@
 // @mui
-import Grid from '@mui/material/Grid';
+import Grid from "@mui/material/Grid";
 
 // @project
-import ComponentsWrapper from '@/components/ComponentsWrapper';
-import { PerformanceChart, TrafficInDevice, SaleMappingChart, LineChart, BarChart, RadialChart } from '@/sections/components/chart';
+import ComponentsWrapper from "@/components/ComponentsWrapper";
+import {
+  PerformanceChart,
+  TrafficInDevice,
+  SaleMappingChart,
+  LineChart,
+  BarChart,
+  RadialChart,
+} from "@/sections/components/chart";
 
 /***************************  COMPONENT - CHART  ***************************/
 

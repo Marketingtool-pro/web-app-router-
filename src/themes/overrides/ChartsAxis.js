@@ -5,14 +5,14 @@ export default function ChartsAxis(theme) {
     MuiChartsAxis: {
       styleOverrides: {
         root: {
-          '& .MuiChartsAxis-tickLabel': {
-            fill: theme.vars.palette.text.secondary
+          "& .MuiChartsAxis-tickLabel": {
+            fill: theme.vars.palette.text.secondary,
           },
-          '& .MuiChartsAxis-line': {
-            stroke: theme.vars.palette.divider
-          }
-        }
-      }
-    }
+          "& .MuiChartsAxis-line": {
+            stroke: theme.vars.palette.divider,
+          },
+        },
+      },
+    },
   };
 }

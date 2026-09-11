@@ -5,9 +5,9 @@ export default function Popper() {
     MuiPopper: {
       styleOverrides: {
         root: {
-          zIndex: 1201
-        }
-      }
-    }
+          zIndex: 1201,
+        },
+      },
+    },
   };
 }

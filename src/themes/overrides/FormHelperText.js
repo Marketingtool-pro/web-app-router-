@@ -9,12 +9,12 @@ export default function FormHelperText(theme) {
           marginLeft: 0,
           marginRight: 0,
           color: theme.vars.palette.grey[700],
-          '&.Mui-error': {
+          "&.Mui-error": {
             color: theme.vars.palette.error.main,
-            ...theme.applyStyles('dark', { color: theme.vars.palette.error.light })
-          }
-        }
-      }
-    }
+            ...theme.applyStyles("dark", { color: theme.vars.palette.error.light }),
+          },
+        },
+      },
+    },
   };
 }

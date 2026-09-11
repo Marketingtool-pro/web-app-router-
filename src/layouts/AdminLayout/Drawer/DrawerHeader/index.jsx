@@ -1,16 +1,16 @@
-import PropTypes from 'prop-types';
+import PropTypes from "prop-types";
 
 // @mui
-import IconButton from '@mui/material/IconButton';
-import Stack from '@mui/material/Stack';
-import Box from '@mui/material/Box';
+import IconButton from "@mui/material/IconButton";
+import Stack from "@mui/material/Stack";
+import Box from "@mui/material/Box";
 
 // @project
-import { handlerDrawerOpen, useGetMenuMaster } from '@/states/menu';
-import Logo from '@/components/logo';
+import { handlerDrawerOpen, useGetMenuMaster } from "@/states/menu";
+import Logo from "@/components/logo";
 
 // @assets
-import { IconLayoutSidebarLeftCollapse, IconLayoutSidebarRightCollapse } from '@tabler/icons-react';
+import { IconLayoutSidebarLeftCollapse, IconLayoutSidebarRightCollapse } from "@tabler/icons-react";
 
 /***************************  DRAWER HEADER  ***************************/
 
@@ -20,7 +20,10 @@ export default function DrawerHeader({ open }) {
 
   return (
     <Box sx={{ width: 1, px: 2, py: { xs: 2, md: 2.5 } }}>
-      <Stack direction="row" sx={{ alignItems: 'center', justifyContent: open ? 'space-between' : 'center', height: 36 }}>
+      <Stack
+        direction="row"
+        sx={{ alignItems: "center", justifyContent: open ? "space-between" : "center", height: 36 }}
+      >
         <Logo isIcon />
         <IconButton
           aria-label="open drawer"
@@ -29,7 +32,11 @@ export default function DrawerHeader({ open }) {
           color="secondary"
           variant="outlined"
         >
-          {!drawerOpen ? <IconLayoutSidebarRightCollapse size={20} /> : <IconLayoutSidebarLeftCollapse size={20} />}
+          {!drawerOpen ? (
+            <IconLayoutSidebarRightCollapse size={20} />
+          ) : (
+            <IconLayoutSidebarLeftCollapse size={20} />
+          )}
         </IconButton>
       </Stack>
     </Box>

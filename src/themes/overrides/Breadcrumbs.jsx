@@ -7,9 +7,9 @@ export default function Breadcrumbs(theme) {
         separator: {
           color: theme.vars.palette.text.secondary,
           marginLeft: 4,
-          marginRight: 4
-        }
-      }
-    }
+          marginRight: 4,
+        },
+      },
+    },
   };
 }

@@ -1,10 +1,10 @@
-import PropTypes from 'prop-types';
+import PropTypes from "prop-types";
 // @mui
-import Stack from '@mui/material/Stack';
-import Typography from '@mui/material/Typography';
+import Stack from "@mui/material/Stack";
+import Typography from "@mui/material/Typography";
 
 // @project
-import MainCard from '@/components/MainCard';
+import MainCard from "@/components/MainCard";
 
 // @types
 
@@ -12,9 +12,9 @@ import MainCard from '@/components/MainCard';
 
 export default function CustomTooltip({ counter, groupLabel, label: xlabel }) {
   return (
-    <MainCard sx={{ p: 1.25, borderRadius: 2, width: 'fit-content' }}>
-      <Stack sx={{ alignItems: 'center', gap: 0.5 }}>
-        <Stack direction="row" sx={{ alignItems: 'center', gap: 0.5 }}>
+    <MainCard sx={{ p: 1.25, borderRadius: 2, width: "fit-content" }}>
+      <Stack sx={{ alignItems: "center", gap: 0.5 }}>
+        <Stack direction="row" sx={{ alignItems: "center", gap: 0.5 }}>
           <Typography variant="subtitle1">{counter}</Typography>
           <Typography variant="caption" color="text.secondary">
             {groupLabel}
@@ -26,4 +26,8 @@ export default function CustomTooltip({ counter, groupLabel, label: xlabel }) {
   );
 }
 
-CustomTooltip.propTypes = { counter: PropTypes.any, groupLabel: PropTypes.any, label: PropTypes.any };
+CustomTooltip.propTypes = {
+  counter: PropTypes.any,
+  groupLabel: PropTypes.any,
+  label: PropTypes.any,
+};

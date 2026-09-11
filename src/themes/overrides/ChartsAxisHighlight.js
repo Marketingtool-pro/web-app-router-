@@ -5,9 +5,9 @@ export default function ChartsAxiasHighlight(theme) {
     MuiChartsAxisHighlight: {
       styleOverrides: {
         root: {
-          stroke: theme.vars.palette.grey[600]
-        }
-      }
-    }
+          stroke: theme.vars.palette.grey[600],
+        },
+      },
+    },
   };
 }

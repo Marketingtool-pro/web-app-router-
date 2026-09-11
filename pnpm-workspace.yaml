@@ -6,4 +6,6 @@ allowBuilds:
   '@firebase/util': true
   protobufjs: true
   '@mui/x-telemetry': false
+  core-js: true
+  fsevents: true
 minimumReleaseAge: 1440

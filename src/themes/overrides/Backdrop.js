@@ -1,5 +1,5 @@
 // @project
-import { withAlpha } from '@/utils/colorUtils';
+import { withAlpha } from "@/utils/colorUtils";
 
 /***************************  OVERRIDES - BACKDROP  ***************************/
 
@@ -9,9 +9,11 @@ export default function Backdrop(theme) {
       styleOverrides: {
         root: {
           backgroundColor: withAlpha(theme.vars.palette.grey[900], 0.2),
-          ...theme.applyStyles('dark', { backgroundColor: withAlpha(theme.vars.palette.grey[600], 0.2) })
-        }
-      }
-    }
+          ...theme.applyStyles("dark", {
+            backgroundColor: withAlpha(theme.vars.palette.grey[600], 0.2),
+          }),
+        },
+      },
+    },
   };
 }

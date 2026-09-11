@@ -1,6 +1,6 @@
-import { useNavigate, useLocation, useParams } from 'react-router-dom';
+import { useNavigate, useLocation, useParams } from "react-router-dom";
 
-const DANGEROUS_PROTOCOLS = new Set(['javascript:', 'data:', 'vbscript:', 'file:']);
+const DANGEROUS_PROTOCOLS = new Set(["javascript:", "data:", "vbscript:", "file:"]);
 
 // Keep this allowlist limited to trusted external destinations only.
 // Add origins as needed, for example: 'https://docs.example.com'
@@ -14,11 +14,11 @@ const getSafeNavigationTarget = (path) => {
   try {
     const url = new URL(path, appOrigin);
 
-    if (url.protocol !== 'http:' && url.protocol !== 'https:') {
+    if (url.protocol !== "http:" && url.protocol !== "https:") {
       if (DANGEROUS_PROTOCOLS.has(url.protocol)) {
-        console.warn('Blocked navigation to dangerous protocol:', url.protocol, 'target:', path);
+        console.warn("Blocked navigation to dangerous protocol:", url.protocol, "target:", path);
       } else {
-        console.warn('Blocked navigation to unsupported protocol:', url.protocol, 'target:', path);
+        console.warn("Blocked navigation to unsupported protocol:", url.protocol, "target:", path);
       }
       return null;
     }
@@ -48,10 +48,10 @@ export function useRouter() {
         // External URL (allowlisted): full page reload
         window.location.href = url.href;
       } else {
-        console.warn('Blocked navigation to non-allowlisted external origin:', url.origin);
+        console.warn("Blocked navigation to non-allowlisted external origin:", url.origin);
       }
     } catch (error) {
-      console.error('Navigation push failed for target:', path, error);
+      console.error("Navigation push failed for target:", path, error);
     }
   };
 
@@ -67,10 +67,10 @@ export function useRouter() {
       } else if (isAllowedExternalOrigin(url.origin)) {
         window.location.replace(url.href);
       } else {
-        console.warn('Blocked replace to non-allowlisted external origin:', url.origin);
+        console.warn("Blocked replace to non-allowlisted external origin:", url.origin);
       }
     } catch (error) {
-      console.error('Navigation replace failed for target:', path, error);
+      console.error("Navigation replace failed for target:", path, error);
     }
   };
 
@@ -81,7 +81,7 @@ export function useRouter() {
     push,
     replace,
     back: () => navigate(-1),
-    params
+    params,
   };
 }
 
@@ -123,8 +123,8 @@ export function useSearchParams() {
         },
         commit: (options = {}) => {
           navigate(`${location.pathname}?${draftParams.toString()}`, options);
-        }
+        },
       };
-    }
+    },
   };
 }

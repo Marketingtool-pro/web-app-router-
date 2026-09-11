@@ -7,5 +7,10 @@
   },
   "files.readonlyInclude": {
     "**/routeTree.gen.ts": true
-  }
+  },
+  "deno.enablePaths": [
+    "/Users/loken/ai-marketingtool-llc/web-app-router-/ghjk.ts"
+  ],
+  "deno.disablePaths": null,
+  "deno": null
 }

@@ -54,7 +54,13 @@
         "name": "tone",
         "label": "Tone of Voice",
         "type": "select",
-        "options": ["Professional", "Casual", "Friendly", "Formal", "Persuasive"],
+        "options": [
+          "Professional",
+          "Casual",
+          "Friendly",
+          "Formal",
+          "Persuasive"
+        ],
         "required": false
       },
       {
@@ -903,7 +909,13 @@
         "name": "campaignType",
         "label": "Campaign Type",
         "type": "select",
-        "options": ["Search", "Shopping", "Display", "Performance Max", "All Types"],
+        "options": [
+          "Search",
+          "Shopping",
+          "Display",
+          "Performance Max",
+          "All Types"
+        ],
         "required": true
       },
       {
@@ -1338,7 +1350,13 @@
         "name": "tone",
         "label": "Tone of Voice",
         "type": "select",
-        "options": ["Professional", "Casual", "Friendly", "Formal", "Persuasive"],
+        "options": [
+          "Professional",
+          "Casual",
+          "Friendly",
+          "Formal",
+          "Persuasive"
+        ],
         "required": false
       },
       {
@@ -1405,7 +1423,13 @@
         "name": "tone",
         "label": "Tone of Voice",
         "type": "select",
-        "options": ["Professional", "Casual", "Friendly", "Formal", "Persuasive"],
+        "options": [
+          "Professional",
+          "Casual",
+          "Friendly",
+          "Formal",
+          "Persuasive"
+        ],
         "required": false
       },
       {
@@ -1472,7 +1496,13 @@
         "name": "tone",
         "label": "Tone of Voice",
         "type": "select",
-        "options": ["Professional", "Casual", "Friendly", "Formal", "Persuasive"],
+        "options": [
+          "Professional",
+          "Casual",
+          "Friendly",
+          "Formal",
+          "Persuasive"
+        ],
         "required": false
       },
       {
@@ -1618,7 +1648,12 @@
         "name": "scaleType",
         "label": "Scaling Direction",
         "type": "select",
-        "options": ["Scale Up Winners", "Scale Down Losers", "Both", "Redistribute Budget"],
+        "options": [
+          "Scale Up Winners",
+          "Scale Down Losers",
+          "Both",
+          "Redistribute Budget"
+        ],
         "required": true
       },
       {
@@ -1939,7 +1974,12 @@
         "name": "goal",
         "label": "Bidding Goal",
         "type": "select",
-        "options": ["Lower CPA", "Higher Position", "More Impressions", "Better ROAS"],
+        "options": [
+          "Lower CPA",
+          "Higher Position",
+          "More Impressions",
+          "Better ROAS"
+        ],
         "required": true
       },
       {
@@ -2006,7 +2046,13 @@
         "name": "tone",
         "label": "Tone of Voice",
         "type": "select",
-        "options": ["Professional", "Casual", "Friendly", "Formal", "Persuasive"],
+        "options": [
+          "Professional",
+          "Casual",
+          "Friendly",
+          "Formal",
+          "Persuasive"
+        ],
         "required": false
       },
       {
@@ -2073,7 +2119,13 @@
         "name": "tone",
         "label": "Tone of Voice",
         "type": "select",
-        "options": ["Professional", "Casual", "Friendly", "Formal", "Persuasive"],
+        "options": [
+          "Professional",
+          "Casual",
+          "Friendly",
+          "Formal",
+          "Persuasive"
+        ],
         "required": false
       },
       {
@@ -2140,7 +2192,13 @@
         "name": "tone",
         "label": "Tone of Voice",
         "type": "select",
-        "options": ["Professional", "Casual", "Friendly", "Formal", "Persuasive"],
+        "options": [
+          "Professional",
+          "Casual",
+          "Friendly",
+          "Formal",
+          "Persuasive"
+        ],
         "required": false
       },
       {
@@ -2207,7 +2265,13 @@
         "name": "tone",
         "label": "Tone of Voice",
         "type": "select",
-        "options": ["Professional", "Casual", "Friendly", "Formal", "Persuasive"],
+        "options": [
+          "Professional",
+          "Casual",
+          "Friendly",
+          "Formal",
+          "Persuasive"
+        ],
         "required": false
       },
       {
@@ -2274,7 +2338,13 @@
         "name": "tone",
         "label": "Tone of Voice",
         "type": "select",
-        "options": ["Professional", "Casual", "Friendly", "Formal", "Persuasive"],
+        "options": [
+          "Professional",
+          "Casual",
+          "Friendly",
+          "Formal",
+          "Persuasive"
+        ],
         "required": false
       },
       {
@@ -2528,7 +2598,12 @@
         "name": "issue",
         "label": "Main Issue",
         "type": "select",
-        "options": ["Overspending", "Underspending", "Uneven Distribution", "No Budget Tracking"],
+        "options": [
+          "Overspending",
+          "Underspending",
+          "Uneven Distribution",
+          "No Budget Tracking"
+        ],
         "required": false
       }
     ]
@@ -2588,14 +2663,25 @@
         "name": "period",
         "label": "Analysis Period",
         "type": "select",
-        "options": ["Last 7 Days", "Last 30 Days", "Last 90 Days", "Year-to-Date"],
+        "options": [
+          "Last 7 Days",
+          "Last 30 Days",
+          "Last 90 Days",
+          "Year-to-Date"
+        ],
         "required": false
       },
       {
         "name": "metric",
         "label": "Key Metric",
         "type": "select",
-        "options": ["CPA", "ROAS", "Conversion Rate", "Cost Per Click", "Budget Utilization"],
+        "options": [
+          "CPA",
+          "ROAS",
+          "Conversion Rate",
+          "Cost Per Click",
+          "Budget Utilization"
+        ],
         "required": false
       }
     ]
@@ -2735,7 +2821,14 @@
         "name": "campaignType",
         "label": "Campaign Type",
         "type": "select",
-        "options": ["Search", "Display", "Shopping", "Performance Max", "Video", "All Types"],
+        "options": [
+          "Search",
+          "Display",
+          "Shopping",
+          "Performance Max",
+          "Video",
+          "All Types"
+        ],
         "required": false
       },
       {
@@ -3498,7 +3591,12 @@
         "name": "scale",
         "label": "Account Size",
         "type": "select",
-        "options": ["Small (1-5 campaigns)", "Medium (5-20)", "Large (20-50)", "Enterprise (50+)"],
+        "options": [
+          "Small (1-5 campaigns)",
+          "Medium (5-20)",
+          "Large (20-50)",
+          "Enterprise (50+)"
+        ],
         "required": false
       }
     ]
@@ -3704,7 +3802,13 @@
         "name": "tone",
         "label": "Tone of Voice",
         "type": "select",
-        "options": ["Professional", "Casual", "Friendly", "Formal", "Persuasive"],
+        "options": [
+          "Professional",
+          "Casual",
+          "Friendly",
+          "Formal",
+          "Persuasive"
+        ],
         "required": false
       },
       {
@@ -4276,7 +4380,13 @@
         "name": "tone",
         "label": "Tone of Voice",
         "type": "select",
-        "options": ["Professional", "Casual", "Friendly", "Formal", "Persuasive"],
+        "options": [
+          "Professional",
+          "Casual",
+          "Friendly",
+          "Formal",
+          "Persuasive"
+        ],
         "required": false
       },
       {
@@ -4353,7 +4463,12 @@
         "name": "dateRange",
         "label": "Analysis Period",
         "type": "select",
-        "options": ["Last 7 days", "Last 14 days", "Last 30 days", "Last 60 days"]
+        "options": [
+          "Last 7 days",
+          "Last 14 days",
+          "Last 30 days",
+          "Last 60 days"
+        ]
       }
     ]
   },
@@ -4423,7 +4538,13 @@
         "name": "format",
         "label": "Creative Format",
         "type": "select",
-        "options": ["All Formats", "Static Images", "Videos", "Carousels", "Stories/Reels"]
+        "options": [
+          "All Formats",
+          "Static Images",
+          "Videos",
+          "Carousels",
+          "Stories/Reels"
+        ]
       }
     ]
   },
@@ -4494,7 +4615,11 @@
         "name": "testingSpeed",
         "label": "Testing Speed",
         "type": "select",
-        "options": ["Conservative (7+ days)", "Standard (3-5 days)", "Aggressive (1-2 days)"]
+        "options": [
+          "Conservative (7+ days)",
+          "Standard (3-5 days)",
+          "Aggressive (1-2 days)"
+        ]
       }
     ]
   },
@@ -4768,7 +4893,13 @@
         "name": "tone",
         "label": "Tone of Voice",
         "type": "select",
-        "options": ["Professional", "Casual", "Friendly", "Formal", "Persuasive"],
+        "options": [
+          "Professional",
+          "Casual",
+          "Friendly",
+          "Formal",
+          "Persuasive"
+        ],
         "required": false
       },
       {
@@ -4835,7 +4966,12 @@
         "name": "position",
         "label": "Expected Position",
         "type": "select",
-        "options": ["Absolute Top (1)", "Top (2-3)", "Bottom of Page (4-7)", "Unknown"],
+        "options": [
+          "Absolute Top (1)",
+          "Top (2-3)",
+          "Bottom of Page (4-7)",
+          "Unknown"
+        ],
         "required": false
       },
       {
@@ -5644,13 +5780,22 @@
         "name": "focus",
         "label": "Primary Focus",
         "type": "select",
-        "options": ["Paid Advertising", "Content Scheduling", "Analytics & Reporting", "Full Suite"]
+        "options": [
+          "Paid Advertising",
+          "Content Scheduling",
+          "Analytics & Reporting",
+          "Full Suite"
+        ]
       },
       {
         "name": "platforms",
         "label": "Platforms",
         "type": "select",
-        "options": ["Facebook Only", "Facebook + Instagram", "Facebook + Instagram + Messenger"]
+        "options": [
+          "Facebook Only",
+          "Facebook + Instagram",
+          "Facebook + Instagram + Messenger"
+        ]
       }
     ]
   },
@@ -5779,7 +5924,13 @@
         "name": "tone",
         "label": "Tone of Voice",
         "type": "select",
-        "options": ["Professional", "Casual", "Friendly", "Formal", "Persuasive"],
+        "options": [
+          "Professional",
+          "Casual",
+          "Friendly",
+          "Formal",
+          "Persuasive"
+        ],
         "required": false
       },
       {
@@ -5973,7 +6124,13 @@
         "name": "scope",
         "label": "Geographic Scope",
         "type": "select",
-        "options": ["City-Level", "State/Region", "Country-Level", "Radius Targeting", "Global"],
+        "options": [
+          "City-Level",
+          "State/Region",
+          "Country-Level",
+          "Radius Targeting",
+          "Global"
+        ],
         "required": true
       },
       {
@@ -6282,7 +6439,12 @@
         "name": "count",
         "label": "Hashtag Count",
         "type": "select",
-        "options": ["10 hashtags", "15 hashtags", "20 hashtags", "30 hashtags (Instagram max)"]
+        "options": [
+          "10 hashtags",
+          "15 hashtags",
+          "20 hashtags",
+          "30 hashtags (Instagram max)"
+        ]
       }
     ]
   },
@@ -6353,7 +6515,11 @@
         "name": "outputFormat",
         "label": "Output Format",
         "type": "select",
-        "options": ["PNG (Best Quality)", "JPEG (Smaller Size)", "WebP (Modern Browsers)"]
+        "options": [
+          "PNG (Best Quality)",
+          "JPEG (Smaller Size)",
+          "WebP (Modern Browsers)"
+        ]
       }
     ]
   },
@@ -6502,7 +6668,13 @@
         "name": "hashtagCount",
         "label": "Hashtag Count",
         "type": "select",
-        "options": ["5 hashtags", "10 hashtags", "15 hashtags", "20 hashtags", "30 hashtags (max)"]
+        "options": [
+          "5 hashtags",
+          "10 hashtags",
+          "15 hashtags",
+          "20 hashtags",
+          "30 hashtags (max)"
+        ]
       }
     ]
   },
@@ -6561,7 +6733,13 @@
         "name": "postsPerWeek",
         "label": "Posts Per Week",
         "type": "select",
-        "options": ["3 posts", "5 posts", "7 posts (daily)", "10+ posts", "14 posts (2x daily)"]
+        "options": [
+          "3 posts",
+          "5 posts",
+          "7 posts (daily)",
+          "10+ posts",
+          "14 posts (2x daily)"
+        ]
       },
       {
         "name": "contentMix",
@@ -6643,7 +6821,12 @@
         "name": "dateRange",
         "label": "Date Range",
         "type": "select",
-        "options": ["Last 7 days", "Last 14 days", "Last 30 days", "Last 90 days"]
+        "options": [
+          "Last 7 days",
+          "Last 14 days",
+          "Last 30 days",
+          "Last 90 days"
+        ]
       }
     ]
   },
@@ -6785,7 +6968,12 @@
         "name": "accountCount",
         "label": "Number of Accounts",
         "type": "select",
-        "options": ["1 account", "2-5 accounts", "6-10 accounts", "10+ accounts"]
+        "options": [
+          "1 account",
+          "2-5 accounts",
+          "6-10 accounts",
+          "10+ accounts"
+        ]
       }
     ]
   },
@@ -6999,7 +7187,12 @@
         "name": "catalogSize",
         "label": "Catalog Size",
         "type": "select",
-        "options": ["1-10 products", "10-50 products", "50-200 products", "200+ products"]
+        "options": [
+          "1-10 products",
+          "10-50 products",
+          "50-200 products",
+          "200+ products"
+        ]
       },
       {
         "name": "adFormat",
@@ -7341,7 +7534,12 @@
         "name": "period",
         "label": "Data Period",
         "type": "select",
-        "options": ["Last 30 Days", "Last 90 Days", "Last 6 Months", "Last Year"],
+        "options": [
+          "Last 30 Days",
+          "Last 90 Days",
+          "Last 6 Months",
+          "Last Year"
+        ],
         "required": false
       }
     ]
@@ -7595,7 +7793,13 @@
         "name": "goal",
         "label": "Conversion Goal",
         "type": "select",
-        "options": ["Form Submission", "Purchase", "Phone Call", "App Download", "Sign Up"],
+        "options": [
+          "Form Submission",
+          "Purchase",
+          "Phone Call",
+          "App Download",
+          "Sign Up"
+        ],
         "required": false
       }
     ]
@@ -8466,7 +8670,12 @@
         "name": "tone",
         "label": "Response Tone",
         "type": "select",
-        "options": ["Professional", "Friendly & Casual", "Formal", "Match Brand Voice"]
+        "options": [
+          "Professional",
+          "Friendly & Casual",
+          "Formal",
+          "Match Brand Voice"
+        ]
       }
     ]
   },
@@ -8614,7 +8823,12 @@
         "name": "size",
         "label": "Target Audience Size",
         "type": "select",
-        "options": ["Narrow (100K-500K)", "Medium (500K-2M)", "Broad (2M-10M)", "Very Broad (10M+)"]
+        "options": [
+          "Narrow (100K-500K)",
+          "Medium (500K-2M)",
+          "Broad (2M-10M)",
+          "Very Broad (10M+)"
+        ]
       }
     ]
   },
@@ -8679,7 +8893,12 @@
         "name": "optimizationGoal",
         "label": "Optimization Goal",
         "type": "select",
-        "options": ["Maximum ROAS", "Lowest CPA", "Maximum Conversions", "Balanced (ROAS + Volume)"]
+        "options": [
+          "Maximum ROAS",
+          "Lowest CPA",
+          "Maximum Conversions",
+          "Balanced (ROAS + Volume)"
+        ]
       }
     ]
   },
@@ -8749,7 +8968,14 @@
         "name": "industry",
         "label": "Your Industry",
         "type": "select",
-        "options": ["E-commerce", "SaaS", "Lead Gen", "App Install", "Local Business", "Agency"]
+        "options": [
+          "E-commerce",
+          "SaaS",
+          "Lead Gen",
+          "App Install",
+          "Local Business",
+          "Agency"
+        ]
       }
     ]
   },
@@ -8819,7 +9045,12 @@
         "name": "autoReply",
         "label": "Auto-Reply",
         "type": "select",
-        "options": ["Disabled", "Questions Only", "All Positive Comments", "All Comments"]
+        "options": [
+          "Disabled",
+          "Questions Only",
+          "All Positive Comments",
+          "All Comments"
+        ]
       }
     ]
   },
@@ -10014,7 +10245,13 @@
         "name": "campaignType",
         "label": "Campaign Type",
         "type": "select",
-        "options": ["Display Network", "YouTube", "Discovery", "Performance Max", "All"],
+        "options": [
+          "Display Network",
+          "YouTube",
+          "Discovery",
+          "Performance Max",
+          "All"
+        ],
         "required": true
       },
       {
@@ -10160,7 +10397,13 @@
         "name": "tone",
         "label": "Tone of Voice",
         "type": "select",
-        "options": ["Professional", "Casual", "Friendly", "Formal", "Persuasive"],
+        "options": [
+          "Professional",
+          "Casual",
+          "Friendly",
+          "Formal",
+          "Persuasive"
+        ],
         "required": false
       },
       {
@@ -10227,7 +10470,14 @@
         "name": "platforms",
         "label": "Platforms",
         "type": "select",
-        "options": ["Instagram", "Facebook", "TikTok", "LinkedIn", "Twitter/X", "All Platforms"]
+        "options": [
+          "Instagram",
+          "Facebook",
+          "TikTok",
+          "LinkedIn",
+          "Twitter/X",
+          "All Platforms"
+        ]
       },
       {
         "name": "timing",
@@ -10305,7 +10555,13 @@
         "name": "tone",
         "label": "Tone of Voice",
         "type": "select",
-        "options": ["Professional", "Casual", "Friendly", "Formal", "Persuasive"],
+        "options": [
+          "Professional",
+          "Casual",
+          "Friendly",
+          "Formal",
+          "Persuasive"
+        ],
         "required": false
       },
       {
@@ -10372,7 +10628,13 @@
         "name": "tone",
         "label": "Tone of Voice",
         "type": "select",
-        "options": ["Professional", "Casual", "Friendly", "Formal", "Persuasive"],
+        "options": [
+          "Professional",
+          "Casual",
+          "Friendly",
+          "Formal",
+          "Persuasive"
+        ],
         "required": false
       },
       {
@@ -11128,7 +11390,13 @@
         "name": "ruleType",
         "label": "Rule Category",
         "type": "select",
-        "options": ["Bid Rules", "Budget Rules", "Pause/Enable Rules", "Alert Rules", "Combined"],
+        "options": [
+          "Bid Rules",
+          "Budget Rules",
+          "Pause/Enable Rules",
+          "Alert Rules",
+          "Combined"
+        ],
         "required": true
       },
       {
@@ -11756,7 +12024,13 @@
         "name": "style",
         "label": "Style",
         "type": "select",
-        "options": ["Clickbait", "Professional", "Question-Based", "How-To", "Listicle"],
+        "options": [
+          "Clickbait",
+          "Professional",
+          "Question-Based",
+          "How-To",
+          "Listicle"
+        ],
         "required": false
       }
     ]
@@ -12147,7 +12421,12 @@
         "name": "reportType",
         "label": "Report Type",
         "type": "select",
-        "options": ["Weekly Summary", "Monthly Deep Dive", "Quarterly Review", "Custom Date Range"]
+        "options": [
+          "Weekly Summary",
+          "Monthly Deep Dive",
+          "Quarterly Review",
+          "Custom Date Range"
+        ]
       }
     ]
   },
@@ -12218,7 +12497,13 @@
         "name": "platform",
         "label": "Platform",
         "type": "select",
-        "options": ["Instagram", "TikTok", "Twitter/X", "YouTube", "All Platforms"]
+        "options": [
+          "Instagram",
+          "TikTok",
+          "Twitter/X",
+          "YouTube",
+          "All Platforms"
+        ]
       }
     ]
   },
@@ -12744,7 +13029,13 @@
         "name": "tone",
         "label": "Tone of Voice",
         "type": "select",
-        "options": ["Professional", "Casual", "Friendly", "Formal", "Persuasive"],
+        "options": [
+          "Professional",
+          "Casual",
+          "Friendly",
+          "Formal",
+          "Persuasive"
+        ],
         "required": false
       },
       {
@@ -12885,7 +13176,13 @@
         "name": "tone",
         "label": "Tone of Voice",
         "type": "select",
-        "options": ["Professional", "Casual", "Friendly", "Formal", "Persuasive"],
+        "options": [
+          "Professional",
+          "Casual",
+          "Friendly",
+          "Formal",
+          "Persuasive"
+        ],
         "required": false
       },
       {
@@ -13012,7 +13309,12 @@
         "name": "duration",
         "label": "Video Duration",
         "type": "select",
-        "options": ["Short (<1 min)", "Medium (1-5 min)", "Long (5-15 min)", "Extended (15+ min)"],
+        "options": [
+          "Short (<1 min)",
+          "Medium (1-5 min)",
+          "Long (5-15 min)",
+          "Extended (15+ min)"
+        ],
         "required": false
       }
     ]
@@ -13079,7 +13381,12 @@
         "name": "duration",
         "label": "Video Duration",
         "type": "select",
-        "options": ["Short (<1 min)", "Medium (1-5 min)", "Long (5-15 min)", "Extended (15+ min)"],
+        "options": [
+          "Short (<1 min)",
+          "Medium (1-5 min)",
+          "Long (5-15 min)",
+          "Extended (15+ min)"
+        ],
         "required": false
       }
     ]
@@ -13146,7 +13453,12 @@
         "name": "duration",
         "label": "Video Duration",
         "type": "select",
-        "options": ["Short (<1 min)", "Medium (1-5 min)", "Long (5-15 min)", "Extended (15+ min)"],
+        "options": [
+          "Short (<1 min)",
+          "Medium (1-5 min)",
+          "Long (5-15 min)",
+          "Extended (15+ min)"
+        ],
         "required": false
       }
     ]
@@ -13206,7 +13518,12 @@
         "name": "goal",
         "label": "Test Goal",
         "type": "select",
-        "options": ["Higher CTR", "More Conversions", "Lower CPA", "Better Quality Score"],
+        "options": [
+          "Higher CTR",
+          "More Conversions",
+          "Lower CPA",
+          "Better Quality Score"
+        ],
         "required": true
       },
       {
@@ -13693,7 +14010,13 @@
         "name": "budget",
         "label": "Tool Budget",
         "type": "select",
-        "options": ["Free Only", "Under $50/mo", "$50-$200/mo", "$200-$500/mo", "$500+/mo"],
+        "options": [
+          "Free Only",
+          "Under $50/mo",
+          "$50-$200/mo",
+          "$200-$500/mo",
+          "$500+/mo"
+        ],
         "required": false
       }
     ]
@@ -13767,7 +14090,12 @@
         "name": "scale",
         "label": "Scale",
         "type": "select",
-        "options": ["Under 100 items", "100-500 items", "500-2000 items", "2000+ items"],
+        "options": [
+          "Under 100 items",
+          "100-500 items",
+          "500-2000 items",
+          "2000+ items"
+        ],
         "required": false
       }
     ]
@@ -14071,7 +14399,12 @@
         "name": "objective",
         "label": "Campaign Objective",
         "type": "select",
-        "options": ["Online Sales", "Lead Generation", "Store Visits", "Brand Awareness"],
+        "options": [
+          "Online Sales",
+          "Lead Generation",
+          "Store Visits",
+          "Brand Awareness"
+        ],
         "required": true
       },
       {
@@ -14158,7 +14491,14 @@
         "name": "tone",
         "label": "Brand Tone",
         "type": "select",
-        "options": ["Professional", "Casual", "Urgent", "Friendly", "Technical", "Luxury"],
+        "options": [
+          "Professional",
+          "Casual",
+          "Urgent",
+          "Friendly",
+          "Technical",
+          "Luxury"
+        ],
         "required": false
       },
       {
@@ -14245,7 +14585,12 @@
         "name": "accountAge",
         "label": "Account Age",
         "type": "select",
-        "options": ["Less than 3 months", "3-12 months", "1-3 years", "3+ years"],
+        "options": [
+          "Less than 3 months",
+          "3-12 months",
+          "1-3 years",
+          "3+ years"
+        ],
         "required": false
       }
     ]
@@ -14312,7 +14657,12 @@
         "name": "action",
         "label": "When Triggered",
         "type": "select",
-        "options": ["Send Alert", "Auto-Pause", "Adjust Bid", "Flag for Review"],
+        "options": [
+          "Send Alert",
+          "Auto-Pause",
+          "Adjust Bid",
+          "Flag for Review"
+        ],
         "required": false
       }
     ]
@@ -14460,7 +14810,13 @@
         "name": "conversionLag",
         "label": "Average Conversion Lag",
         "type": "select",
-        "options": ["Same Day", "1-3 Days", "3-7 Days", "7-14 Days", "14+ Days"],
+        "options": [
+          "Same Day",
+          "1-3 Days",
+          "3-7 Days",
+          "7-14 Days",
+          "14+ Days"
+        ],
         "required": false
       }
     ]
@@ -14520,7 +14876,13 @@
         "name": "campaignType",
         "label": "Campaign Type",
         "type": "select",
-        "options": ["Search", "Shopping", "Display", "Performance Max", "Video"],
+        "options": [
+          "Search",
+          "Shopping",
+          "Display",
+          "Performance Max",
+          "Video"
+        ],
         "required": true
       },
       {
@@ -14835,7 +15197,12 @@
         "name": "reportFrequency",
         "label": "Report Frequency",
         "type": "select",
-        "options": ["Daily Summary", "Weekly Report", "Monthly Report", "Real-time Alerts"],
+        "options": [
+          "Daily Summary",
+          "Weekly Report",
+          "Monthly Report",
+          "Real-time Alerts"
+        ],
         "required": false
       }
     ]
@@ -14902,7 +15269,12 @@
         "name": "priority",
         "label": "Priority Component",
         "type": "select",
-        "options": ["Expected CTR", "Ad Relevance", "Landing Page Experience", "All Components"],
+        "options": [
+          "Expected CTR",
+          "Ad Relevance",
+          "Landing Page Experience",
+          "All Components"
+        ],
         "required": false
       }
     ]
@@ -14962,14 +15334,25 @@
         "name": "period",
         "label": "Reporting Period",
         "type": "select",
-        "options": ["Last 7 Days", "Last 30 Days", "Last Quarter", "Year-to-Date", "Custom Range"],
+        "options": [
+          "Last 7 Days",
+          "Last 30 Days",
+          "Last Quarter",
+          "Year-to-Date",
+          "Custom Range"
+        ],
         "required": true
       },
       {
         "name": "audience",
         "label": "Report Audience",
         "type": "select",
-        "options": ["Client/Executive", "Marketing Team", "Internal Review", "Investor/Board"],
+        "options": [
+          "Client/Executive",
+          "Marketing Team",
+          "Internal Review",
+          "Investor/Board"
+        ],
         "required": false
       },
       {
@@ -15256,7 +15639,12 @@
         "name": "goal",
         "label": "Position Goal",
         "type": "select",
-        "options": ["Top of Page", "Absolute Top", "Cost-Efficient Position", "Maximum Visibility"],
+        "options": [
+          "Top of Page",
+          "Absolute Top",
+          "Cost-Efficient Position",
+          "Maximum Visibility"
+        ],
         "required": false
       },
       {
@@ -15618,7 +16006,12 @@
         "name": "timeframe",
         "label": "Time Range",
         "type": "select",
-        "options": ["Past 12 Months", "Past 5 Years", "Past 30 Days", "Real-Time (7 Days)"],
+        "options": [
+          "Past 12 Months",
+          "Past 5 Years",
+          "Past 30 Days",
+          "Real-Time (7 Days)"
+        ],
         "required": false
       }
     ]
@@ -15817,7 +16210,12 @@
         "name": "level",
         "label": "Apply To",
         "type": "select",
-        "options": ["Account Level", "Campaign Level", "Ad Group Level", "Shared List"],
+        "options": [
+          "Account Level",
+          "Campaign Level",
+          "Ad Group Level",
+          "Shared List"
+        ],
         "required": false
       }
     ]
@@ -15940,7 +16338,12 @@
         "name": "dateRange",
         "label": "Date Range",
         "type": "select",
-        "options": ["Last 7 days", "Last 14 days", "Last 30 days", "Last 90 days"]
+        "options": [
+          "Last 7 days",
+          "Last 14 days",
+          "Last 30 days",
+          "Last 90 days"
+        ]
       },
       {
         "name": "metric",
@@ -16056,7 +16459,13 @@
         "name": "objective",
         "label": "Campaign Objective",
         "type": "select",
-        "options": ["Conversions", "Traffic", "Engagement", "Lead Generation", "Sales"]
+        "options": [
+          "Conversions",
+          "Traffic",
+          "Engagement",
+          "Lead Generation",
+          "Sales"
+        ]
       },
       {
         "name": "variations",
@@ -16106,7 +16515,12 @@
         "name": "timeframe",
         "label": "Analysis Timeframe",
         "type": "select",
-        "options": ["Last 7 days", "Last 14 days", "Last 30 days", "Last 60 days"]
+        "options": [
+          "Last 7 days",
+          "Last 14 days",
+          "Last 30 days",
+          "Last 60 days"
+        ]
       }
     ]
   },
@@ -16188,7 +16602,14 @@
         "name": "tone",
         "label": "Tone of Voice",
         "type": "select",
-        "options": ["Professional", "Casual", "Urgent", "Playful", "Inspirational", "Direct"]
+        "options": [
+          "Professional",
+          "Casual",
+          "Urgent",
+          "Playful",
+          "Inspirational",
+          "Direct"
+        ]
       },
       {
         "name": "adFormat",
@@ -16238,7 +16659,13 @@
         "name": "goal",
         "label": "Primary Goal",
         "type": "select",
-        "options": ["Increase ROAS", "Lower CPA", "Scale Spend", "Improve CTR", "Reduce Waste"]
+        "options": [
+          "Increase ROAS",
+          "Lower CPA",
+          "Scale Spend",
+          "Improve CTR",
+          "Reduce Waste"
+        ]
       },
       {
         "name": "monthlyBudget",
@@ -16293,7 +16720,11 @@
         "name": "audienceSize",
         "label": "Audience Size Preference",
         "type": "select",
-        "options": ["Narrow (High Intent)", "Medium (Balanced)", "Broad (Maximum Reach)"]
+        "options": [
+          "Narrow (High Intent)",
+          "Medium (Balanced)",
+          "Broad (Maximum Reach)"
+        ]
       }
     ]
   },
@@ -16342,7 +16773,12 @@
         "name": "lookbackPeriod",
         "label": "Data Lookback Period",
         "type": "select",
-        "options": ["Last 30 days", "Last 60 days", "Last 90 days", "Last 180 days"]
+        "options": [
+          "Last 30 days",
+          "Last 60 days",
+          "Last 90 days",
+          "Last 180 days"
+        ]
       }
     ]
   },
@@ -16485,7 +16921,12 @@
         "name": "optimizeFor",
         "label": "Optimize For",
         "type": "select",
-        "options": ["Maximum ROAS", "Lowest CPA", "Maximum Conversions", "Maximum Revenue"]
+        "options": [
+          "Maximum ROAS",
+          "Lowest CPA",
+          "Maximum Conversions",
+          "Maximum Revenue"
+        ]
       }
     ]
   },
@@ -16523,7 +16964,14 @@
         "name": "platform",
         "label": "Website Platform",
         "type": "select",
-        "options": ["Shopify", "WooCommerce", "WordPress", "Custom/Other", "Magento", "BigCommerce"]
+        "options": [
+          "Shopify",
+          "WooCommerce",
+          "WordPress",
+          "Custom/Other",
+          "Magento",
+          "BigCommerce"
+        ]
       },
       {
         "name": "events",
@@ -16572,13 +17020,24 @@
         "name": "analysisScope",
         "label": "Analysis Scope",
         "type": "select",
-        "options": ["All Creatives", "Top Performers Only", "Underperformers", "Fatigued Creatives"]
+        "options": [
+          "All Creatives",
+          "Top Performers Only",
+          "Underperformers",
+          "Fatigued Creatives"
+        ]
       },
       {
         "name": "format",
         "label": "Creative Format",
         "type": "select",
-        "options": ["All Formats", "Images Only", "Videos Only", "Carousels Only", "Stories/Reels"]
+        "options": [
+          "All Formats",
+          "Images Only",
+          "Videos Only",
+          "Carousels Only",
+          "Stories/Reels"
+        ]
       }
     ]
   },
@@ -16900,7 +17359,12 @@
         "name": "dateRange",
         "label": "Date Range",
         "type": "select",
-        "options": ["Last 7 days", "Last 14 days", "Last 30 days", "Last 90 days"]
+        "options": [
+          "Last 7 days",
+          "Last 14 days",
+          "Last 30 days",
+          "Last 90 days"
+        ]
       }
     ]
   },
@@ -16938,7 +17402,13 @@
         "name": "platform",
         "label": "E-commerce Platform",
         "type": "select",
-        "options": ["Shopify", "WooCommerce", "Magento", "BigCommerce", "Custom/Other"]
+        "options": [
+          "Shopify",
+          "WooCommerce",
+          "Magento",
+          "BigCommerce",
+          "Custom/Other"
+        ]
       },
       {
         "name": "pixelId",
@@ -16994,7 +17464,12 @@
         "name": "threshold",
         "label": "Performance Threshold",
         "type": "select",
-        "options": ["Top 10% Performers", "Above Average", "Below Average", "Bottom 10% (Losers)"]
+        "options": [
+          "Top 10% Performers",
+          "Above Average",
+          "Below Average",
+          "Bottom 10% (Losers)"
+        ]
       }
     ]
   },
@@ -17038,7 +17513,12 @@
         "name": "reportSchedule",
         "label": "Report Schedule",
         "type": "select",
-        "options": ["Weekly (Monday)", "Bi-Weekly", "Monthly (1st)", "Custom Schedule"]
+        "options": [
+          "Weekly (Monday)",
+          "Bi-Weekly",
+          "Monthly (1st)",
+          "Custom Schedule"
+        ]
       }
     ]
   },
@@ -17076,13 +17556,23 @@
         "name": "style",
         "label": "Bio Style",
         "type": "select",
-        "options": ["Professional", "Creative & Fun", "Minimalist", "Bold & Direct", "Storytelling"]
+        "options": [
+          "Professional",
+          "Creative & Fun",
+          "Minimalist",
+          "Bold & Direct",
+          "Storytelling"
+        ]
       },
       {
         "name": "includeEmoji",
         "label": "Include Emojis?",
         "type": "select",
-        "options": ["Yes - Relevant emojis", "Minimal - 1-2 emojis", "No emojis"]
+        "options": [
+          "Yes - Relevant emojis",
+          "Minimal - 1-2 emojis",
+          "No emojis"
+        ]
       }
     ]
   },
@@ -17120,7 +17610,11 @@
         "name": "groupCount",
         "label": "Hashtag Groups",
         "type": "select",
-        "options": ["3 rotating groups", "5 rotating groups", "7 rotating groups"]
+        "options": [
+          "3 rotating groups",
+          "5 rotating groups",
+          "7 rotating groups"
+        ]
       },
       {
         "name": "hashtagsPerGroup",
@@ -17164,13 +17658,22 @@
         "name": "analysisDepth",
         "label": "Analysis Depth",
         "type": "select",
-        "options": ["Quick Overview", "Standard Analysis", "Deep Dive (All Metrics)"]
+        "options": [
+          "Quick Overview",
+          "Standard Analysis",
+          "Deep Dive (All Metrics)"
+        ]
       },
       {
         "name": "timeframe",
         "label": "Timeframe",
         "type": "select",
-        "options": ["Last 30 days", "Last 60 days", "Last 90 days", "Last 6 months"]
+        "options": [
+          "Last 30 days",
+          "Last 60 days",
+          "Last 90 days",
+          "Last 6 months"
+        ]
       }
     ]
   },

@@ -4,8 +4,8 @@ export default function DialogTitle() {
   return {
     MuiDialogTitle: {
       styleOverrides: {
-        root: { paddingLeft: 16, paddingRight: 16 }
-      }
-    }
+        root: { paddingLeft: 16, paddingRight: 16 },
+      },
+    },
   };
 }

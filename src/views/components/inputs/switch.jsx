@@ -1,9 +1,16 @@
 // @mui
-import Grid from '@mui/material/Grid';
+import Grid from "@mui/material/Grid";
 
 // @project
-import ComponentsWrapper from '@/components/ComponentsWrapper';
-import { BasicSwitch, ColorSwitch, ContentSwitch, LabelPositionSwitch, LabelSwitch, SizeSwitch } from '@/sections/components/switch';
+import ComponentsWrapper from "@/components/ComponentsWrapper";
+import {
+  BasicSwitch,
+  ColorSwitch,
+  ContentSwitch,
+  LabelPositionSwitch,
+  LabelSwitch,
+  SizeSwitch,
+} from "@/sections/components/switch";
 
 /***************************  INPUTS - SWITCH  ***************************/
 

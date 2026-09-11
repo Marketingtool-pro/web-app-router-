@@ -5,14 +5,14 @@ export default function PickersCalendarHeader(theme) {
     MuiPickersCalendarHeader: {
       styleOverrides: {
         root: {
-          '& .MuiPickersCalendarHeader-switchViewIcon': {
-            fill: theme.vars.palette.text.secondary
-          }
+          "& .MuiPickersCalendarHeader-switchViewIcon": {
+            fill: theme.vars.palette.text.secondary,
+          },
         },
         label: {
-          ...theme.typography.subtitle2
-        }
-      }
-    }
+          ...theme.typography.subtitle2,
+        },
+      },
+    },
   };
 }

@@ -1,18 +1,26 @@
 // @mui
-import { useColorScheme, useTheme } from '@mui/material/styles';
+import { useColorScheme, useTheme } from "@mui/material/styles";
 
 // @project
-import { ThemeMode } from '@/config';
+import { ThemeMode } from "@/config";
 
 /***************************  IMAGE - ERROR 500 SERVER  ***************************/
 
 export default function Error5001() {
   const theme = useTheme();
   const { colorScheme } = useColorScheme();
-  const primaryColor = colorScheme === ThemeMode.DARK ? theme.vars.palette.primary.main : theme.vars.palette.primary.dark;
+  const primaryColor =
+    colorScheme === ThemeMode.DARK
+      ? theme.vars.palette.primary.main
+      : theme.vars.palette.primary.dark;
 
   return (
-    <svg viewBox="0 0 1207 399" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ width: '100%', height: 'auto' }}>
+    <svg
+      viewBox="0 0 1207 399"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      style={{ width: "100%", height: "auto" }}
+    >
       <path
         d="M845.5 315H390.498C368.407 315 350.498 297.091 350.498 275V275C350.498 252.909 368.407 235 390.498 235H459.112C481.418 235 499.5 216.918 499.5 194.612V194.612C499.5 172.75 481.75 155.041 459.888 155.092L256 155.563"
         stroke={primaryColor}

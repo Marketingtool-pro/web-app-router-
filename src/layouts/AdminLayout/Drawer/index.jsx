@@ -1,25 +1,25 @@
-import PropTypes from 'prop-types';
-import { Activity, useMemo } from 'react';
+import PropTypes from "prop-types";
+import { Activity, useMemo } from "react";
 
-import useMediaQuery from '@mui/material/useMediaQuery';
-import Divider from '@mui/material/Divider';
-import Drawer from '@mui/material/Drawer';
-import Box from '@mui/material/Box';
+import useMediaQuery from "@mui/material/useMediaQuery";
+import Divider from "@mui/material/Divider";
+import Drawer from "@mui/material/Drawer";
+import Box from "@mui/material/Box";
 
 // @project
-import DrawerHeader from './DrawerHeader';
-import DrawerContent from './DrawerContent';
-import MiniDrawerStyled from './MiniDrawerStyled';
+import DrawerHeader from "./DrawerHeader";
+import DrawerContent from "./DrawerContent";
+import MiniDrawerStyled from "./MiniDrawerStyled";
 
-import { handlerDrawerOpen, useGetMenuMaster } from '@/states/menu';
-import { DRAWER_WIDTH } from '@/config';
+import { handlerDrawerOpen, useGetMenuMaster } from "@/states/menu";
+import { DRAWER_WIDTH } from "@/config";
 
 /***************************  ADMIN LAYOUT - DRAWER  ***************************/
 
 export default function MainDrawer({ window }) {
   const { menuMaster } = useGetMenuMaster();
   const drawerOpen = menuMaster.isDashboardDrawerOpened;
-  const downLG = useMediaQuery((theme) => theme.breakpoints.down('lg'));
+  const downLG = useMediaQuery((theme) => theme.breakpoints.down("lg"));
 
   // Define container for drawer when window is specified
   const container = window !== undefined ? () => window().document.body : undefined;
@@ -39,14 +39,14 @@ export default function MainDrawer({ window }) {
         slotProps={{
           paper: {
             sx: {
-              boxSizing: 'border-box',
+              boxSizing: "border-box",
               width: DRAWER_WIDTH,
-              borderRight: '1px solid',
-              borderRightColor: 'divider',
-              backgroundImage: 'none',
-              boxShadow: 'inherit'
-            }
-          }
+              borderRight: "1px solid",
+              borderRightColor: "divider",
+              backgroundImage: "none",
+              boxShadow: "inherit",
+            },
+          },
         }}
       >
         {drawerHeader}
@@ -55,7 +55,7 @@ export default function MainDrawer({ window }) {
       </Drawer>
 
       {/* Permanent mini-drawer for large media */}
-      <Activity mode={!downLG ? 'visible' : 'hidden'}>
+      <Activity mode={!downLG ? "visible" : "hidden"}>
         <MiniDrawerStyled variant="permanent" open={drawerOpen}>
           {drawerHeader}
           <Divider sx={{ mx: 2 }} />

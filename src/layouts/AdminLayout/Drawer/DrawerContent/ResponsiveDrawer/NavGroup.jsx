@@ -1,15 +1,15 @@
-import PropTypes from 'prop-types';
+import PropTypes from "prop-types";
 // @mui
-import List from '@mui/material/List';
-import Typography from '@mui/material/Typography';
+import List from "@mui/material/List";
+import Typography from "@mui/material/Typography";
 
 // @project
-import NavCollapse from './NavCollapse';
-import NavItem from './NavItem';
-import useCurrentUser from '@/hooks/useCurrentUser';
+import NavCollapse from "./NavCollapse";
+import NavItem from "./NavItem";
+import useCurrentUser from "@/hooks/useCurrentUser";
 
 // @third-party
-import { FormattedMessage } from 'react-intl';
+import { FormattedMessage } from "react-intl";
 
 /***************************  RESPONSIVE DRAWER - GROUP  ***************************/
 
@@ -26,9 +26,9 @@ export default function NavGroup({ item }) {
 
     // Render items based on the type
     switch (menuItem.type) {
-      case 'collapse':
+      case "collapse":
         return <NavCollapse key={menuItem.id} item={menuItem} />;
-      case 'item':
+      case "item":
         return <NavItem key={menuItem.id} item={menuItem} />;
       default:
         return (
@@ -43,11 +43,11 @@ export default function NavGroup({ item }) {
     <List
       component="div"
       subheader={
-        <Typography component="div" variant="caption" sx={{ mb: 0.75, color: 'grey.700' }}>
+        <Typography component="div" variant="caption" sx={{ mb: 0.75, color: "grey.700" }}>
           <FormattedMessage id={item.title} />
         </Typography>
       }
-      sx={{ '&:not(:first-of-type)': { pt: 1, borderTop: '1px solid', borderColor: 'divider' } }}
+      sx={{ "&:not(:first-of-type)": { pt: 1, borderTop: "1px solid", borderColor: "divider" } }}
     >
       {item.children?.map((menuItem) => renderNavItem(menuItem))}
     </List>

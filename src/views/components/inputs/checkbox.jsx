@@ -1,9 +1,9 @@
 // @mui
-import Grid from '@mui/material/Grid';
+import Grid from "@mui/material/Grid";
 
 // @project
-import ComponentsWrapper from '@/components/ComponentsWrapper';
-import { Basic, Color, Content, Label, Size } from '@/sections/components/checkbox';
+import ComponentsWrapper from "@/components/ComponentsWrapper";
+import { Basic, Color, Content, Label, Size } from "@/sections/components/checkbox";
 
 /***************************  INPUTS - CHECKBOX  ***************************/
 

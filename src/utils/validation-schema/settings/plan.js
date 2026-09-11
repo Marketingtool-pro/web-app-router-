@@ -15,7 +15,7 @@ export function conditionalSchema(isPublishing) {
       if (!trimmed && isPublishing) return message;
       if (!trimmed) return true;
       return true;
-    }
+    },
   };
 }
 
@@ -24,16 +24,16 @@ export function getPlanFormSchemas(isPublishing) {
 
   return {
     nameSchema: {
-      required: cond.required('Plan name is required')
+      required: cond.required("Plan name is required"),
     },
     priceModalSchema: {
-      required: cond.required('Price modal is required')
+      required: cond.required("Price modal is required"),
     },
     pricingOptionsSchema: {
-      required: cond.required('At least one billing period is required')
+      required: cond.required("At least one billing period is required"),
     },
     featuresSchema: {
-      required: cond.required('At least one feature is required')
-    }
+      required: cond.required("At least one feature is required"),
+    },
   };
 }

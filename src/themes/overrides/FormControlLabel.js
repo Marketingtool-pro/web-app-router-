@@ -1,5 +1,5 @@
 // @project
-import { withAlpha } from '@/utils/colorUtils';
+import { withAlpha } from "@/utils/colorUtils";
 
 /***************************  OVERRIDES - FORM CONTROL LABEL  ***************************/
 
@@ -8,18 +8,18 @@ export default function FormControlLabel(theme) {
     MuiFormControlLabel: {
       styleOverrides: {
         root: {
-          '&.Mui-disabled': {
-            cursor: 'not-allowed'
-          }
+          "&.Mui-disabled": {
+            cursor: "not-allowed",
+          },
         },
         label: {
-          '&.Mui-disabled': {
-            color: withAlpha(theme.vars.palette.text.disabled, 0.8)
-          }
+          "&.Mui-disabled": {
+            color: withAlpha(theme.vars.palette.text.disabled, 0.8),
+          },
         },
-        labelPlacementStart: { marginRight: 0, '& .MuiSwitch-root': { marginLeft: 12 } },
-        labelPlacementEnd: { '& .MuiSwitch-root': { marginRight: 12 } }
-      }
-    }
+        labelPlacementStart: { marginRight: 0, "& .MuiSwitch-root": { marginLeft: 12 } },
+        labelPlacementEnd: { "& .MuiSwitch-root": { marginRight: 12 } },
+      },
+    },
   };
 }

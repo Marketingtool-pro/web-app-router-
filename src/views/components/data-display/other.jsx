@@ -1,9 +1,9 @@
 // @mui
-import Grid from '@mui/material/Grid';
+import Grid from "@mui/material/Grid";
 
 // @project
-import ComponentsWrapper from '@/components/ComponentsWrapper';
-import { MainHeader, PageHeader, SectionHeader } from '@/sections/components/other';
+import ComponentsWrapper from "@/components/ComponentsWrapper";
+import { MainHeader, PageHeader, SectionHeader } from "@/sections/components/other";
 
 /***************************  DATA DISPLAY - OTHER  ***************************/
 

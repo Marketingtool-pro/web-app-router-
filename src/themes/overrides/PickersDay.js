@@ -7,14 +7,14 @@ export default function PickersDay(theme) {
         root: {
           ...theme.typography.body1,
           color: theme.vars.palette.grey[700],
-          ':not(.Mui-selected)': {
-            borderColor: theme.vars.palette.primary.main
-          }
+          ":not(.Mui-selected)": {
+            borderColor: theme.vars.palette.primary.main,
+          },
         },
         today: {
-          color: theme.vars.palette.primary.main
-        }
-      }
-    }
+          color: theme.vars.palette.primary.main,
+        },
+      },
+    },
   };
 }

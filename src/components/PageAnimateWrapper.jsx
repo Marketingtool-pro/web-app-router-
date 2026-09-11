@@ -1,11 +1,11 @@
-import PropTypes from 'prop-types';
-import { useLocation } from 'react-router-dom';
+import PropTypes from "prop-types";
+import { useLocation } from "react-router-dom";
 
 // @third-party
-import { motion } from 'motion/react';
+import { motion } from "motion/react";
 
 // @project
-import { varSlide } from '@/components/third-party/motion/animate/dialog';
+import { varSlide } from "@/components/third-party/motion/animate/dialog";
 
 // @types
 
@@ -20,7 +20,12 @@ export default function PageAnimateWrapper({ children }) {
   const outletKey = location.pathname;
 
   return (
-    <motion.div key={outletKey} variants={varSlide('slideInDown', { distance: 50 })} initial="initial" animate="animate">
+    <motion.div
+      key={outletKey}
+      variants={varSlide("slideInDown", { distance: 50 })}
+      initial="initial"
+      animate="animate"
+    >
       {children}
     </motion.div>
   );

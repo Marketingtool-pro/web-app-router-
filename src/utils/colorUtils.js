@@ -1,5 +1,5 @@
 // material-ui
-import { alpha } from '@mui/material/styles';
+import { alpha } from "@mui/material/styles";
 
 /**
  * Converts a hex color string to an RGB channel string ("r g b").
@@ -9,19 +9,19 @@ import { alpha } from '@mui/material/styles';
  * @throws {Error} If the input is not a valid hex color.
  */
 export function hexToRgbChannel(hex) {
-  let cleaned = hex.replace(/^#/, '');
+  let cleaned = hex.replace(/^#/, "");
 
   if (cleaned.length === 3) {
     cleaned = cleaned
-      .split('')
+      .split("")
       .map((c) => c + c)
-      .join('');
+      .join("");
   }
   if (cleaned.length === 4) {
     cleaned = cleaned
-      .split('')
+      .split("")
       .map((c) => c + c)
-      .join('');
+      .join("");
   }
 
   if (cleaned.length !== 6 && cleaned.length !== 8) {
@@ -39,9 +39,9 @@ export function extendPaletteWithChannels(palette) {
   const result = { ...palette };
 
   Object.entries(palette).forEach(([k, v]) => {
-    if (typeof v === 'string' && v.startsWith('#')) {
+    if (typeof v === "string" && v.startsWith("#")) {
       result[`${k}Channel`] = hexToRgbChannel(v);
-    } else if (typeof v === 'object' && v !== null) {
+    } else if (typeof v === "object" && v !== null) {
       result[k] = extendPaletteWithChannels(v);
     }
   });
@@ -56,9 +56,11 @@ export function withAlpha(color, opacity) {
   }
 
   // Case 2: CSS Var: var(--mui-palette-xxx) or var(--palette-xxx, #hex)
-  if (color.startsWith('var(')) {
+  if (color.startsWith("var(")) {
     // inject "Channel" *before the closing parenthesis of the var name only*
-    return color.replace(/(--[a-zA-Z0-9-]+)(.*)\)/, `$1Channel$2)`).replace(/^var\((.+)\)$/, `rgba(var($1) / ${opacity})`);
+    return color
+      .replace(/(--[a-zA-Z0-9-]+)(.*)\)/, `$1Channel$2)`)
+      .replace(/^var\((.+)\)$/, `rgba(var($1) / ${opacity})`);
   }
 
   // Fallback

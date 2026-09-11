@@ -1,9 +1,9 @@
 // @mui
-import Grid from '@mui/material/Grid';
+import Grid from "@mui/material/Grid";
 
 // @project
-import PageAnimateWrapper from '@/components/PageAnimateWrapper';
-import { FileUpload, AvatarUpload } from '@/sections/plugins/dropzone';
+import PageAnimateWrapper from "@/components/PageAnimateWrapper";
+import { FileUpload, AvatarUpload } from "@/sections/plugins/dropzone";
 
 /***************************  PLUGINES - DROPZONE  ***************************/
 

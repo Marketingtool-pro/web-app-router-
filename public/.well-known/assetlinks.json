@@ -14,27 +14,21 @@
     }
   },
   {
-    "relation": [
-      "delegate_permission/common.get_login_creds"
-    ],
+    "relation": ["delegate_permission/common.get_login_creds"],
     "target": {
       "namespace": "web",
       "site": "https://marketingtool.pro"
     }
   },
   {
-    "relation": [
-      "delegate_permission/common.get_login_creds"
-    ],
+    "relation": ["delegate_permission/common.get_login_creds"],
     "target": {
       "namespace": "web",
       "site": "https://app.marketingtool.pro"
     }
   },
   {
-    "relation": [
-      "delegate_permission/common.get_login_creds"
-    ],
+    "relation": ["delegate_permission/common.get_login_creds"],
     "target": {
       "namespace": "web",
       "site": "https://auth.marketingtool.pro"

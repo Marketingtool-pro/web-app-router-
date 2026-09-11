@@ -1,11 +1,11 @@
-import { createSupabaseClient } from '@/utils/auth-client/supabase';
+import { createSupabaseClient } from "@/utils/auth-client/supabase";
 
 const supabase = createSupabaseClient();
 
 export async function login(formData) {
   const { data, error } = await supabase.auth.signInWithPassword({
     email: formData.email,
-    password: formData.password
+    password: formData.password,
   });
 
   if (error) throw error;
@@ -14,8 +14,8 @@ export async function login(formData) {
     id: data.user.id,
     email: data.user.email,
     access_token: data.session.access_token,
-    firstname: data.user.user_metadata?.firstname || '',
-    lastname: data.user.user_metadata?.lastname || ''
+    firstname: data.user.user_metadata?.firstname || "",
+    lastname: data.user.user_metadata?.lastname || "",
   };
 }
 
@@ -27,8 +27,8 @@ export async function getUser() {
   return {
     id: data.user.id,
     email: data.user.email,
-    firstname: data.user.user_metadata?.firstname || '',
-    lastname: data.user.user_metadata?.lastname || ''
+    firstname: data.user.user_metadata?.firstname || "",
+    lastname: data.user.user_metadata?.lastname || "",
   };
 }
 
@@ -39,9 +39,9 @@ export async function signUp(formData) {
     options: {
       data: {
         firstname: formData.firstname,
-        lastname: formData.lastname
-      }
-    }
+        lastname: formData.lastname,
+      },
+    },
   });
 
   if (error) throw error;
@@ -49,7 +49,7 @@ export async function signUp(formData) {
   return {
     id: data.user.id,
     email: data.user.email,
-    access_token: data.session?.access_token
+    access_token: data.session?.access_token,
   };
 }
 
@@ -78,5 +78,14 @@ export async function signOut() {
   return { status: 200 };
 }
 
-const supabaseAuth = { login, getUser, signUp, verifyOtp, resend, forgotPassword, resetPassword, signOut };
+const supabaseAuth = {
+  login,
+  getUser,
+  signUp,
+  verifyOtp,
+  resend,
+  forgotPassword,
+  resetPassword,
+  signOut,
+};
 export default supabaseAuth;

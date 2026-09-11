@@ -8,16 +8,16 @@ export default function InputLabel(theme) {
           ...theme.typography.body2,
           color: theme.vars.palette.text.primary,
           marginBottom: 6,
-          '&.Mui-error': {
+          "&.Mui-error": {
             color: theme.vars.palette.error.main,
-            ...theme.applyStyles('dark', { color: theme.vars.palette.error.light })
-          }
+            ...theme.applyStyles("dark", { color: theme.vars.palette.error.light }),
+          },
         },
         asterisk: {
           color: theme.vars.palette.error.main,
-          ...theme.applyStyles('dark', { color: theme.vars.palette.error.light })
-        }
-      }
-    }
+          ...theme.applyStyles("dark", { color: theme.vars.palette.error.light }),
+        },
+      },
+    },
   };
 }

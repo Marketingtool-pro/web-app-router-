@@ -1,39 +1,39 @@
-import { useMemo } from 'react';
+import { useMemo } from "react";
 
 // @third-party
-import useSWR, { mutate } from 'swr';
+import useSWR, { mutate } from "swr";
 
 const endpoints = {
-  key: 'snackbar'
+  key: "snackbar",
 };
 
 const initialState = {
   action: false,
   open: false,
-  message: 'Note archived',
+  message: "Note archived",
   anchorOrigin: {
-    vertical: 'bottom',
-    horizontal: 'right'
+    vertical: "bottom",
+    horizontal: "right",
   },
-  severity: 'success',
-  variant: 'default',
+  severity: "success",
+  variant: "default",
   alert: {
-    variant: 'filled'
+    variant: "filled",
   },
-  transition: 'Zoom',
+  transition: "Zoom",
   close: false,
   actionButton: false,
   maxStack: 3,
   dense: false,
-  iconVariant: 'useemojis',
-  hideIconVariant: false
+  iconVariant: "useemojis",
+  hideIconVariant: false,
 };
 
 export function useGetSnackbar() {
   const { data } = useSWR(endpoints.key, () => initialState, {
     revalidateIfStale: false,
     revalidateOnFocus: false,
-    revalidateOnReconnect: false
+    revalidateOnReconnect: false,
   });
 
   const memoizedValue = useMemo(() => ({ snackbar: data }), [data]);
@@ -44,7 +44,18 @@ export function useGetSnackbar() {
 export function openSnackbar(snackbar) {
   // to update local state based on key
 
-  const { action, open, message, anchorOrigin, variant, alert, transition, close, actionButton, severity } = snackbar;
+  const {
+    action,
+    open,
+    message,
+    anchorOrigin,
+    variant,
+    alert,
+    transition,
+    close,
+    actionButton,
+    severity,
+  } = snackbar;
 
   mutate(
     endpoints.key,
@@ -61,10 +72,10 @@ export function openSnackbar(snackbar) {
         severity: severity || initialState.severity,
         transition: transition || initialState.transition,
         close: close || initialState.close,
-        actionButton: actionButton || initialState.actionButton
+        actionButton: actionButton || initialState.actionButton,
       };
     },
-    false
+    false,
   );
 }
 
@@ -76,7 +87,7 @@ export function closeSnackbar() {
       const safeSnackbar = currentSnackbar || initialState;
       return { ...safeSnackbar, open: false };
     },
-    false
+    false,
   );
 }
 
@@ -88,7 +99,7 @@ export function handlerIncrease(maxStack) {
       const safeSnackbar = currentSnackbar || initialState;
       return { ...safeSnackbar, maxStack };
     },
-    false
+    false,
   );
 }
 
@@ -100,7 +111,7 @@ export function handlerDense(dense) {
       const safeSnackbar = currentSnackbar || initialState;
       return { ...safeSnackbar, dense };
     },
-    false
+    false,
   );
 }
 
@@ -110,8 +121,8 @@ export function handlerIconVariants(iconVariant) {
     endpoints.key,
     (currentSnackbar) => {
       const safeSnackbar = currentSnackbar || initialState;
-      return { ...safeSnackbar, iconVariant, hideIconVariant: iconVariant === 'hide' };
+      return { ...safeSnackbar, iconVariant, hideIconVariant: iconVariant === "hide" };
     },
-    false
+    false,
   );
 }

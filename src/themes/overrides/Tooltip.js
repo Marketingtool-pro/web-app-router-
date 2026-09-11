@@ -11,14 +11,14 @@ export default function Tooltip(theme) {
           padding: 6,
           borderRadius: 8,
           boxShadow: theme.vars.customShadows.tooltip,
-          '& svg': {
-            opacity: 0.7
-          }
+          "& svg": {
+            opacity: 0.7,
+          },
         },
         arrow: {
-          color: theme.vars.palette.secondary.lighter
-        }
-      }
-    }
+          color: theme.vars.palette.secondary.lighter,
+        },
+      },
+    },
   };
 }

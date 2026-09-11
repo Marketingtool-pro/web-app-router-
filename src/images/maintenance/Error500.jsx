@@ -1,21 +1,43 @@
 // @mui
-import { useColorScheme, useTheme } from '@mui/material/styles';
+import { useColorScheme, useTheme } from "@mui/material/styles";
 
 // @project
-import { ThemeMode } from '@/config';
+import { ThemeMode } from "@/config";
 
 /***************************  IMAGE - ERROR 500  ***************************/
 
 export default function Error500() {
   const theme = useTheme();
   const { colorScheme } = useColorScheme();
-  const primaryColor = colorScheme === ThemeMode.DARK ? theme.vars.palette.primary.main : theme.vars.palette.primary.dark;
+  const primaryColor =
+    colorScheme === ThemeMode.DARK
+      ? theme.vars.palette.primary.main
+      : theme.vars.palette.primary.dark;
 
   return (
-    <svg viewBox="0 0 731 319" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ width: '100%', height: 'auto' }}>
+    <svg
+      viewBox="0 0 731 319"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      style={{ width: "100%", height: "auto" }}
+    >
       <g filter="url(#filter0_d_10084_35483)">
-        <mask id="path-1-outside-1_10084_35483" maskUnits="userSpaceOnUse" x="93" y="76" width="544" height="223" fill="black">
-          <rect fill={theme.vars.palette.background.default} x="93" y="76" width="544" height="223" />
+        <mask
+          id="path-1-outside-1_10084_35483"
+          maskUnits="userSpaceOnUse"
+          x="93"
+          y="76"
+          width="544"
+          height="223"
+          fill="black"
+        >
+          <rect
+            fill={theme.vars.palette.background.default}
+            x="93"
+            y="76"
+            width="544"
+            height="223"
+          />
           <path d="M174.809 298.242C158.245 298.242 143.903 295.313 131.783 289.455C119.865 283.597 110.674 275.315 104.21 264.609C97.746 253.903 94.514 241.48 94.514 227.34V224.31H133.904V227.037C133.904 237.137 137.237 245.823 143.903 253.095C150.771 260.165 160.871 263.7 174.203 263.7C187.535 263.7 197.736 260.165 204.806 253.095C212.078 245.823 215.714 236.43 215.714 224.916V221.886C215.714 210.574 212.078 201.585 204.806 194.919C197.736 188.253 188.848 184.92 178.142 184.92C172.284 184.92 167.436 185.728 163.598 187.344C159.76 188.96 156.629 190.98 154.205 193.404C151.781 195.828 149.761 198.252 148.145 200.676H101.18V81.9H246.014V117.048H139.964V168.861H145.418C147.438 166.235 150.165 163.71 153.599 161.286C157.033 158.862 161.477 156.842 166.931 155.226C172.385 153.61 178.849 152.802 186.323 152.802C198.847 152.802 210.26 155.428 220.562 160.68C230.864 165.932 239.045 173.709 245.105 184.011C251.367 194.111 254.498 206.635 254.498 221.583V225.219C254.498 240.167 251.266 253.095 244.802 264.003C238.54 274.911 229.45 283.395 217.532 289.455C205.614 295.313 191.373 298.242 174.809 298.242ZM359.824 298.242C334.776 298.242 314.677 291.374 299.527 277.638C284.377 263.7 276.802 242.692 276.802 214.614V161.286C276.802 134.016 284.377 113.311 299.527 99.171C314.677 84.829 334.776 77.658 359.824 77.658C385.074 77.658 405.173 84.829 420.121 99.171C435.271 113.311 442.846 134.016 442.846 161.286V214.614C442.846 242.692 435.271 263.7 420.121 277.638C405.173 291.374 385.074 298.242 359.824 298.242ZM359.824 263.7C374.974 263.7 386.084 259.559 393.154 251.277C400.426 242.995 404.062 231.178 404.062 215.826V159.468C404.062 143.914 400.022 132.198 391.942 124.32C384.064 116.24 373.358 112.2 359.824 112.2C345.886 112.2 334.978 116.341 327.1 124.623C319.424 132.905 315.586 144.52 315.586 159.468V215.826C315.586 231.784 319.222 243.803 326.494 251.883C333.968 259.761 345.078 263.7 359.824 263.7ZM553.27 298.242C528.222 298.242 508.123 291.374 492.973 277.638C477.823 263.7 470.248 242.692 470.248 214.614V161.286C470.248 134.016 477.823 113.311 492.973 99.171C508.123 84.829 528.222 77.658 553.27 77.658C578.52 77.658 598.619 84.829 613.567 99.171C628.717 113.311 636.292 134.016 636.292 161.286V214.614C636.292 242.692 628.717 263.7 613.567 277.638C598.619 291.374 578.52 298.242 553.27 298.242ZM553.27 263.7C568.42 263.7 579.53 259.559 586.6 251.277C593.872 242.995 597.508 231.178 597.508 215.826V159.468C597.508 143.914 593.468 132.198 585.388 124.32C577.51 116.24 566.804 112.2 553.27 112.2C539.332 112.2 528.424 116.341 520.546 124.623C512.87 132.905 509.032 144.52 509.032 159.468V215.826C509.032 231.784 512.668 243.803 519.94 251.883C527.414 259.761 538.524 263.7 553.27 263.7Z" />
         </mask>
         <path
@@ -46,7 +68,15 @@ export default function Error500() {
         strokeWidth="2"
         strokeLinecap="round"
       />
-      <line x1="364.5" y1="207.637" x2="370.5" y2="207.637" stroke={primaryColor} strokeWidth="2" strokeLinecap="round" />
+      <line
+        x1="364.5"
+        y1="207.637"
+        x2="370.5"
+        y2="207.637"
+        stroke={primaryColor}
+        strokeWidth="2"
+        strokeLinecap="round"
+      />
       <g filter="url(#filter1_d_10084_35483)">
         <path
           d="M616.928 21C616.928 38.47 608.528 54.9675 599.5 69.412"
@@ -82,12 +112,25 @@ export default function Error500() {
           colorInterpolationFilters="sRGB"
         >
           <feFlood floodOpacity="0" result="BackgroundImageFix" />
-          <feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha" />
+          <feColorMatrix
+            in="SourceAlpha"
+            type="matrix"
+            values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0"
+            result="hardAlpha"
+          />
           <feOffset dx="7" dy="7" />
           <feComposite in2="hardAlpha" operator="out" />
-          <feColorMatrix type="matrix" values="0 0 0 0 0.564706 0 0 0 0 0.564706 0 0 0 0 0.564706 0 0 0 0.36 0" />
+          <feColorMatrix
+            type="matrix"
+            values="0 0 0 0 0.564706 0 0 0 0 0.564706 0 0 0 0 0.564706 0 0 0 0.36 0"
+          />
           <feBlend mode="normal" in2="BackgroundImageFix" result="effect1_dropShadow_10084_35483" />
-          <feBlend mode="normal" in="SourceGraphic" in2="effect1_dropShadow_10084_35483" result="shape" />
+          <feBlend
+            mode="normal"
+            in="SourceGraphic"
+            in2="effect1_dropShadow_10084_35483"
+            result="shape"
+          />
         </filter>
         <filter
           id="filter1_d_10084_35483"
@@ -99,12 +142,25 @@ export default function Error500() {
           colorInterpolationFilters="sRGB"
         >
           <feFlood floodOpacity="0" result="BackgroundImageFix" />
-          <feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha" />
+          <feColorMatrix
+            in="SourceAlpha"
+            type="matrix"
+            values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0"
+            result="hardAlpha"
+          />
           <feOffset dx="7" dy="7" />
           <feComposite in2="hardAlpha" operator="out" />
-          <feColorMatrix type="matrix" values="0 0 0 0 0.564706 0 0 0 0 0.564706 0 0 0 0 0.564706 0 0 0 0.36 0" />
+          <feColorMatrix
+            type="matrix"
+            values="0 0 0 0 0.564706 0 0 0 0 0.564706 0 0 0 0 0.564706 0 0 0 0.36 0"
+          />
           <feBlend mode="normal" in2="BackgroundImageFix" result="effect1_dropShadow_10084_35483" />
-          <feBlend mode="normal" in="SourceGraphic" in2="effect1_dropShadow_10084_35483" result="shape" />
+          <feBlend
+            mode="normal"
+            in="SourceGraphic"
+            in2="effect1_dropShadow_10084_35483"
+            result="shape"
+          />
         </filter>
         <filter
           id="filter2_d_10084_35483"
@@ -116,12 +172,25 @@ export default function Error500() {
           colorInterpolationFilters="sRGB"
         >
           <feFlood floodOpacity="0" result="BackgroundImageFix" />
-          <feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha" />
+          <feColorMatrix
+            in="SourceAlpha"
+            type="matrix"
+            values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0"
+            result="hardAlpha"
+          />
           <feOffset dx="7" dy="7" />
           <feComposite in2="hardAlpha" operator="out" />
-          <feColorMatrix type="matrix" values="0 0 0 0 0.564706 0 0 0 0 0.564706 0 0 0 0 0.564706 0 0 0 0.36 0" />
+          <feColorMatrix
+            type="matrix"
+            values="0 0 0 0 0.564706 0 0 0 0 0.564706 0 0 0 0 0.564706 0 0 0 0.36 0"
+          />
           <feBlend mode="normal" in2="BackgroundImageFix" result="effect1_dropShadow_10084_35483" />
-          <feBlend mode="normal" in="SourceGraphic" in2="effect1_dropShadow_10084_35483" result="shape" />
+          <feBlend
+            mode="normal"
+            in="SourceGraphic"
+            in2="effect1_dropShadow_10084_35483"
+            result="shape"
+          />
         </filter>
         <filter
           id="filter3_d_10084_35483"
@@ -133,12 +202,25 @@ export default function Error500() {
           colorInterpolationFilters="sRGB"
         >
           <feFlood floodOpacity="0" result="BackgroundImageFix" />
-          <feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha" />
+          <feColorMatrix
+            in="SourceAlpha"
+            type="matrix"
+            values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0"
+            result="hardAlpha"
+          />
           <feOffset dx="7" dy="7" />
           <feComposite in2="hardAlpha" operator="out" />
-          <feColorMatrix type="matrix" values="0 0 0 0 0.564706 0 0 0 0 0.564706 0 0 0 0 0.564706 0 0 0 0.36 0" />
+          <feColorMatrix
+            type="matrix"
+            values="0 0 0 0 0.564706 0 0 0 0 0.564706 0 0 0 0 0.564706 0 0 0 0.36 0"
+          />
           <feBlend mode="normal" in2="BackgroundImageFix" result="effect1_dropShadow_10084_35483" />
-          <feBlend mode="normal" in="SourceGraphic" in2="effect1_dropShadow_10084_35483" result="shape" />
+          <feBlend
+            mode="normal"
+            in="SourceGraphic"
+            in2="effect1_dropShadow_10084_35483"
+            result="shape"
+          />
         </filter>
       </defs>
     </svg>

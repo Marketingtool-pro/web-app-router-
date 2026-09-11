@@ -1,5 +1,5 @@
 // @mui
-import { useColorScheme } from '@mui/material/styles';
+import { useColorScheme } from "@mui/material/styles";
 
 // @types
 
@@ -14,5 +14,5 @@ function isImageComponentProps(value) {
 export default function GetImagePath(image) {
   const { colorScheme } = useColorScheme();
 
-  return isImageComponentProps(image) ? image[colorScheme || 'light'] : image;
+  return isImageComponentProps(image) ? image[colorScheme || "light"] : image;
 }

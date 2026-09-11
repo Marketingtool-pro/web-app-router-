@@ -1,17 +1,17 @@
 // @mui
-import Typography from '@mui/material/Typography';
-import Box from '@mui/material/Box';
+import Typography from "@mui/material/Typography";
+import Box from "@mui/material/Box";
 
 // @project
-import menuItems from '@/menu';
-import NavGroup from './NavGroup';
+import menuItems from "@/menu";
+import NavGroup from "./NavGroup";
 
 /***************************  DRAWER CONTENT - MINI DRAWER  ***************************/
 
 export default function MiniDrawer() {
   const navGroups = menuItems.items.map((item, index) => {
     switch (item.type) {
-      case 'group':
+      case "group":
         return <NavGroup key={index} item={item} />;
       default:
         return (
@@ -22,5 +22,5 @@ export default function MiniDrawer() {
     }
   });
 
-  return <Box sx={{ transition: 'all 0.3s ease-in-out' }}>{navGroups}</Box>;
+  return <Box sx={{ transition: "all 0.3s ease-in-out" }}>{navGroups}</Box>;
 }

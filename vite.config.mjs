@@ -9,6 +9,15 @@ export default defineConfig(({ mode }) => {
   const PORT = 3000;
 
   return {
+    create: {
+      templates: [
+        {
+          name: "@marketingtool-pro/here-immediately",
+          description: "Generate new components for our monorepo",
+          template: "./marketingtool/here-immediately",
+        },
+      ],
+    },
     staged: { "*": "vp check --fix" },
     server: {
       open: true,
@@ -29,12 +38,7 @@ export default defineConfig(({ mode }) => {
       environment: "jsdom",
       setupFiles: "./src/setupTests.js",
       css: true,
-      exclude: [
-        "**/node_modules/**",
-        "**/dist/**",
-        "website/**",
-        "vcpkg/**",
-      ],
+      exclude: ["**/node_modules/**", "**/dist/**", "website/**", "vcpkg/**"],
     },
   };
 });

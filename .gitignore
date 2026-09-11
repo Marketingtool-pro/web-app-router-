@@ -18,3 +18,10 @@ public/videos/seo-hero.mp4
 
 # LangGraph API
 .langgraph_api
+composer config --global --auth http-basic.repo.packagist.com help772 packagist_uut_314d6c76f0a2d409d8c79c6d959c0b022eff7b4c4512d844535c6852069cd16d4551
+
+/vendor/
+
+# PHP CS Fixer configuration
+/.php-cs-fixer.cache
+/.php-cs-fixer.php

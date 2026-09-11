@@ -1,27 +1,34 @@
 // @third-party
-import { createUserWithEmailAndPassword, onAuthStateChanged, sendPasswordResetEmail, signInWithEmailAndPassword } from 'firebase/auth';
+import {
+  createUserWithEmailAndPassword,
+  onAuthStateChanged,
+  sendPasswordResetEmail,
+  signInWithEmailAndPassword,
+} from "firebase/auth";
 
 // @project
-import { AuthRole } from '@/enum';
-import { attempt } from '@/utils/attempt';
-import { firebaseAuth as auth } from '@/utils/auth-client/firebase';
+import { AuthRole } from "@/enum";
+import { attempt } from "@/utils/attempt";
+import { firebaseAuth as auth } from "@/utils/auth-client/firebase";
 
 /***************************  FIREBASE - LOGIN  ***************************/
 
 export async function login(formData) {
   return new Promise(async (resolve, reject) => {
     try {
-      const { data, error } = await attempt(signInWithEmailAndPassword(auth, formData.email, formData.password));
+      const { data, error } = await attempt(
+        signInWithEmailAndPassword(auth, formData.email, formData.password),
+      );
 
       if (error || !data) {
-        reject(new Error('Invalid credentials'));
+        reject(new Error("Invalid credentials"));
         return;
       }
 
       const firebaseUser = data.user;
 
       if (!firebaseUser) {
-        reject(new Error('Login failed'));
+        reject(new Error("Login failed"));
         return;
       }
 
@@ -29,11 +36,11 @@ export async function login(formData) {
 
       resolve({
         id: firebaseUser.uid,
-        email: firebaseUser.email || '',
-        access_token: token
+        email: firebaseUser.email || "",
+        access_token: token,
       });
     } catch {
-      reject(new Error('Server error'));
+      reject(new Error("Server error"));
     }
   });
 }
@@ -47,19 +54,19 @@ export function getUser() {
         if (user) {
           resolve({
             id: user.uid,
-            email: user.email || '',
+            email: user.email || "",
             role: AuthRole.USER,
-            contact: '123456789',
-            dialcode: '+1',
-            firstname: 'John',
-            lastname: 'Charly'
+            contact: "123456789",
+            dialcode: "+1",
+            firstname: "John",
+            lastname: "Charly",
           });
         } else {
-          reject(new Error('No user is signed in.'));
+          reject(new Error("No user is signed in."));
         }
       });
     } catch {
-      reject(new Error('Server error'));
+      reject(new Error("Server error"));
     }
   });
 }
@@ -77,7 +84,7 @@ export async function signUp(formData) {
           reject(new Error(error.message));
         });
     } catch {
-      reject(new Error('Server error'));
+      reject(new Error("Server error"));
     }
   });
 }
@@ -115,7 +122,7 @@ export function forgotPassword(formData) {
           reject(new Error(error.message));
         });
     } catch {
-      reject(new Error('Server error'));
+      reject(new Error("Server error"));
     }
   });
 }
@@ -138,11 +145,20 @@ export async function signOut() {
       await auth.signOut();
       resolve({ status: 200 });
     } catch {
-      reject(new Error('Server error'));
+      reject(new Error("Server error"));
     }
   });
 }
 
-const firebaseAuth = { login, signUp, forgotPassword, resetPassword, resend, verifyOtp, signOut, getUser };
+const firebaseAuth = {
+  login,
+  signUp,
+  forgotPassword,
+  resetPassword,
+  resend,
+  verifyOtp,
+  signOut,
+  getUser,
+};
 
 export default firebaseAuth;

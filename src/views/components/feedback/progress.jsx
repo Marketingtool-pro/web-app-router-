@@ -1,8 +1,8 @@
 // @mui
-import Grid from '@mui/material/Grid';
+import Grid from "@mui/material/Grid";
 
 // @project
-import ComponentsWrapper from '@/components/ComponentsWrapper';
+import ComponentsWrapper from "@/components/ComponentsWrapper";
 import {
   BasicProgress,
   ColorProgress,
@@ -10,8 +10,8 @@ import {
   SizeProgress,
   WithLabelProgress,
   WithLabelSizeProgress,
-  TragerProgress
-} from '@/sections/components/progress';
+  TragerProgress,
+} from "@/sections/components/progress";
 
 /***************************  FEEDBACK - PROGRESS  ***************************/
 

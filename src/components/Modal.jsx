@@ -1,19 +1,19 @@
-import PropTypes from 'prop-types';
-import CardActions from '@mui/material/CardActions';
-import CardContent from '@mui/material/CardContent';
-import CardHeader from '@mui/material/CardHeader';
-import IconButton from '@mui/material/IconButton';
-import MuiModal from '@mui/material/Modal';
-import Stack from '@mui/material/Stack';
+import PropTypes from "prop-types";
+import CardActions from "@mui/material/CardActions";
+import CardContent from "@mui/material/CardContent";
+import CardHeader from "@mui/material/CardHeader";
+import IconButton from "@mui/material/IconButton";
+import MuiModal from "@mui/material/Modal";
+import Stack from "@mui/material/Stack";
 
 // @project
-import MainCard from './MainCard';
-import { ModalSize } from '@/enum';
+import MainCard from "./MainCard";
+import { ModalSize } from "@/enum";
 
 // @types
 
 // @assets
-import { IconX } from '@tabler/icons-react';
+import { IconX } from "@tabler/icons-react";
 
 /***************************  MODAL - SIZES  ***************************/
 
@@ -22,7 +22,7 @@ const ModalMaxWidth = {
   [ModalSize.SM]: 400,
   [ModalSize.MD]: 600,
   [ModalSize.LG]: 800,
-  [ModalSize.XL]: 1000
+  [ModalSize.XL]: 1000,
 };
 
 function ModalSection({ header, footer, modalContent, modalClose, sx }) {
@@ -31,18 +31,26 @@ function ModalSection({ header, footer, modalContent, modalClose, sx }) {
       {header && (
         <CardHeader
           {...(header.title && { title: header.title })}
-          {...(header.subheader && { subheader: header.subheader, subheaderTypographyProps: { color: 'grey.700' } })}
+          {...(header.subheader && {
+            subheader: header.subheader,
+            subheaderTypographyProps: { color: "grey.700" },
+          })}
           {...(header.closeButton && {
             action: (
-              <IconButton variant="outlined" color="secondary" aria-label="close" onClick={() => modalClose({}, 'closeButton')}>
+              <IconButton
+                variant="outlined"
+                color="secondary"
+                aria-label="close"
+                onClick={() => modalClose({}, "closeButton")}
+              >
                 <IconX size={20} />
               </IconButton>
-            )
+            ),
           })}
         />
       )}
 
-      <CardContent sx={{ flexGrow: 1, overflowY: 'auto' }}>{modalContent}</CardContent>
+      <CardContent sx={{ flexGrow: 1, overflowY: "auto" }}>{modalContent}</CardContent>
       {footer && <CardActions>{footer}</CardActions>}
     </Stack>
   );
@@ -58,30 +66,35 @@ export default function Modal({
   footer,
   modalContent,
   closeOnBackdropClick = false,
-  onFormSubmit
+  onFormSubmit,
 }) {
   const modalClose = (_event, reason) => {
-    if (!closeOnBackdropClick && reason === 'backdropClick') return;
+    if (!closeOnBackdropClick && reason === "backdropClick") return;
     onClose();
   };
 
   const commonProps = { header, footer, modalContent, modalClose };
 
   return (
-    <MuiModal open={open} onClose={modalClose} aria-labelledby="modal-modal-title" aria-describedby="modal-modal-description">
+    <MuiModal
+      open={open}
+      onClose={modalClose}
+      aria-labelledby="modal-modal-title"
+      aria-describedby="modal-modal-description"
+    >
       <MainCard
         sx={{
           p: 0,
           width: 1,
           maxWidth: ModalMaxWidth[maxWidth],
           m: 1,
-          maxHeight: 'calc(100% - 16px)',
-          display: 'flex',
-          '&:focus-visible': { outline: 'none' }
+          maxHeight: "calc(100% - 16px)",
+          display: "flex",
+          "&:focus-visible": { outline: "none" },
         }}
       >
         {onFormSubmit ? (
-          <form onSubmit={onFormSubmit} autoComplete="off" style={{ width: '100%' }}>
+          <form onSubmit={onFormSubmit} autoComplete="off" style={{ width: "100%" }}>
             <ModalSection {...commonProps} sx={{ height: 1 }} />
           </form>
         ) : (
@@ -97,7 +110,7 @@ ModalSection.propTypes = {
   footer: PropTypes.any,
   modalContent: PropTypes.any,
   modalClose: PropTypes.any,
-  sx: PropTypes.any
+  sx: PropTypes.any,
 };
 
 Modal.propTypes = {
@@ -110,5 +123,5 @@ Modal.propTypes = {
   footer: PropTypes.any,
   modalContent: PropTypes.any,
   closeOnBackdropClick: PropTypes.bool,
-  onFormSubmit: PropTypes.any
+  onFormSubmit: PropTypes.any,
 };

@@ -1,20 +1,24 @@
 {
   "name": "@marketingtool-pro/web-app-router",
   "version": "1.0.0",
-  "publishConfig": {
-    "registry": "https://npm.pkg.github.com",
-    "access": "restricted"
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Marketingtool-pro/web-app-router-.git"
   },
   "type": "module",
   "imports": {
     "#/*": "./src/*"
+  },
+  "publishConfig": {
+    "access": "restricted",
+    "registry": "https://npm.pkg.github.com"
   },
   "scripts": {
     "build": "vite build",
     "dev": "vite dev --port 3000",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
-    "prepare": "husky || true",
+    "prepare": "husky",
     "preview": "vite preview",
     "start": "node server.js",
     "start:dev": "vite dev --port 3001",
@@ -35,6 +39,8 @@
     "@mui/x-date-pickers-pro": "^9.12.0",
     "@mui/x-license": "^9.12.0",
     "@react-pdf/renderer": "^4.9.0",
+    "@std/assert": "npm:@jsr/std__assert@^1.0.19",
+    "@std/path": "npm:@jsr/std__path@^1.1.6",
     "@supabase/supabase-js": "^2.112.4",
     "@tabler/icons-react": "^3.46.0",
     "@tailwindcss/vite": "^4.3.3",
@@ -45,6 +51,7 @@
     "@tanstack/react-start": "^1.168.49",
     "@tanstack/react-table": "^8.21.3",
     "@tanstack/router-plugin": "^1.168.35",
+    "@typegraph/sdk": "0.5.1-rc.6",
     "amazon-cognito-identity-js": "^6.3.20",
     "apexcharts": "^7.0.0",
     "appwrite": "^26.2.0",
@@ -52,7 +59,9 @@
     "d3": "^7.9.0",
     "date-fns": "^4.4.0",
     "dayjs": "^1.11.23",
+    "express": "^5.2.1",
     "firebase": "^12.18.0",
+    "foo": "0.0.7",
     "lodash-es": "^4.18.1",
     "lucide-react": "^1.34.0",
     "motion": "^13.1.1",
@@ -94,8 +103,8 @@
     "eslint-plugin-react-hooks": "^5.2.0",
     "husky": "^9.1.7",
     "jsdom": "^30.0.1",
-    "lint-staged": "^17.4.1",
-    "prettier": "^3.6.2",
+    "lint-staged": "^17.5.0",
+    "prettier": "3.9.6",
     "typescript": "^7.0.2",
     "vite": "^8.2.2",
     "vite-jsconfig-paths": "^2.0.1",
@@ -107,13 +116,9 @@
       "echo \"staged lint ok\""
     ]
   },
-  "packageManager": "pnpm@11.22.0",
   "engines": {
     "node": ">=22.13.0",
     "pnpm": ">=11"
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/Marketingtool-pro/web-app-router-.git"
-  }
+  "packageManager": "pnpm@11.22.0"
 }

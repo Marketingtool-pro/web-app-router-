@@ -1,53 +1,53 @@
-import { Activity, Fragment, useEffect, useRef, useState } from 'react';
+import { Activity, Fragment, useEffect, useRef, useState } from "react";
 
 // @mui
-import { useTheme } from '@mui/material/styles';
-import useMediaQuery from '@mui/material/useMediaQuery';
-import ClickAwayListener from '@mui/material/ClickAwayListener';
-import Fade from '@mui/material/Fade';
-import InputAdornment from '@mui/material/InputAdornment';
-import List from '@mui/material/List';
-import ListItemButton from '@mui/material/ListItemButton';
-import ListItemText from '@mui/material/ListItemText';
-import ListSubheader from '@mui/material/ListSubheader';
-import OutlinedInput from '@mui/material/OutlinedInput';
-import Popper from '@mui/material/Popper';
-import Stack from '@mui/material/Stack';
-import Typography from '@mui/material/Typography';
+import { useTheme } from "@mui/material/styles";
+import useMediaQuery from "@mui/material/useMediaQuery";
+import ClickAwayListener from "@mui/material/ClickAwayListener";
+import Fade from "@mui/material/Fade";
+import InputAdornment from "@mui/material/InputAdornment";
+import List from "@mui/material/List";
+import ListItemButton from "@mui/material/ListItemButton";
+import ListItemText from "@mui/material/ListItemText";
+import ListSubheader from "@mui/material/ListSubheader";
+import OutlinedInput from "@mui/material/OutlinedInput";
+import Popper from "@mui/material/Popper";
+import Stack from "@mui/material/Stack";
+import Typography from "@mui/material/Typography";
 
 // @third-party
-import { AnimatePresence, motion } from 'motion/react';
+import { AnimatePresence, motion } from "motion/react";
 
 // @project
-import { ThemeDirection } from '@/config';
-import EmptySearch from '@/components/header/empty-state/EmptySearch';
-import MainCard from '@/components/MainCard';
-import NotificationItem from '@/components/NotificationItem';
-import { varSlide } from '@/components/third-party/motion/animate/dialog';
-import { AvatarSize } from '@/enum';
+import { ThemeDirection } from "@/config";
+import EmptySearch from "@/components/header/empty-state/EmptySearch";
+import MainCard from "@/components/MainCard";
+import NotificationItem from "@/components/NotificationItem";
+import { varSlide } from "@/components/third-party/motion/animate/dialog";
+import { AvatarSize } from "@/enum";
 
 // @assets
-import { IconCommand, IconSearch } from '@tabler/icons-react';
-import avatar1 from '@/assets/images/users/avatar-1.png';
-import avatar2 from '@/assets/images/users/avatar-2.png';
+import { IconCommand, IconSearch } from "@tabler/icons-react";
+import avatar1 from "@/assets/images/users/avatar-1.png";
+import avatar2 from "@/assets/images/users/avatar-2.png";
 
 /***************************  HEADER - SEARCH DATA  ***************************/
 
 const profileData = [
-  { alt: 'Aplican Warner', src: avatar1, title: 'Aplican Warner', subTitle: 'Admin' },
-  { alt: 'Apliaye Aweoa', src: avatar2, title: 'Apliaye Aweoa', subTitle: 'Admin' }
+  { alt: "Aplican Warner", src: avatar1, title: "Aplican Warner", subTitle: "Admin" },
+  { alt: "Apliaye Aweoa", src: avatar2, title: "Apliaye Aweoa", subTitle: "Admin" },
 ];
 
 const listCotent = [
-  { title: 'Role', items: ['Applican', 'App User'] },
-  { title: 'Files', items: ['Applican', 'Applican'] }
+  { title: "Role", items: ["Applican", "App User"] },
+  { title: "Files", items: ["Applican", "Applican"] },
 ];
 
 /***************************  HEADER - SEARCH BAR  ***************************/
 
 export default function SearchBar() {
   const theme = useTheme();
-  const downSM = useMediaQuery(theme.breakpoints.down('sm'));
+  const downSM = useMediaQuery(theme.breakpoints.down("sm"));
 
   const buttonStyle = { borderRadius: 2, p: 1 };
   const [anchorEl, setAnchorEl] = useState(null);
@@ -72,7 +72,7 @@ export default function SearchBar() {
   };
 
   const handleInputChange = (event) => {
-    const isEmpty = event.target.value.trim() === '';
+    const isEmpty = event.target.value.trim() === "";
     setIsEmptySearch(isEmpty);
 
     if (!isPopperOpen && !isEmpty) {
@@ -81,12 +81,12 @@ export default function SearchBar() {
   };
 
   const handleKeyDown = (event) => {
-    if (event.key === 'Enter' && !isPopperOpen) {
+    if (event.key === "Enter" && !isPopperOpen) {
       openPopper(event);
-    } else if (event.key === 'Escape' && isPopperOpen) {
+    } else if (event.key === "Escape" && isPopperOpen) {
       setIsPopperOpen(false);
       setAnchorEl(null);
-    } else if (event.ctrlKey && event.key === 'k') {
+    } else if (event.ctrlKey && event.key === "k") {
       event.preventDefault();
       if (!isPopperOpen) {
         openPopper(event);
@@ -95,7 +95,16 @@ export default function SearchBar() {
   };
 
   const renderSubheader = (title, withMarginTop = false) => (
-    <ListSubheader sx={{ color: 'text.disabled', typography: 'caption', py: 0.5, px: 1, mb: 0.5, ...(withMarginTop && { mt: 1.5 }) }}>
+    <ListSubheader
+      sx={{
+        color: "text.disabled",
+        typography: "caption",
+        py: 0.5,
+        px: 1,
+        mb: 0.5,
+        ...(withMarginTop && { mt: 1.5 }),
+      }}
+    >
       {title}
     </ListSubheader>
   );
@@ -108,7 +117,7 @@ export default function SearchBar() {
 
   useEffect(() => {
     const handleGlobalKeyDown = (event) => {
-      if (event.ctrlKey && event.key === 'k') {
+      if (event.ctrlKey && event.key === "k") {
         event.preventDefault();
         // Check if the search input is not focused before opening the popper
         if (document.activeElement !== inputRef.current) {
@@ -118,9 +127,9 @@ export default function SearchBar() {
       }
     };
 
-    window.addEventListener('keydown', handleGlobalKeyDown);
+    window.addEventListener("keydown", handleGlobalKeyDown);
     return () => {
-      window.removeEventListener('keydown', handleGlobalKeyDown);
+      window.removeEventListener("keydown", handleGlobalKeyDown);
     };
   }, [isPopperOpen]);
 
@@ -136,34 +145,55 @@ export default function SearchBar() {
         }
         endAdornment={
           <InputAdornment position="end">
-            <Stack direction="row" sx={{ gap: 0.25, opacity: 0.8, alignItems: 'center', color: 'grey.600', '& svg': { color: 'inherit' } }}>
+            <Stack
+              direction="row"
+              sx={{
+                gap: 0.25,
+                opacity: 0.8,
+                alignItems: "center",
+                color: "grey.600",
+                "& svg": { color: "inherit" },
+              }}
+            >
               <IconCommand />
               <Typography variant="caption">+ K</Typography>
             </Stack>
           </InputAdornment>
         }
         aria-describedby="Search"
-        slotProps={{ input: { 'aria-label': 'search' } }}
+        slotProps={{ input: { "aria-label": "search" } }}
         onClick={handleActionClick}
         onKeyDown={handleKeyDown}
         onChange={handleInputChange}
         sx={{ minWidth: { xs: 170, sm: 240 } }}
       />
       <AnimatePresence>
-        <Activity mode={isPopperOpen ? 'visible' : 'hidden'}>
+        <Activity mode={isPopperOpen ? "visible" : "hidden"}>
           <Popper
             placement="bottom"
-            id={isPopperOpen ? 'search-action-popper' : undefined}
+            id={isPopperOpen ? "search-action-popper" : undefined}
             open={isPopperOpen}
             anchorEl={anchorEl}
             transition
             popperOptions={{
-              modifiers: [{ name: 'offset', options: { offset: [downSM ? (theme.direction === ThemeDirection.RTL ? -20 : 20) : 0, 8] } }]
+              modifiers: [
+                {
+                  name: "offset",
+                  options: {
+                    offset: [downSM ? (theme.direction === ThemeDirection.RTL ? -20 : 20) : 0, 8],
+                  },
+                },
+              ],
             }}
           >
             {({ TransitionProps }) => (
               <Fade in={isPopperOpen} {...TransitionProps}>
-                <motion.div variants={varSlide('slideInDown', { distance: 20 })} initial="initial" animate="animate" exit="exit">
+                <motion.div
+                  variants={varSlide("slideInDown", { distance: 20 })}
+                  initial="initial"
+                  animate="animate"
+                  exit="exit"
+                >
                   <MainCard
                     sx={{
                       borderRadius: 2,
@@ -171,7 +201,7 @@ export default function SearchBar() {
                       width: 1,
                       minWidth: { xs: 352, sm: 240 },
                       maxWidth: { xs: 352, md: 420 },
-                      p: 0.5
+                      p: 0.5,
                     }}
                   >
                     <ClickAwayListener
@@ -184,9 +214,13 @@ export default function SearchBar() {
                         <EmptySearch />
                       ) : (
                         <List disablePadding>
-                          {renderSubheader('Users')}
+                          {renderSubheader("Users")}
                           {profileData.map((user, index) => (
-                            <ListItemButton sx={buttonStyle} key={index} onClick={handleActionClick}>
+                            <ListItemButton
+                              sx={buttonStyle}
+                              key={index}
+                              onClick={handleActionClick}
+                            >
                               <NotificationItem
                                 avatar={{ alt: user.alt, src: user.src, size: AvatarSize.XS }}
                                 title={user.title}

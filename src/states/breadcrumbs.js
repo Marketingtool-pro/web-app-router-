@@ -1,19 +1,19 @@
-import { useEffect, useMemo } from 'react';
+import { useEffect, useMemo } from "react";
 
 // @third-party
-import useSWR, { mutate } from 'swr';
+import useSWR, { mutate } from "swr";
 
 // @project
-import { usePathname } from '@/utils/navigation';
+import { usePathname } from "@/utils/navigation";
 
 const initialState = {
-  activePath: '',
-  data: []
+  activePath: "",
+  data: [],
 };
 
 export const endpoints = {
-  key: 'api/breadcrumbs',
-  master: 'master'
+  key: "api/breadcrumbs",
+  master: "master",
 };
 
 export function useGetBreadcrumbsMaster() {
@@ -22,7 +22,7 @@ export function useGetBreadcrumbsMaster() {
   const { data, isLoading } = useSWR(endpoints.key + endpoints.master, () => initialState, {
     revalidateIfStale: false,
     revalidateOnFocus: false,
-    revalidateOnReconnect: false
+    revalidateOnReconnect: false,
   });
 
   // reset cache if currentPath doesn't match activePath
@@ -36,9 +36,9 @@ export function useGetBreadcrumbsMaster() {
   const memoizedValue = useMemo(
     () => ({
       breadcrumbsMaster: data,
-      breadcrumbsMasterLoading: isLoading
+      breadcrumbsMasterLoading: isLoading,
     }),
-    [data, isLoading]
+    [data, isLoading],
   );
 
   return memoizedValue;
@@ -52,6 +52,6 @@ export function handlerBreadcrumbs(activePath, data) {
     (currentBreadcrumbsMaster = initialState) => {
       return { ...currentBreadcrumbsMaster, activePath, data };
     },
-    false
+    false,
   );
 }

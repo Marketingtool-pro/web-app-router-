@@ -1,10 +1,10 @@
-import PropTypes from 'prop-types';
-import { useEffect, useState } from 'react';
+import PropTypes from "prop-types";
+import { useEffect, useState } from "react";
 
 // @project
-import PageLoader from '@/components/PageLoader';
-import { APP_DEFAULT_PATH, AUTH_USER_KEY } from '@/config';
-import { useRouter } from '@/utils/navigation';
+import PageLoader from "@/components/PageLoader";
+import { APP_DEFAULT_PATH, AUTH_USER_KEY } from "@/config";
+import { useRouter } from "@/utils/navigation";
 
 /***************************  GUEST GUARD  ***************************/
 
@@ -22,7 +22,8 @@ export default function GuestGuard({ children }) {
   };
 
   useEffect(() => {
-    const localStorageData = typeof window !== 'undefined' ? localStorage.getItem(AUTH_USER_KEY) : null;
+    const localStorageData =
+      typeof window !== "undefined" ? localStorage.getItem(AUTH_USER_KEY) : null;
     manageUserData(localStorageData);
 
     const handleStorageEvent = (e) => {
@@ -31,10 +32,10 @@ export default function GuestGuard({ children }) {
       }
     };
 
-    window.addEventListener('storage', handleStorageEvent);
+    window.addEventListener("storage", handleStorageEvent);
 
     return () => {
-      window.removeEventListener('storage', handleStorageEvent);
+      window.removeEventListener("storage", handleStorageEvent);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);

@@ -27,7 +27,9 @@ export function ErrorCatch() {
   }
 
   const errorMessage =
-    error instanceof Error ? error.message : String(error || "Unknown application error");
+    error instanceof Error
+      ? error.message
+      : String(error || "Unknown application error");
 
   return (
     <Box sx={{ minHeight: "100vh", display: "flex", flexDirection: "column" }}>
@@ -39,7 +41,10 @@ export function ErrorCatch() {
         }}
       />
 
-      <Container maxWidth="md" sx={{ mt: -10, mb: 10, position: "relative", zIndex: 10 }}>
+      <Container
+        maxWidth="md"
+        sx={{ mt: -10, mb: 10, position: "relative", zIndex: 10 }}
+      >
         <Stack
           spacing={2}
           sx={{
