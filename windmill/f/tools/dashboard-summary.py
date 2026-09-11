@@ -12,8 +12,12 @@ def _sb():
 def _q(table, filt="", sel="*"):
     try:
         r = requests.get(f"{SUPABASE_URL}/rest/v1/{table}?{filt}&select={sel}", headers=_sb(), timeout=10)
-        return r.json() if r.status_code == 200 else []
-    except:
+        if r.status_code != 200:
+            print(f"[dashboard-summary] {table} query returned {r.status_code}: {r.text[:200]}")
+            return []
+        return r.json()
+    except Exception as e:
+        print(f"[dashboard-summary] {table} query raised: {e}")
         return []
 
 def call_meta_api(endpoint, params=None):
@@ -26,8 +30,12 @@ def call_meta_api(endpoint, params=None):
         proof = hmac.new(secret.encode(), token.encode(), hashlib.sha256).hexdigest()
         p = {"access_token": token, "appsecret_proof": proof, **(params or {})}
         r = requests.get(f"https://graph.facebook.com/v21.0/{endpoint}", params=p, timeout=10)
-        return r.json() if r.status_code == 200 else {}
-    except:
+        if r.status_code != 200:
+            print(f"[dashboard-summary] Meta {endpoint} returned {r.status_code}: {r.text[:300]}")
+            return {}
+        return r.json()
+    except Exception as e:
+        print(f"[dashboard-summary] Meta {endpoint} raised: {e}")
         return {}
 
 # Currency symbols — auto from account
@@ -97,8 +105,12 @@ def _run(userId):
     try:
         raw = call_meta_api("me/adaccounts", {"fields": "name,account_id,amount_spent,currency", "limit": "10"})
         real_meta_accts = raw.get("data", []) if isinstance(raw, dict) else raw if isinstance(raw, list) else []
-    except:
-        pass
+        if not real_meta_accts:
+            # An empty list here is what an expired Meta token looks like.
+            # The sync cron has been returning zeros since 2026-04-08 this way.
+            print("[dashboard-summary] Meta returned no ad accounts")
+    except Exception as e:
+        print(f"[dashboard-summary] Meta ad-account fetch raised: {e}")
 
     # ── Auto-detect currency from connected accounts ──
     # Each account has its own currency. Use the primary account's currency.
@@ -157,8 +169,8 @@ def _run(userId):
                 monthly_spend[mon] += float(m.get("spend", 0))
                 monthly_revenue[mon] += float(m.get("conversions", 0)) * 45
                 monthly_active[mon] += 1
-            except:
-                pass
+            except (ValueError, TypeError, IndexError) as e:
+                print(f"[dashboard-summary] skipped malformed metric row: {e}")
     # If all zeros, put current data in current month
     if sum(monthly_spend) == 0 and total_spend > 0:
         monthly_spend[current_month - 1] = total_spend
