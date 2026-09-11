@@ -48,7 +48,7 @@ def main(fbAccessToken: str = "", userId: str = "", appwriteJwt: str = ""):
     if not fbAccessToken or not userId:
         return {"success": False, "error": "fbAccessToken and userId required"}
 
-    SUPABASE_URL = "http://62.72.58.221:8000"
+    SUPABASE_URL = "https://62.72.58.221:8000"
     sb_key = wmill.get_variable("f/tools/supabase_service_key")
     try:
         app_secret = wmill.get_variable("f/tools/fb_ads_app_secret")
