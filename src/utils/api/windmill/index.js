@@ -5,7 +5,13 @@ import { AUTH_USER_KEY } from '@/config';
 // ZERO TRUST: always route through the VPS 2 nginx proxy, never straight to Windmill.
 // The proxy injects the Windmill token server-side and 403s every non-execution path.
 // The frontend holds NO secrets — it sends only the customer's Appwrite JWT.
-const API_BASE = import.meta.env.VITE_WINDMILL_URL || 'https://app.marketingtool.pro';
+//
+// Deliberately NOT overridable by VITE_WINDMILL_URL. That override is how the
+// bypass happened: the env pointed at wm.marketingtool.pro, so builds went
+// straight to Windmill with no path allowlist and no server-side token
+// injection, and a Windmill token ended up compiled into the public bundle.
+// Hardcoding the proxy origin makes that unreachable from configuration.
+const API_BASE = 'https://app.marketingtool.pro';
 const API_WORKSPACE = import.meta.env.VITE_WINDMILL_WORKSPACE || 'marketingtool-pro';
 
 // Get Appwrite JWT to pass to Windmill scripts for validation.
