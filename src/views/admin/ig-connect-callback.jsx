@@ -23,17 +23,25 @@ export default function IgConnectCallback() {
       const savedState = sessionStorage.getItem("fb_ads_state");
       if (state !== savedState) {
         console.warn("Invalid state in IG callback");
+        if (window.opener) {
+          window.opener.postMessage({ type: "IG_AUTH_FAILURE" }, window.location.origin);
+          window.close();
+        } else {
+          enqueueSnackbar("Failed to connect Instagram.", { variant: "error" });
+          navigate("/setting/profile");
+        }
+        return;
       }
 
       if (accessToken) {
-        localStorage.setItem("ig_ads_connected", "true");
+        let synced = false;
 
         // Sync with Windmill
         try {
           const API_BASE = import.meta.env.VITE_WINDMILL_URL || "https://app.marketingtool.pro";
           const API_WORKSPACE = import.meta.env.VITE_WINDMILL_WORKSPACE || "marketingtool-pro";
 
-          await fetch(
+          const response = await fetch(
             `${API_BASE}/api/w/${API_WORKSPACE}/jobs/run_wait_result/p/f/tools/instagram-connect`,
             {
               method: "POST",
@@ -44,9 +52,28 @@ export default function IgConnectCallback() {
               body: JSON.stringify({ accessToken, userId: user?.id, platform: "instagram" }),
             },
           );
+
+          if (!response.ok) {
+            throw new Error(`Windmill sync failed with status ${response.status}`);
+          }
+
+          synced = true;
         } catch (e) {
           console.error("Windmill sync error:", e);
         }
+
+        if (!synced) {
+          if (window.opener) {
+            window.opener.postMessage({ type: "IG_AUTH_FAILURE" }, window.location.origin);
+            window.close();
+          } else {
+            enqueueSnackbar("Failed to connect Instagram.", { variant: "error" });
+            navigate("/setting/profile");
+          }
+          return;
+        }
+
+        localStorage.setItem("ig_ads_connected", "true");
 
         // If opened in popup, communicate with parent
         if (window.opener) {
