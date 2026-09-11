@@ -121,6 +121,50 @@ Check with `pm2 logs ai-router --nostream | grep AI-ROUTER`. Backup of the previ
 at `/root/app.py.bak-*`. This is how the Anthropic message was confirmed verbatim:
 *"Your credit balance is too low to access the Anthropic API."*
 
+### WHERE THE KEYS ACTUALLY LIVE — FOUR STORES, NOT ONE
+
+Checked 2026-09-11. Provider keys are scattered across four places, and the AI Router reads
+only one of them.
+
+**1. Windmill variables — the richest store.** It already holds keys for the exact providers
+that are failing in the router:
+
+| Windmill path | provider |
+|---|---|
+| `f/tools/groq_api_key` | **Groq** — the router's Groq key is invalid |
+| `u/admin/gemini_api_key` | **Gemini** — the router's Gemini key is invalid |
+| `f/tools/anthropic_api_key` | Anthropic |
+| `u/admin/dauntless_anthropic` | Anthropic |
+| `u/admin/groundbreaking_anthropic` | Anthropic |
+| `f/mobile/believable_anthropic` | Anthropic |
+| `u/admin/first_in_class_openai` | OpenAI |
+| `u/admin/redeeming_openai` | OpenAI |
+| `f/tools/openrouter_api_key` | OpenRouter |
+
+**Four separate Anthropic keys and two OpenAI keys exist.** The router holds one of each.
+If any of the others sits on a funded account, that is the fix — no purchase needed.
+
+**2. The AI Router's own env files on VPS 1.** The only store the router reads. Its Groq and
+Gemini keys are rejected; its Anthropic and OpenAI keys are valid but out of credit.
+
+**3. GCloud Secret Manager.** Contains only `anthropic-api-key` (a single version from
+2026-04-25) and `GOOGLE_GENAI_API_KEY`. Two problems make it useless today:
+
+- **No gcloud account is authenticated on VPS 1** (`gcloud auth list` returns nothing), so
+  `get_secret()`'s Secret Manager fallback always fails.
+- **Name mismatch:** `app.py` looks up `gemini-api-key`, but the secret is called
+  `GOOGLE_GENAI_API_KEY`. It would never be found even with working auth.
+
+There are no `groq-api-key`, `openai-api-key`, `stability-api-key`, `fal-api-key` or
+`openrouter-api-key` secrets at all.
+
+**4. Appwrite project variables.** Holds `ANTHROPIC_API_KEY` and `GEMINI_API_KEY` for the
+Appwrite Functions (phone path). No `GROQ_API_KEY`.
+
+**So the first thing to try before buying anything:** open the Windmill UI, read
+`f/tools/groq_api_key` and `u/admin/gemini_api_key`, and put those into the router's env.
+Then try each of the four Anthropic keys and two OpenAI keys to find one with credit.
+
 ### THERE ARE TWO SEPARATE KEY STORES — THIS IS THE TRAP
 
 Fixing an API key in **Appwrite does not reach the AI Router.** They are different stores
