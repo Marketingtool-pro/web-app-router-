@@ -5,7 +5,6 @@ import hashlib
 import requests
 import urllib.request
 import urllib.error
-import ssl
 from datetime import datetime
 
 
@@ -20,14 +19,11 @@ def _validate_jwt(jwt_token, expected_uid=""):
     if not jwt_token:
         return None, "Authentication required"
     try:
-        _ctx = ssl.create_default_context()
-        _ctx.check_hostname = False
-        _ctx.verify_mode = ssl.CERT_NONE
         _req = urllib.request.Request(
             f"{_AW_ENDPOINT}/account",
             headers={"X-Appwrite-Project": _AW_PROJECT, "X-Appwrite-JWT": jwt_token},
         )
-        _resp = urllib.request.urlopen(_req, timeout=5, context=_ctx)
+        _resp = urllib.request.urlopen(_req, timeout=5)
         user = json.loads(_resp.read().decode())
         if expected_uid and user.get("$id") != expected_uid:
             return None, "User ID mismatch"
