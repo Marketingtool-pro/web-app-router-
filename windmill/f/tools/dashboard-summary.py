@@ -3,7 +3,7 @@ import json
 import requests
 from datetime import datetime
 
-SUPABASE_URL = "http://62.72.58.221:8000"
+SUPABASE_URL = "https://62.72.58.221:8000"
 
 def _sb():
     key = wmill.get_variable("f/tools/supabase_service_key")
