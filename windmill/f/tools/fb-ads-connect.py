@@ -79,8 +79,10 @@ def main(fbAccessToken: str = "", userId: str = "", appwriteJwt: str = ""):
         if r.status_code == 200:
             info = r.json()
             user_name = info.get("name", info.get("email", ""))
-    except Exception:
-        pass
+        else:
+            print(f"[fb-ads-connect] /me returned {r.status_code}: {r.text[:200]}")
+    except Exception as e:
+        print(f"[fb-ads-connect] /me call failed: {e}")
 
     # Fetch ALL ad accounts this user has access to
     ad_params = {
@@ -96,8 +98,12 @@ def main(fbAccessToken: str = "", userId: str = "", appwriteJwt: str = ""):
         r = requests.get("https://graph.facebook.com/v21.0/me/adaccounts", params=ad_params, timeout=15)
         if r.status_code == 200:
             accounts = r.json().get("data", [])
-    except Exception:
-        pass
+        else:
+            # A 200 with an empty list vs a 403 here is the difference between
+            # "no ad accounts" and "this app lacks ads_read / ads_management".
+            print(f"[fb-ads-connect] /me/adaccounts returned {r.status_code}: {r.text[:300]}")
+    except Exception as e:
+        print(f"[fb-ads-connect] /me/adaccounts call failed: {e}")
 
     saved = 0
     for acct in accounts:
@@ -118,10 +124,13 @@ def main(fbAccessToken: str = "", userId: str = "", appwriteJwt: str = ""):
             "updated_at": now,
         }
         try:
-            requests.post(f"{SUPABASE_URL}/rest/v1/ad_accounts", headers=headers, json=row, timeout=10)
-            saved += 1
-        except Exception:
-            pass
+            resp = requests.post(f"{SUPABASE_URL}/rest/v1/ad_accounts", headers=headers, json=row, timeout=10)
+            if resp.status_code >= 300:
+                print(f"[fb-ads-connect] save {acct_id} failed {resp.status_code}: {resp.text[:200]}")
+            else:
+                saved += 1
+        except Exception as e:
+            print(f"[fb-ads-connect] save {acct_id} raised: {e}")
 
     # If no ad accounts found, save with user ID
     if not accounts:
@@ -137,10 +146,13 @@ def main(fbAccessToken: str = "", userId: str = "", appwriteJwt: str = ""):
             "updated_at": now,
         }
         try:
-            requests.post(f"{SUPABASE_URL}/rest/v1/ad_accounts", headers=headers, json=row, timeout=10)
-            saved = 1
-        except Exception:
-            pass
+            resp = requests.post(f"{SUPABASE_URL}/rest/v1/ad_accounts", headers=headers, json=row, timeout=10)
+            if resp.status_code >= 300:
+                print(f"[fb-ads-connect] fallback save failed {resp.status_code}: {resp.text[:200]}")
+            else:
+                saved = 1
+        except Exception as e:
+            print(f"[fb-ads-connect] fallback save raised: {e}")
 
     return {
         "success": True,

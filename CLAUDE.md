@@ -47,22 +47,39 @@ exception without logging, so every failure is invisible and answers arrive as
 
 Verified by live call on 2026-09-11:
 
-| task | intended provider | state | evidence |
-|---|---|---|---|
-| creative | Anthropic | **BROKEN → gpt-4o-mini** | Anthropic: credit balance too low |
-| coding | Anthropic | **BROKEN → gpt-4o-mini** | Anthropic: credit balance too low |
-| default | Anthropic | **BROKEN → gpt-4o-mini** | Anthropic: credit balance too low |
-| research | Google | **BROKEN → gpt-4o-mini** | Gemini: "API key not valid" |
-| automation | Groq | **BROKEN → gpt-4o-mini** | Groq: 401 "Invalid API Key" |
-| image_gen | OpenAI | OK | key authenticates (rejected on prompt length) |
-| stable_image | Stability | OK | key authenticates (rejected on prompt length) |
-| video_gen | FAL | OK | key authenticates (rejected on prompt length) |
-| vision_analysis | OpenRouter | **OK, full output verified** | returned a correct description of a real image |
-| ocr | OpenRouter | **OK, full output verified** | returned correct text from a real image |
+All ten task names were executed individually and the real response inspected. Not
+inferred from imports or auth checks — actually run.
 
-Five task names are healthy on their own providers; five are down because of **three
-accounts**: Anthropic billing, and two invalid keys. Nothing else is wrong — the routing
-code is correct and the other providers are untouched.
+| task | intended | what answered | state |
+|---|---|---|---|
+| creative | Claude | `gpt-4o-mini` | **BROKEN** — Anthropic credit balance too low |
+| coding | Claude | `gpt-4o-mini` | **BROKEN** — same |
+| default | Claude | `gpt-4o-mini` | **BROKEN** — same |
+| research | Gemini | `gpt-4o-mini` | **BROKEN** — Gemini "API key not valid" |
+| automation | Llama / Groq | `gpt-4o-mini` | **BROKEN** — Groq 401 invalid key |
+| image_gen | DALL-E 3 | falls to Stability | **BROKEN** — OpenAI 429 "no credits remaining" |
+| stable_image | sd3.5-large | Stable Diffusion 3.5 | **WORKS** — returned a real PNG |
+| video_gen | Kling / FAL | FAL.ai Video (Kling) | **WORKS** — returned a real MP4 URL |
+| vision_analysis | `openai/gpt-4o` | GPT-4o Vision | **WORKS** — correct description of a real image |
+| ocr | `qwen/qwen-2.5-vl-72b` | Qwen2.5-VL-72B | **WORKS** — correct text from a real image |
+
+**4 of 10 work. 6 are down, and they need exactly 4 account fixes:**
+
+| fix | tasks it restores |
+|---|---|
+| add credit to Anthropic | creative, coding, default |
+| valid Gemini key | research |
+| valid Groq key | automation |
+| add credit to OpenAI | image_gen |
+
+The routing code is correct and needs no change. Every failure is an account state, not a
+bug. OpenAI's key is still valid — it authenticates and rejects on prompt length — it has
+simply run out of credit, so `image_gen` silently serves Stability instead of DALL-E 3.
+
+**Timeout constraint:** `video_gen` took **over 3 minutes** to return. `call_ai_router` in
+the engines defaults to a 30-second timeout, and the parallel fan-outs use 25-40 seconds.
+No script calls `video_gen` today (verified: 0 scripts reference it), but any engine that
+adds it at those timeouts will always fail. Give video its own long timeout.
 
 **Do NOT "fix" this by routing Claude/Gemini/Llama through OpenRouter.** The task table is
 frozen: each task uses its own provider. Rerouting would recreate exactly the failure this
@@ -103,6 +120,50 @@ completely invisible. It now prints each failure before falling through:
 Check with `pm2 logs ai-router --nostream | grep AI-ROUTER`. Backup of the previous file is
 at `/root/app.py.bak-*`. This is how the Anthropic message was confirmed verbatim:
 *"Your credit balance is too low to access the Anthropic API."*
+
+### WHERE THE KEYS ACTUALLY LIVE — FOUR STORES, NOT ONE
+
+Checked 2026-09-11. Provider keys are scattered across four places, and the AI Router reads
+only one of them.
+
+**1. Windmill variables — the richest store.** It already holds keys for the exact providers
+that are failing in the router:
+
+| Windmill path | provider |
+|---|---|
+| `f/tools/groq_api_key` | **Groq** — the router's Groq key is invalid |
+| `u/admin/gemini_api_key` | **Gemini** — the router's Gemini key is invalid |
+| `f/tools/anthropic_api_key` | Anthropic |
+| `u/admin/dauntless_anthropic` | Anthropic |
+| `u/admin/groundbreaking_anthropic` | Anthropic |
+| `f/mobile/believable_anthropic` | Anthropic |
+| `u/admin/first_in_class_openai` | OpenAI |
+| `u/admin/redeeming_openai` | OpenAI |
+| `f/tools/openrouter_api_key` | OpenRouter |
+
+**Four separate Anthropic keys and two OpenAI keys exist.** The router holds one of each.
+If any of the others sits on a funded account, that is the fix — no purchase needed.
+
+**2. The AI Router's own env files on VPS 1.** The only store the router reads. Its Groq and
+Gemini keys are rejected; its Anthropic and OpenAI keys are valid but out of credit.
+
+**3. GCloud Secret Manager.** Contains only `anthropic-api-key` (a single version from
+2026-04-25) and `GOOGLE_GENAI_API_KEY`. Two problems make it useless today:
+
+- **No gcloud account is authenticated on VPS 1** (`gcloud auth list` returns nothing), so
+  `get_secret()`'s Secret Manager fallback always fails.
+- **Name mismatch:** `app.py` looks up `gemini-api-key`, but the secret is called
+  `GOOGLE_GENAI_API_KEY`. It would never be found even with working auth.
+
+There are no `groq-api-key`, `openai-api-key`, `stability-api-key`, `fal-api-key` or
+`openrouter-api-key` secrets at all.
+
+**4. Appwrite project variables.** Holds `ANTHROPIC_API_KEY` and `GEMINI_API_KEY` for the
+Appwrite Functions (phone path). No `GROQ_API_KEY`.
+
+**So the first thing to try before buying anything:** open the Windmill UI, read
+`f/tools/groq_api_key` and `u/admin/gemini_api_key`, and put those into the router's env.
+Then try each of the four Anthropic keys and two OpenAI keys to find one with credit.
 
 ### THERE ARE TWO SEPARATE KEY STORES — THIS IS THE TRAP
 
@@ -438,6 +499,53 @@ the returned `$id` against the claimed `userId`. **546 of 908** tools scripts ca
 check; 362 do not. The weakness is inside the check — it builds an SSL context with
 `check_hostname = False` and `verify_mode = CERT_NONE`, so that hop trusts any certificate.
 
+## DASHBOARD — CROSS-TENANT DATA LEAK (found 2026-09-11, fix committed, NOT yet pushed)
+
+The dashboard is the first page a customer sees, and it shows **every customer's data**.
+
+`f/tools/dashboard-summary` accepts `userId` and then never uses it. All four Supabase
+reads run unfiltered under the **service_role** key, which bypasses RLS:
+
+```python
+_q("ad_accounts",      "order=created_at.desc&limit=20")
+_q("campaigns",        "status=neq.archived&order=created_at.desc&limit=50")
+_q("campaign_metrics", "order=date.desc&limit=100")
+_q("daily_summary",    "order=date.desc&limit=30")
+```
+
+A grep for `user_id=eq` in that script returns **0**. Measured impact: `ad_accounts` holds
+**114 rows across 7 distinct customers**, so each customer's dashboard renders a blend of
+all seven. It also does **no JWT validation**.
+
+Corrected script committed at `windmill/f/tools/dashboard-summary.py`: validates the
+Appwrite JWT first, derives the id from the token rather than the caller-supplied `userId`,
+and scopes all four reads with `user_id=eq.`. Push it through the Windmill UI.
+
+**Still open in that script:** `call_meta_api` uses the global variables
+`f/tools/fb_ads_access_token` and `f/tools/fb_ads_app_secret`, so the live Meta figures come
+from one shared account rather than each customer's stored `ad_accounts.access_token`.
+Fixing that is a design change, not a one-line patch.
+
+### The dashboard also refuses to load for most customers
+
+`src/hooks/useDashboardData.js` only calls the API when `localStorage.fb_ads_connected ===
+'true'`, and only `src/views/admin/fb-connect-callback.jsx` ever sets that flag. So:
+
+- a customer who connected on another browser or device sees an empty dashboard
+- a Google-Ads-only customer never sets the flag, so the dashboard never loads at all
+- clearing site data re-triggers the connect popup forever
+
+`src/layouts/AdminLayout/index.jsx` gates the hard connect-ads popup on the same flag.
+Both should ask the server whether this user has `ad_accounts` rows, not the browser.
+
+### Dashboard routes — the URLs
+
+The live routes are `/dashboard/analytics/:tab`, where tab is `overview`, `user-behavior`
+or `performance`. `/dashboard` redirects to `analytics/overview`. **`/dashboard/overview`
+is not a route** and falls through to the `path: "*"` catch-all in `src/routes/index.jsx`,
+rendering `NotFoundCatch`. The tab labels are Overview, Campaign Performance and
+Finance & Revenue, fed from `data.overview`, `data.campaigns` and `data.finance`.
+
 ## THE CHAT PAGE BUG — two scripts point at the wrong host
 
 **Symptom:** the chat UI replies *"AI is temporarily busy, please try again."*
@@ -557,6 +665,47 @@ Two real defects in the flow the customer actually walks:
   prior "test access only" note is obsolete. The token value is held with the other
   credentials and is deliberately not recorded in this file.
 - **`reports/` and `chart/` views contain no backend call** despite being listed as done.
+
+## META APP REVIEW — NOTHING WAS EVER SUBMITTED (read live 2026-09-11)
+
+The owner believed Meta App Review had been pending for nine months. It has not. Read
+straight from the Meta developer API:
+
+| app | id | submission | privileges held |
+|---|---|---|---|
+| marketingtool | `2246709019441842` | **NO_SUBMISSION / UNSUBMITTED** — a draft exists (`2246714072774670`), `submitted_time` is null | openid, public_profile, email |
+| marketingtool pro | `1830149205008066` | **NO_SUBMISSION**, never submitted | **none at all** |
+
+Nothing sits in a review queue. `is_pending` is `false` on both.
+
+**Compliance is clean** on the main app: `overall_status: compliant`, zero required actions,
+zero open violations. So nothing is blocking a submission either. It simply was not sent.
+
+### The ads permissions were never requested
+
+This is the deeper problem. The main app holds only **login-level** permissions. There is
+no `ads_read`, no `ads_management`, no `business_management`, no `pages_show_list`.
+
+`f/tools/fb-ads-connect` calls `GET /me/adaccounts`, which requires `ads_read` or
+`ads_management`. With only `public_profile`, `email` and `openid`, that call cannot return
+a customer's ad accounts. **The Meta ads connect flow cannot work on either of these apps
+as configured**, regardless of the code being correct.
+
+Three privileges are rejected on the main app: `gaming_profile`, `gaming_user_picture`, and
+`instagram_business_manage_messages`. The last one is the only item in the draft submission,
+so the one submission being prepared is for an Instagram messaging permission that has
+already been rejected — not for ads at all.
+
+### And the hardcoded App ID is a third app
+
+`ProfileLoginService.jsx`, `connect-ads/index.jsx` and `ConnectAdsModal.jsx` hardcode
+`1582682256320433`, which is **neither** app above. Whatever that ID is, it is not in the
+set this account grants, so it cannot be inspected or reviewed from here.
+
+**Order of work to make Meta ads real:** decide which app is the product, point the
+frontend at that ID, request `ads_read` plus `ads_management` (and `business_management`
+for account discovery), complete Data Use Checkup, then actually submit. Until submission
+happens, waiting achieves nothing.
 
 ## Google OAuth verification status
 
