@@ -1,6 +1,9 @@
 import { useMemo, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 
+// @project
+import PlanGate from '@/components/PlanGate';
+
 // @mui
 import Box from '@mui/material/Box';
 import Grid from '@mui/material/Grid';
@@ -1688,7 +1691,7 @@ function AIToolsPlatformContent() {
 
 /***************************  PLATFORM PAGE  ***************************/
 
-export default function PlatformPage() {
+function PlatformPageContent() {
   const { platform } = useParams();
   const config = PLATFORM_CONFIG[platform];
   const [categoryFilter, setCategoryFilter] = useState('all');
@@ -1792,5 +1795,21 @@ export default function PlatformPage() {
         </Box>
       )}
     </Stack>
+  );
+}
+
+/***************************  PLATFORM PAGE (gated)  ***************************/
+
+// Platform pages are paid. PlanGate calls f/tools/check-subscription and shows
+// LockedPageOverlay for free users; admins bypass. Both pieces already existed
+// in this codebase but nothing connected them, so every paid page was open.
+export default function PlatformPage() {
+  const { platform } = useParams();
+  const config = PLATFORM_CONFIG[platform];
+
+  return (
+    <PlanGate featureName={config?.title || 'this platform'} featureDescription={config?.subtitle}>
+      <PlatformPageContent />
+    </PlanGate>
   );
 }
