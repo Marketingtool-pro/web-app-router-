@@ -94,16 +94,20 @@ def main(fbAccessToken: str = "", userId: str = "", appwriteJwt: str = ""):
         ad_params["appsecret_proof"] = proof
 
     accounts = []
+    adaccounts_fetch_ok = False
     try:
         r = requests.get("https://graph.facebook.com/v21.0/me/adaccounts", params=ad_params, timeout=15)
         if r.status_code == 200:
             accounts = r.json().get("data", [])
+            adaccounts_fetch_ok = True
         else:
             # A 200 with an empty list vs a 403 here is the difference between
             # "no ad accounts" and "this app lacks ads_read / ads_management".
             print(f"[fb-ads-connect] /me/adaccounts returned {r.status_code}: {r.text[:300]}")
+            return {"ok": False, "error": f"Meta ad accounts request failed with status {r.status_code}"}
     except Exception as e:
         print(f"[fb-ads-connect] /me/adaccounts call failed: {e}")
+        return {"ok": False, "error": "Meta ad accounts request failed"}
 
     saved = 0
     for acct in accounts:
