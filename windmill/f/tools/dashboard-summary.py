@@ -252,6 +252,8 @@ def _run(userId):
         },
     }
 
+    today = datetime.utcnow().strftime("%Y-%m-%d")
+
     return {
         "hasData": len(accounts) > 0 or len(campaigns) > 0 or meta_spend_total > 0,
         "overview": overview,
