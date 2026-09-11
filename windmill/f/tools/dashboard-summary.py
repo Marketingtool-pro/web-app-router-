@@ -54,8 +54,6 @@ def _validate_jwt(jwt_token, expected_uid=""):
         return None, "Authentication required"
     try:
         _ctx = ssl.create_default_context()
-        _ctx.check_hostname = False
-        _ctx.verify_mode = ssl.CERT_NONE
         _req = urllib.request.Request(
             f"{_AW_ENDPOINT}/account",
             headers={"X-Appwrite-Project": _AW_PROJECT, "X-Appwrite-JWT": jwt_token},
