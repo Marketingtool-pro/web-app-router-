@@ -27,9 +27,9 @@ import {
 // @project
 import { logout } from '@/utils/api/auth';
 import { getAppwriteJwt } from '@/utils/api/windmill';
-import { AUTH_USER_KEY } from '@/config';
+import { AUTH_USER_KEY, META_APP_ID } from '@/config';
 
-const FB_APP_ID = '1582682256320433';
+const FB_APP_ID = META_APP_ID;
 const FB_SCOPES = 'ads_read,ads_management,business_management,pages_read_engagement,pages_manage_ads,pages_show_list,pages_manage_metadata,instagram_basic,instagram_manage_insights,instagram_content_publish,instagram_manage_comments,read_insights,catalog_management,leads_retrieval,email';
 
 const GOOGLE_CLIENT_ID = '911925145433-lnqjvdu44j1krdoq95eqpf3rjo4sf6vv.apps.googleusercontent.com';
