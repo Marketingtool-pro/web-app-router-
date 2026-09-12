@@ -22,15 +22,13 @@ import {
   IconStarFilled,
 } from "@tabler/icons-react";
 
-// Meta app for Ads Connect. Owned by the Facebook profile that created the
-// ad accounts, NOT by the Instagram identity (@marketingtool.pro) that Meta
-// Business Suite signs into by default. A Meta API session authenticated as
-// the Instagram identity returns "Viewer does not have permission to access
-// this app" for this id and only sees 2246709019441842 / 1830149205008066,
-// which are login-only apps with no ads permissions. That is an identity
-// scoping artefact, not proof this app is wrong - do not "correct" it to one
-// of those two without checking while signed in as the Facebook profile.
-const FB_APP_ID = "1582682256320433";
+// Meta app 2246709019441842 ("marketingtool"). This is the app the owner
+// actually configures in the Meta console: it carries the Marketing API,
+// Facebook Login, Webhooks and App Events products, Site URL
+// https://marketingtool.pro/, BUSINESS category, and the pending
+// "Marketing API Access Tier" review request. The previous id
+// 1582682256320433 is not readable from this Meta account at all.
+const FB_APP_ID = "2246709019441842";
 const FB_SCOPES = "ads_read,ads_management,business_management,email";
 
 /***************************  CONNECT ADS — MADGICX-STYLE  ***************************/
