@@ -65,9 +65,14 @@ function Forecast({ raw }) {
 
   return (
     <MainCard>
-      <Stack direction="row" sx={{ alignItems: "center", justifyContent: "space-between", mb: 2 }}>
+      <Stack
+        direction="row"
+        sx={{ alignItems: "center", justifyContent: "space-between", mb: 2 }}
+      >
         <Typography variant="h6">Next 30 days</Typography>
-        {f.confidence ? <Chip size="small" label={`${f.confidence}% confidence`} /> : null}
+        {f.confidence ? (
+          <Chip size="small" label={`${f.confidence}% confidence`} />
+        ) : null}
       </Stack>
       <Grid container spacing={2}>
         {cells.map((c) => (
@@ -85,7 +90,10 @@ function Forecast({ raw }) {
   );
 }
 
-export default function AiInsights({ dateRange = "last_30_days", platform = null }) {
+export default function AiInsights({
+  dateRange = "last_30_days",
+  platform = null,
+}) {
   const { user } = useAuth();
   const [state, setState] = useState({ loading: false, data: null });
 
@@ -98,7 +106,11 @@ export default function AiInsights({ dateRange = "last_30_days", platform = null
 
     (async () => {
       try {
-        const res = await fetchAnalyticsOverview({ userId, dateRange, platform });
+        const res = await fetchAnalyticsOverview({
+          userId,
+          dateRange,
+          platform,
+        });
         if (!cancelled) setState({ loading: false, data: res?.data || null });
       } catch {
         // Show nothing rather than an error block or placeholder text.
@@ -113,16 +125,32 @@ export default function AiInsights({ dateRange = "last_30_days", platform = null
 
   const { loading, data } = state;
   const hasAny =
-    data && (data.aiAnalysis || data.aiRecommendations || data.aiForecast || data.automationRules);
+    data &&
+    (data.aiAnalysis ||
+      data.aiRecommendations ||
+      data.aiForecast ||
+      data.automationRules);
 
   if (!loading && !hasAny) return null;
 
   return (
     <Stack sx={{ gap: { xs: 3, md: 4 } }}>
-      <Section title="What the numbers say" body={data?.aiAnalysis} loading={loading} />
-      <Section title="Recommended actions" body={data?.aiRecommendations} loading={loading} />
+      <Section
+        title="What the numbers say"
+        body={data?.aiAnalysis}
+        loading={loading}
+      />
+      <Section
+        title="Recommended actions"
+        body={data?.aiRecommendations}
+        loading={loading}
+      />
       <Forecast raw={data?.aiForecast} />
-      <Section title="Automation rules" body={data?.automationRules} loading={loading} />
+      <Section
+        title="Automation rules"
+        body={data?.automationRules}
+        loading={loading}
+      />
     </Stack>
   );
 }

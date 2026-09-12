@@ -25,7 +25,8 @@ export default function DashboardLayout() {
   const { menuMasterLoading } = useGetMenuMaster();
   const { user } = useAuth();
   const isAdmin =
-    user?.email?.toLowerCase() === "help@marketingtool.pro" || user?.name === "testuser1";
+    user?.email?.toLowerCase() === "help@marketingtool.pro" ||
+    user?.name === "testuser1";
   const {
     state: { miniDrawer },
   } = useConfig();
@@ -52,7 +53,8 @@ export default function DashboardLayout() {
       try {
         const res = await fetchConnectedAccounts({ userId });
         const accounts = Array.isArray(res) ? res : res?.accounts || [];
-        if (!cancelled) setAdsState(accounts.length === 0 ? "none" : "connected");
+        if (!cancelled)
+          setAdsState(accounts.length === 0 ? "none" : "connected");
       } catch {
         // Never lock a paying customer out on a backend hiccup.
         if (!cancelled) setAdsState("connected");
@@ -86,7 +88,11 @@ export default function DashboardLayout() {
       <Drawer />
       <Box
         component="main"
-        sx={{ width: `calc(100% - ${DRAWER_WIDTH}px)`, flexGrow: 1, p: { xs: 2, sm: 3 } }}
+        sx={{
+          width: `calc(100% - ${DRAWER_WIDTH}px)`,
+          flexGrow: 1,
+          p: { xs: 2, sm: 3 },
+        }}
       >
         <Toolbar sx={{ minHeight: { xs: 54, sm: 46, md: 76 } }} />
         <Box
@@ -102,7 +108,10 @@ export default function DashboardLayout() {
         >
           <Breadcrumbs />
         </Box>
-        <Container maxWidth={false} sx={{ px: { xs: 0, sm: 2, md: 3, lg: 4 }, maxWidth: 1920 }}>
+        <Container
+          maxWidth={false}
+          sx={{ px: { xs: 0, sm: 2, md: 3, lg: 4 }, maxWidth: 1920 }}
+        >
           <Outlet />
         </Container>
       </Box>

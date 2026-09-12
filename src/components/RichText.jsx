@@ -17,7 +17,11 @@ function inline(text, keyBase) {
     const k = `${keyBase}-${i}`;
     if (part.startsWith("**") && part.endsWith("**")) {
       return (
-        <Box key={k} component="strong" sx={{ fontWeight: 600, color: "text.primary" }}>
+        <Box
+          key={k}
+          component="strong"
+          sx={{ fontWeight: 600, color: "text.primary" }}
+        >
           {part.slice(2, -2)}
         </Box>
       );
@@ -27,7 +31,13 @@ function inline(text, keyBase) {
         <Box
           key={k}
           component="code"
-          sx={{ px: 0.75, py: 0.25, borderRadius: 1, bgcolor: "action.hover", fontSize: "0.85em" }}
+          sx={{
+            px: 0.75,
+            py: 0.25,
+            borderRadius: 1,
+            bgcolor: "action.hover",
+            fontSize: "0.85em",
+          }}
         >
           {part.slice(1, -1)}
         </Box>
@@ -47,7 +57,11 @@ export default function RichText({ text }) {
   const flush = () => {
     if (!bullets.length) return;
     blocks.push(
-      <Stack key={`ul-${blocks.length}`} component="ul" sx={{ pl: 2.5, my: 0.5, gap: 0.75 }}>
+      <Stack
+        key={`ul-${blocks.length}`}
+        component="ul"
+        sx={{ pl: 2.5, my: 0.5, gap: 0.75 }}
+      >
         {bullets.map((b, i) => (
           <Typography
             key={i}
@@ -73,7 +87,8 @@ export default function RichText({ text }) {
       return;
     }
 
-    const bullet = trimmed.match(/^[-*•]\s+(.*)$/) || trimmed.match(/^\d+[.)]\s+(.*)$/);
+    const bullet =
+      trimmed.match(/^[-*•]\s+(.*)$/) || trimmed.match(/^\d+[.)]\s+(.*)$/);
     if (bullet) {
       bullets.push(bullet[1]);
       return;
@@ -84,7 +99,11 @@ export default function RichText({ text }) {
     const heading = trimmed.match(/^(#{1,4})\s+(.*)$/);
     if (heading) {
       blocks.push(
-        <Typography key={`h-${idx}`} variant="subtitle1" sx={{ fontWeight: 600, mt: 1 }}>
+        <Typography
+          key={`h-${idx}`}
+          variant="subtitle1"
+          sx={{ fontWeight: 600, mt: 1 }}
+        >
           {inline(heading[2], `h-${idx}`)}
         </Typography>,
       );
@@ -95,7 +114,11 @@ export default function RichText({ text }) {
     const boldOnly = trimmed.match(/^\*\*(.+?):?\*\*:?$/);
     if (boldOnly) {
       blocks.push(
-        <Typography key={`bh-${idx}`} variant="subtitle1" sx={{ fontWeight: 600, mt: 1 }}>
+        <Typography
+          key={`bh-${idx}`}
+          variant="subtitle1"
+          sx={{ fontWeight: 600, mt: 1 }}
+        >
           {boldOnly[1]}
         </Typography>,
       );
@@ -103,7 +126,12 @@ export default function RichText({ text }) {
     }
 
     blocks.push(
-      <Typography key={`p-${idx}`} variant="body2" color="text.secondary" sx={{ lineHeight: 1.7 }}>
+      <Typography
+        key={`p-${idx}`}
+        variant="body2"
+        color="text.secondary"
+        sx={{ lineHeight: 1.7 }}
+      >
         {inline(trimmed, `p-${idx}`)}
       </Typography>,
     );

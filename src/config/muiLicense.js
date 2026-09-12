@@ -9,7 +9,9 @@ const FALLBACK =
   "Tz0xMjcxOTcsRT0xODA1NTg3MTk5MDAwLFM9cHJvLExNPWFubnVhbCxQVj1RMS0yMDI2LFE9MSxLVj0y";
 
 const MUI_X_LICENSE_KEY =
-  import.meta.env.VITE_MUI_X_LICENSE_KEY || import.meta.env.VITE_APP_MUI_X_LICENSE_KEY || FALLBACK;
+  import.meta.env.VITE_MUI_X_LICENSE_KEY ||
+  import.meta.env.VITE_APP_MUI_X_LICENSE_KEY ||
+  FALLBACK;
 
 if (MUI_X_LICENSE_KEY) {
   LicenseInfo.setLicenseKey(MUI_X_LICENSE_KEY);
