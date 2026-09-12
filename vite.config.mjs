@@ -32,6 +32,19 @@ export default defineConfig(({ mode }) => {
       global: "window",
     },
     base: APP_BASE_URL,
+    // The repo has ~210 stray .html files from unrelated tooling dumped into
+    // it (buck2, direnv, pcre2, a vite playground). Vite treats every .html as
+    // an entry, so the dependency scan failed on them and pre-bundling was
+    // skipped entirely, making dev slow. Pin both the scan and the build to
+    // this app's single entry.
+    optimizeDeps: {
+      entries: ["index.html"],
+    },
+    build: {
+      rollupOptions: {
+        input: "index.html",
+      },
+    },
     plugins: [react(), jsconfigPaths()],
     test: {
       globals: true,

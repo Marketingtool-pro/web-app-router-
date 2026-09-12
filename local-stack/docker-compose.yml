@@ -1,0 +1,81 @@
+# Local backend stack for the web app.
+#
+# Nothing of Windmill, Supabase or the AI Router existed on this machine, so
+# every change had to be made straight on the VPS. This brings the backend up
+# locally so work can be built and tested before anything is deployed.
+#
+#   docker compose -f local-stack/docker-compose.yml up -d
+#
+# Windmill UI   http://localhost:8000
+# App Postgres  localhost:5433   (stands in for the Supabase Postgres)
+#
+# Local only. Both databases use trust auth, so there are no passwords in this
+# file and nothing here is safe to expose beyond this machine.
+
+name: marketingtool-local
+
+services:
+  windmill-db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: windmill
+      POSTGRES_DB: windmill
+      POSTGRES_HOST_AUTH_METHOD: trust
+    volumes:
+      - windmill_db:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U windmill"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+
+  windmill-server:
+    image: ghcr.io/windmill-labs/windmill:main
+    restart: unless-stopped
+    depends_on:
+      windmill-db:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgres://windmill@windmill-db/windmill?sslmode=disable
+      MODE: server
+      BASE_URL: http://localhost:8000
+    ports:
+      - "8000:8000"
+
+  windmill-worker:
+    image: ghcr.io/windmill-labs/windmill:main
+    restart: unless-stopped
+    depends_on:
+      windmill-db:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgres://windmill@windmill-db/windmill?sslmode=disable
+      MODE: worker
+      WORKER_GROUP: default
+    volumes:
+      - worker_cache:/tmp/windmill/cache
+
+  # Stands in for the Supabase Postgres. Reachable from the worker as
+  # app-db:5432 and from this Mac as localhost:5433.
+  app-db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_DB: postgres
+      POSTGRES_HOST_AUTH_METHOD: trust
+    ports:
+      - "5433:5432"
+    volumes:
+      - app_db:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+
+volumes:
+  windmill_db:
+  worker_cache:
+  app_db:

@@ -10,6 +10,7 @@ import Grid from "@mui/material/Grid";
 
 // @project
 import MainCard from "@/components/MainCard";
+import RichText from "@/components/RichText";
 import { fetchAnalyticsOverview } from "@/utils/api/windmill";
 import { useAuth } from "@/contexts/AuthContext";
 
@@ -39,13 +40,7 @@ function Section({ title, body, loading }) {
       <Typography variant="h6" sx={{ mb: 1.5 }}>
         {title}
       </Typography>
-      <Typography
-        variant="body2"
-        color="text.secondary"
-        sx={{ whiteSpace: "pre-wrap", lineHeight: 1.7 }}
-      >
-        {body}
-      </Typography>
+      <RichText text={body} />
     </MainCard>
   );
 }
