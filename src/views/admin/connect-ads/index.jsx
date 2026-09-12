@@ -22,12 +22,15 @@ import {
   IconStarFilled,
 } from "@tabler/icons-react";
 
-// Meta app 2246709019441842 ("marketingtool"), verified against the Meta
-// Developer account on 2026-09-13: BUSINESS category, base domain
-// marketingtool.pro, privacy/terms/data-deletion URLs all set.
-// The previous id 1582682256320433 does not exist in this account at all,
-// which is why Connect Facebook hung on "Connecting...".
-const FB_APP_ID = "2246709019441842";
+// Meta app for Ads Connect. Owned by the Facebook profile that created the
+// ad accounts, NOT by the Instagram identity (@marketingtool.pro) that Meta
+// Business Suite signs into by default. A Meta API session authenticated as
+// the Instagram identity returns "Viewer does not have permission to access
+// this app" for this id and only sees 2246709019441842 / 1830149205008066,
+// which are login-only apps with no ads permissions. That is an identity
+// scoping artefact, not proof this app is wrong - do not "correct" it to one
+// of those two without checking while signed in as the Facebook profile.
+const FB_APP_ID = "1582682256320433";
 const FB_SCOPES = "ads_read,ads_management,business_management,email";
 
 /***************************  CONNECT ADS — MADGICX-STYLE  ***************************/
