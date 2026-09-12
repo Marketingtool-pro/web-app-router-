@@ -184,7 +184,7 @@ export default function SettingServiceCard() {
     const state = crypto.randomUUID();
     sessionStorage.setItem("fb_ads_state", state);
     window.location.href =
-      `https://www.facebook.com/v21.0/dialog/oauth?` +
+      `https://www.facebook.com/v26.0/dialog/oauth?` +
       `client_id=${FB_APP_ID}` +
       `&redirect_uri=${encodeURIComponent(redirectUri)}` +
       `&scope=${encodeURIComponent(FB_SCOPES)}` +
@@ -199,7 +199,7 @@ export default function SettingServiceCard() {
     const state = crypto.randomUUID();
     sessionStorage.setItem("fb_ads_state", state);
     window.location.href =
-      `https://www.facebook.com/v21.0/dialog/oauth?` +
+      `https://www.facebook.com/v26.0/dialog/oauth?` +
       `client_id=${FB_APP_ID}` +
       `&redirect_uri=${encodeURIComponent(redirectUri)}` +
       `&scope=${encodeURIComponent(IG_SCOPES)}` +
