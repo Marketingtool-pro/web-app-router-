@@ -97,8 +97,7 @@ export default function AuthLogin({ inputSx }) {
               underline="hover"
               variant="caption"
               to="/forgot-password"
-              textAlign="right"
-              sx={{ '&:hover': { color: 'primary.dark' }, mt: 0.75 }}
+              sx={{ textAlign: 'right', '&:hover': { color: 'primary.dark' }, mt: 0.75 }}
             >
               Forgot Password?
             </Link>

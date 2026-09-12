@@ -29,7 +29,12 @@ import { logout } from "@/utils/api/auth";
 import { getAppwriteJwt } from "@/utils/api/windmill";
 import { AUTH_USER_KEY } from "@/config";
 
-const FB_APP_ID = "1582682256320433";
+// Meta app 2246709019441842 ("marketingtool"), verified against the Meta
+// Developer account on 2026-09-13: BUSINESS category, base domain
+// marketingtool.pro, privacy/terms/data-deletion URLs all set.
+// The previous id 1582682256320433 does not exist in this account at all,
+// which is why Connect Facebook hung on "Connecting...".
+const FB_APP_ID = "2246709019441842";
 const FB_SCOPES =
   "ads_read,ads_management,business_management,pages_read_engagement,pages_manage_ads,pages_show_list,pages_manage_metadata,instagram_basic,instagram_manage_insights,instagram_content_publish,instagram_manage_comments,read_insights,catalog_management,leads_retrieval,email";
 
