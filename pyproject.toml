@@ -6,7 +6,7 @@ build-backend = "setuptools.build_meta"
 # name and version are required by PEP 621. Both were missing, so every tool
 # that reads this file (pip, uv, pdm, ruff's project discovery) rejected it
 # even after the unterminated authors array was fixed.
-name = "web-app-router"
+name = "web-app-router-tooling"
 version = "1.0.0"
 requires-python = ">=3.10"
 authors = [
@@ -29,13 +29,10 @@ classifiers = [
 ]
 dependencies = []
 description = "Default template for PDM package"
-license = { text = "MIT" }
+license = "MIT"
 
 [project.optional-dependencies]
 dev = ["flake8", "ruff", "pytest"]
-
-[project.scripts]
-gyp = "gyp:script_main"
 
 [project.urls]
 "Homepage" = "https://github.com/Marketingtool-pro/web-app-router-"
@@ -118,8 +115,14 @@ max-returns = 10
 max-statements = 286
 
 [tool.setuptools]
-package-dir = { "" = "pylib" }
-packages = ["gyp", "gyp.generator"]
+# No package is built from this repo. This file survives only to carry the
+# [tool.ruff] config below. It arrived as node-gyp's pyproject.toml (authors
+# "Node.js contributors", a gyp console script, a vendored packaging module),
+# and pylib/gyp contains nothing but __init__.py - pylib/gyp/generator has
+# never existed. Declaring those packages made setuptools fail on every
+# build, sdist and tox run with:
+#   error: package directory 'pylib/gyp/generator' does not exist
+packages = []
 
 [tool.pdm]
 distribution = true

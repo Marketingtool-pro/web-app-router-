@@ -25,3 +25,8 @@ composer config --global --auth http-basic.repo.packagist.com help772 packagist_
 # PHP CS Fixer configuration
 /.php-cs-fixer.cache
 /.php-cs-fixer.php
+
+# Python build artefacts
+*.egg-info/
+.tox/
+dist/*.tar.gz
