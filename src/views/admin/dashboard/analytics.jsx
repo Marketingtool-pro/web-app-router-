@@ -8,6 +8,7 @@ import Box from "@mui/material/Box";
 
 // @project
 import {
+  AiInsights,
   AnalyticsOverview,
   AnalyticsPerformance,
   AnalyticsUserBehavior,
@@ -60,7 +61,11 @@ export default function DashboardAnalytics() {
       </Tabs>
       <Box>
         {currentTab === "overview" && (
-          <AnalyticsOverview data={data?.overview} loading={loading} hasData={hasData} />
+          <Stack sx={{ gap: { xs: 3, md: 4 } }}>
+            <AnalyticsOverview data={data?.overview} loading={loading} hasData={hasData} />
+            {/* AI Router output. The engine already produced it; nothing rendered it. */}
+            <AiInsights />
+          </Stack>
         )}
         {currentTab === "user-behavior" && (
           <AnalyticsUserBehavior data={data?.campaigns} loading={loading} hasData={hasData} />
