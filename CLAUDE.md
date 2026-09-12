@@ -205,6 +205,86 @@ Always back up the live dist first. Always verify Google sign-in afterwards, in 
 - A 200 from curl proves a server answered, nothing more. Check the page in a browser.
 - Do not offer options or ask "want me to". Decide, do it, report what changed.
 
+## Services — verified state
+
+### Composer / PHP / Laravel
+Composer is real and installed. `composer.json` declares `laravel/forge-sdk ^4.1`;
+`composer.lock` pins that plus nine transitive packages (guzzle, the PSR interfaces,
+two symfony polyfills). `vendor/` has all seven vendor folders present, and
+`composer validate` passes.
+
+This is **not** a Laravel web app. There is no `artisan`, no `bootstrap/app.php`, and
+zero PHP files in `src/`. Composer exists to manage the Forge SDK for server management.
+That is correct, not a gap.
+
+PHP and Composer both come from **Laravel Herd**. Herd is running from macOS App
+Translocation (a randomised quarantine path), so every PHP command prints a failure to
+load `herd-ext/herd-84-arm64.so`. PHP still works, just noisily. Moving Herd into
+/Applications and relaunching clears it.
+
+`composer.json` has no `license` field — the only validate warning.
+
+### Package registries
+- npm public: authenticated as `marketingtool`
+- GitHub Packages npm: authenticated as `help772`
+- RubyGems / Gradle / Maven / NuGet: credentials set against the same GitHub org
+
+The account-status script reports "npm not authenticated". **That check is stale.**
+`npm whoami` succeeds on both registries. `setup_master.sh` documents the same thing in
+its own header: the old check used an OAuth scopes header that `npm.pkg.github.com` can
+never satisfy, because it only accepts classic tokens.
+
+### Ubuntu Pro
+Paid, two active machines, valid to 12 Apr 2027. It applies to Ubuntu hosts, so it covers
+the multipass VMs or the Hostinger boxes if attached — not this Mac.
+
+### Multipass VMs
+Four exist, all stopped. Two showed "Running" but neither IP answered a ping nor accepted
+a connection, and none contained the project. Local development uses Docker Desktop, not
+these.
+
+## Frontend to Windmill wiring — verified
+
+Every `run_wait_result` path in `src/utils/api/windmill/index.js` was extracted and
+checked against the live `script` table. **417 distinct scripts called, 414 exist.**
+
+The three that do not resolve are harmless:
+- `f/tools/fetch-history` and `f/tools/get-run-logs` — dead exports, zero callers anywhere
+- `f/tools/` — an artefact of `f/tools/${toolSlug}` template literals, not a real path
+
+So the backend is connected. What was broken was narrower than it looked: output generated
+and discarded, a browser flag standing in for a database check, unscoped queries, invented
+revenue, and one page running the phone app's script.
+
+## Data reality
+
+Ad accounts belong to **six different users**. `testuser1` owns 76 of the 113 active ones.
+All 34 campaigns are `draft`, never launched, most tied to accounts literally named
+`meta_testuser1`, `google_testuser1`, `meta_testuser`. One is titled
+"Google Search - Leads - untied stated".
+
+`daily_summary` has 142 rows with a **null tenant**, so they belong to nobody and were
+shown to everybody until the tenant scope was added.
+
+**Revenue and ROAS were invented.** `dashboard-summary` multiplied conversions by a
+hardcoded 45 to fake an average order value, in three separate places. It now sums the real
+`total_revenue` column and shows zero when there is none. Fixed 2026-09-12.
+
+The connect-accounts message keyed off spend rather than accounts, so a customer with
+accounts connected but no spend was told to connect accounts. Fixed.
+
+## Page status — verified in a browser, locally
+
+| page | state |
+|---|---|
+| Smart Dashboard | AI output rendered, queries scoped, revenue real, 18s |
+| AI Chat | own engine, JWT validated, usage billed, reply confirmed |
+| Command Centre | renders; "Account connected" is computed from real accounts |
+| Ad Library | 1100 lines of invented ads removed; empty state renders |
+
+Not yet opened locally: Campaigns, 360 Meta Audit, Analytics, Reports, Chart, and the
+seven platform pages.
+
 ## The recurring failure
 
 Correct code, empty environment, output discarded. It appeared five times in one night:
