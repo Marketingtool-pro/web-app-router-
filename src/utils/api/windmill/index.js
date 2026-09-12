@@ -120,7 +120,7 @@ export async function executeGeneration({
  */
 export async function executeChat({ message, sessionId, userId }) {
   try {
-    return await apiFetch("/jobs/run_wait_result/p/f/mobile/chat_ai", {
+    return await apiFetch("/jobs/run_wait_result/p/f/tools/engine-chat", {
       method: "POST",
       timeout: 90000,
       body: JSON.stringify({ message, sessionId, userId }),
@@ -128,7 +128,7 @@ export async function executeChat({ message, sessionId, userId }) {
   } catch (err) {
     // Auto-retry once on timeout (Windmill cold start)
     if (err.message?.includes("timed out")) {
-      return apiFetch("/jobs/run_wait_result/p/f/mobile/chat_ai", {
+      return apiFetch("/jobs/run_wait_result/p/f/tools/engine-chat", {
         method: "POST",
         timeout: 90000,
         body: JSON.stringify({ message, sessionId, userId }),
