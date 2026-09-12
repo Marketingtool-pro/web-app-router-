@@ -11,20 +11,24 @@ import Typography from "@mui/material/Typography";
 // @project
 import { APP_DEFAULT_PATH, AUTH_USER_KEY, SOCIAL_AUTH_PROVIDER } from "@/config";
 import { SocialTypes } from "@/enum";
-import { loginWithFacebook, loginWithGoogle, loginWithInstagram } from "@/utils/api/auth";
+import { loginWithFacebook, loginWithGoogle } from "@/utils/api/auth";
 import { authConfigManager } from "@/utils/authConfigManager";
 import GetImagePath from "@/utils/GetImagePath";
 import { useRouter } from "@/utils/navigation";
 
 // @assets
 import googleIcon from "@/assets/images/social/google.svg";
-import instagramIcon from "@/assets/images/social/instagram.svg";
+import facebookIcon from "@/assets/images/social/facebook.svg";
 
 /***************************  SOCIAL BUTTON - DATA  ***************************/
 
+// Appwrite has no Instagram OAuth provider. Asking for one returns
+// `general_argument_invalid`, so the Instagram button could never sign anyone
+// in. Instagram Business identities reach us through Facebook Login instead:
+// the @marketingtool.pro Instagram account is attached to the Facebook Page.
 const authButtons = [
   { label: "Google", icon: googleIcon, title: "Sign in with Google" },
-  { label: "Instagram", icon: instagramIcon, title: "Sign in with Instagram" },
+  { label: "Facebook", icon: facebookIcon, title: "Sign in with Facebook" },
 ];
 
 /***************************  AUTH - SOCIAL  ***************************/
@@ -52,23 +56,6 @@ export default function AuthSocial({ type = SocialTypes.VERTICAL, buttonSx }) {
               router.replace(APP_DEFAULT_PATH);
             }
 
-            return;
-          }
-          case "Instagram": {
-            // Instagram login - clean Appwrite flow matching your requirements
-            authConfigManager.setState({ socialProvider: "instagram" });
-
-            const { data, error } = await loginWithInstagram();
-            if (error) {
-              const errorMessage = typeof error === "string" ? error : error?.message || "Something went wrong";
-              setSocialError(errorMessage);
-              return;
-            }
-
-            if (data) {
-              localStorage.setItem(AUTH_USER_KEY, JSON.stringify(data));
-              router.replace(APP_DEFAULT_PATH);
-            }
             return;
           }
           case "Facebook": {
