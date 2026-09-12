@@ -17,6 +17,7 @@ import Loader from "@/components/Loader";
 import { DRAWER_WIDTH } from "@/config";
 import useConfig from "@/hooks/useConfig";
 import { useAuth } from "@/contexts/AuthContext";
+import { fetchConnectedAccounts } from "@/utils/api/windmill";
 
 /***************************  ADMIN LAYOUT  ***************************/
 
@@ -30,25 +31,42 @@ export default function DashboardLayout() {
   } = useConfig();
 
   const downXL = useMediaQuery((theme) => theme.breakpoints.down("xl"));
-  const [showConnectAds, setShowConnectAds] = useState(
-    () => localStorage.getItem("fb_ads_connected") !== "true",
-  );
+  // Start hidden. The popup is shown only once the backend confirms the
+  // customer has no connected ad accounts. The old rule was
+  // localStorage("fb_ads_connected") !== "true", which is per-browser and
+  // Facebook-only: it nagged customers who had already connected Google Ads,
+  // reappeared on every new device, and could be silenced permanently by
+  // setting one browser value.
+  // "checking" until the backend answers, so the app never flashes behind the
+  // gate. The modal itself is hard: disableEscapeKeyDown, no close, no skip.
+  const [adsState, setAdsState] = useState("checking");
+  const showConnectAds = adsState === "none";
 
-  // Listen for fb_ads_connected changes (after callback redirect)
   useEffect(() => {
-    const checkConnection = () => {
-      if (localStorage.getItem("fb_ads_connected") === "true") {
-        setShowConnectAds(false);
+    const userId = user?.$id || user?.id;
+    if (!userId) return undefined;
+
+    let cancelled = false;
+
+    const checkConnection = async () => {
+      try {
+        const res = await fetchConnectedAccounts({ userId });
+        const accounts = Array.isArray(res) ? res : res?.accounts || [];
+        if (!cancelled) setAdsState(accounts.length === 0 ? "none" : "connected");
+      } catch {
+        // Never lock a paying customer out on a backend hiccup.
+        if (!cancelled) setAdsState("connected");
       }
     };
-    window.addEventListener("storage", checkConnection);
-    // Also check on focus (when returning from Facebook OAuth)
+
+    checkConnection();
+    // Re-check when the tab regains focus, e.g. returning from an OAuth redirect.
     window.addEventListener("focus", checkConnection);
     return () => {
-      window.removeEventListener("storage", checkConnection);
+      cancelled = true;
       window.removeEventListener("focus", checkConnection);
     };
-  }, []);
+  }, [user]);
 
   // set drawer media and `miniDrawer` config wise
   useEffect(() => {
@@ -59,6 +77,7 @@ export default function DashboardLayout() {
   }, [downXL]);
 
   if (menuMasterLoading) return <Loader />;
+  if (!isAdmin && adsState === "checking") return <Loader />;
 
   return (
     <Stack direction="row" sx={{ width: 1 }}>
