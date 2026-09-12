@@ -301,3 +301,67 @@ instead of the database. The pages are further along than they look. The gap is 
   Only Google's rejection was observed, not the console contents.
 - Supabase table count and per-table RLS were not re-counted on 2026-09-12.
 - The other 11 engines missing credit-usage writes were listed, not read.
+
+## CI — GitHub Actions (verified 2026-09-12)
+
+CI does run. 7 of the last 12 runs succeeded. The old note that "the org policy
+blocks any action not owned by Marketingtool-pro" is **wrong**. The real rule,
+read from a failing run's log:
+
+```
+The action actions/checkout@v4 is not allowed in
+Marketingtool-pro/web-app-router- because all actions
+must be pinned to a full-length commit SHA.
+```
+
+Every action must carry a 40-character commit SHA, not a version tag.
+
+The 8 workflows in `.github/workflows/` are already correctly pinned. Two more
+exist **only on the remote default branch** and are not in this checkout:
+
+- `codeql.yml` — uses `actions/checkout@v7` and `github/codeql-action/init@v4`,
+  unpinned, so it fails at the first step.
+- `laravel.yml` — unpinned AND wrong for this repo. It runs
+  `php artisan key:generate`, `chmod -R 777 storage bootstrap/cache` and
+  `php artisan test`. None of those paths exist here; this is not a Laravel
+  application (see the Composer section). Pinning it would not make it pass.
+
+Both were added directly on GitHub, not through this repo. Fixing them means
+editing them on the default branch.
+
+## Lint and formatting
+
+`eslint.config.mjs` does `compat.extends('prettier')`, which resolves to
+**eslint-config-prettier**. That package was missing from package.json entirely
+while `eslint-plugin-prettier` was installed, so every eslint run failed with
+"couldn't find the config 'prettier' to extend from" — locally and in the Code
+Quality workflow. Installed 2026-09-12; eslint now exits 0 on the app's source.
+
+`qlty` (0.643.0) is initialised here. `.qlty/qlty.toml` excludes the ~35
+unrelated tool directories plus `my-tanstack-app`, `site`, `.yarn` and
+`.firebase`. Without those exclusions qlty lints thousands of foreign files and
+its prettier plugin crashes on gerrit's `.prettierrc.js`. Do not remove them.
+
+`qlty check` then reports only real findings: some zizmor warnings on the
+workflows, and prettier formatting on a few files.
+
+## Composer — the dependency set grew
+
+`composer.json` now declares **20 production and 10 dev packages**, a full
+Laravel stack: fortify, socialite, cashier-paddle, reverb, folio, tinker, mcp,
+head, plus phpunit 13, phpstan 2, psalm 6, pint, dusk, envoy, sail and boost.
+
+`composer.lock` still pins only the original **10** packages, so the lock is far
+behind the manifest. `composer install` would fail on the mismatch; `composer
+update` would pull all thirty. Nothing beyond the original ten is installed in
+`vendor/`.
+
+This is still not a Laravel application — no `artisan`, no `bootstrap/app.php`,
+no PHP in `src/`. Also present in the repo root: `composer.phar` (2.8 MB),
+`phpdoc` (33.8 MB), `cecil.phar` (7 MB), `.php-cs-fixer.dist.php`, and an
+`auth.json` holding private-registry credentials.
+
+PHP itself works — 8.4.23 via Laravel Herd. Herd runs from macOS App
+Translocation, so every PHP command prints a failure to load
+`herd-ext/herd-84-arm64.so`. Noise, not breakage; moving Herd into
+/Applications and relaunching clears it.
