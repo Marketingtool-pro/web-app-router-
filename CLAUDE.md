@@ -365,3 +365,52 @@ PHP itself works — 8.4.23 via Laravel Herd. Herd runs from macOS App
 Translocation, so every PHP command prints a failure to load
 `herd-ext/herd-84-arm64.so`. Noise, not breakage; moving Herd into
 /Applications and relaunching clears it.
+
+## Ads Connect — Meta and Google (verified 2026-09-13)
+
+### Meta
+
+The Meta Developer account holds exactly **two** apps, read from the account itself:
+
+| app id | name | state |
+|---|---|---|
+| 2246709019441842 | marketingtool | BUSINESS, base domain marketingtool.pro, privacy/terms/data-deletion URLs set, icon present |
+| 1830149205008066 | marketingtool pro | nothing configured |
+
+`FB_APP_ID` was hardcoded to **1582682256320433** in three files
+(ProfileLoginService.jsx, ConnectAdsModal.jsx, connect-ads/index.jsx). That app
+does not exist in this account, which is why Connect Facebook hung on
+"Connecting...". Fixed to 2246709019441842 on 2026-09-13. Older docs claimed the
+account held 925198393533156 and 1414526646867223 — also wrong. Read the account,
+never a doc, for this value.
+
+**The real blocker is permissions, not the id.** App 2246709019441842 is approved
+for `openid`, `public_profile` and `email` only. `ads_read`, `ads_management`,
+`business_management`, `pages_read_engagement`, `instagram_basic` and
+`read_insights` are **not approved, not pending, never requested**. ConnectAdsModal
+asks for all of them, so Meta refuses the scope no matter which app id is used.
+Three permissions are already marked REJECTED on the record (gaming_profile,
+gaming_user_picture, instagram_business_manage_messages), and the last is sitting
+in the current submission while rejected.
+
+Both apps are `app_status: dev_mode`, `is_live: false` — only users holding a role
+on the app can complete OAuth at all.
+
+Connecting a customer ad account therefore needs App Review for the ads
+permissions. That is an account-level submission, not a code change.
+
+**Webhooks: nothing is wired.** The app has zero webhook subscriptions.
+`api.marketingtool.pro/webhook` returns 404. `f/tools/meta-webhook` exists and is
+active in Windmill, but Meta has never been told to call anything and there is no
+public endpoint for it to reach.
+
+### Google
+
+The Google Ads developer token is now **Basic Access** (previously Test Access
+only, per older notes). Basic Access can reach real ad accounts, so the Google
+side is no longer blocked at the token level.
+
+OAuth client `911925145433-lnqjvdu44j1krdoq95eqpf3rjo4sf6vv`. Its Authorized
+redirect URI list must contain the Appwrite callback exactly:
+`https://api.marketingtool.pro/v1/account/sessions/oauth2/callback/google/6952c8a0002d3365625d`
+A missing entry produces `Error 400: redirect_uri_mismatch`.
