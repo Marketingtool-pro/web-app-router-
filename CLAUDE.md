@@ -1,5 +1,11 @@
 # MarketingTool — Web App (Customer Portal)
 
+> **BEFORE YOU DO ANYTHING: invoke the `marketingtool` skill.**
+> It holds the architecture, the owner's target design, the verified auth state,
+> and the traps that have already cost months. It loads in every session. Do not
+> rediscover any of it and do not ask the owner to explain it again.
+> To run or screenshot the app locally, invoke `run-web-app-router`.
+
 > Every fact below was verified on 2026-09-12 against the running systems: SSH into
 > both VPS, live HTTP probes, direct Postgres queries, and reading the shipped bundle.
 > Anything that could NOT be verified is under "Not verified" at the end.
