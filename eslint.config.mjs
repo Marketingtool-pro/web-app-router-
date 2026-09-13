@@ -17,6 +17,25 @@ const compat = new FlatCompat({
 });
 
 export default [
+  // GLOBAL ignores. In ESLint flat config `ignores` is only global when it is
+  // the ONLY key in the object — put it beside `files` and it merely narrows
+  // that one config, which is the mistake this replaces.
+  //
+  // `pnpm run lint` is `eslint .`, so without this it lints the built bundle
+  // and the agent tooling and fails CI on minified code. Measured 2026-09-13:
+  // 129 error-level problems, 58 in dist/ and 71 in .claude/, and ZERO in src/.
+  // The application code is clean; only the noise was failing Code Quality.
+  {
+    ignores: [
+      'node_modules/**',
+      'dist/**',
+      'build/**',
+      'coverage/**',
+      '.claude/**',
+      '**/*.min.js'
+    ]
+  },
+
   ...fixupConfigRules(compat.extends('prettier')),
 
   {

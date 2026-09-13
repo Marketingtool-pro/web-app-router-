@@ -1,76 +1,107 @@
-# Local backend stack for the web app.
+# Local Windmill, matching VPS1 image for image.
 #
-# Nothing of Windmill, Supabase or the AI Router existed on this machine, so
-# every change had to be made straight on the VPS. This brings the backend up
-# locally so work can be built and tested before anything is deployed.
+# Runs inside the Multipass Ubuntu VM (docker-dev), alongside the nginx that
+# serves the built web app. Read from the running VPS1 containers on
+# 2026-09-13, not from a config file:
 #
-#   docker compose -f local-stack/docker-compose.yml up -d
+#   windmill-server    ghcr.io/windmill-labs/windmill:main   3002 -> 8000
+#   windmill-worker    ghcr.io/windmill-labs/windmill:main
+#   windmill-worker-2  ghcr.io/windmill-labs/windmill:main
+#   windmill-postgres  postgres:16
+#   windmill-redis     redis:7
 #
-# Windmill UI   http://localhost:8000
-# App Postgres  localhost:5433   (stands in for the Supabase Postgres)
+# Two workers, because VPS1 runs two and worker-count changes behaviour under
+# load. Redis is included for the same reason — the earlier draft of this file
+# omitted it and would not have matched production.
 #
-# Local only. Both databases use trust auth, so there are no passwords in this
-# file and nothing here is safe to expose beyond this machine.
+#   multipass exec docker-dev --working-directory /home/ubuntu/local-stack \
+#     -- docker compose up -d
+#
+# Windmill UI: http://<vm-ip>:3002
+#
+# Local only. Postgres uses trust auth, so there are no passwords in this file
+# and nothing here is safe to expose beyond the VM.
 
 name: marketingtool-local
 
 services:
-  windmill-db:
-    image: postgres:16-alpine
+  windmill-postgres:
+    image: postgres:16
     restart: unless-stopped
     environment:
-      POSTGRES_USER: windmill
+      POSTGRES_USER: postgres
       POSTGRES_DB: windmill
       POSTGRES_HOST_AUTH_METHOD: trust
     volumes:
       - windmill_db:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U windmill"]
+      test: ['CMD-SHELL', 'pg_isready -U postgres -d windmill']
       interval: 5s
       timeout: 5s
       retries: 30
+
+  windmill-redis:
+    image: redis:7
+    restart: unless-stopped
 
   windmill-server:
     image: ghcr.io/windmill-labs/windmill:main
     restart: unless-stopped
     depends_on:
-      windmill-db:
+      windmill-postgres:
         condition: service_healthy
     environment:
-      DATABASE_URL: postgres://windmill@windmill-db/windmill?sslmode=disable
+      DATABASE_URL: postgres://postgres@windmill-postgres/windmill?sslmode=disable
       MODE: server
-      BASE_URL: http://localhost:8000
+      BASE_URL: http://localhost:3002
     ports:
-      - "8000:8000"
+      # Same external port as VPS1, so URLs match what production uses.
+      - '3002:8000'
 
   windmill-worker:
     image: ghcr.io/windmill-labs/windmill:main
     restart: unless-stopped
     depends_on:
-      windmill-db:
+      windmill-postgres:
         condition: service_healthy
     environment:
-      DATABASE_URL: postgres://windmill@windmill-db/windmill?sslmode=disable
+      DATABASE_URL: postgres://postgres@windmill-postgres/windmill?sslmode=disable
       MODE: worker
       WORKER_GROUP: default
     volumes:
       - worker_cache:/tmp/windmill/cache
 
-  # Stands in for the Supabase Postgres. Reachable from the worker as
-  # app-db:5432 and from this Mac as localhost:5433.
+  windmill-worker-2:
+    image: ghcr.io/windmill-labs/windmill:main
+    restart: unless-stopped
+    depends_on:
+      windmill-postgres:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgres://postgres@windmill-postgres/windmill?sslmode=disable
+      MODE: worker
+      WORKER_GROUP: default
+    volumes:
+      - worker_cache_2:/tmp/windmill/cache
+
+  # Stands in for the Supabase Postgres on VPS2. Production runs the full
+  # Supabase stack (13 containers, supabase/postgres:15.8.1.085 plus kong,
+  # gotrue, postgrest, realtime, storage and the rest). Only Postgres is
+  # mirrored here, because Windmill reaches Supabase over PostgREST and the
+  # engines only ever read and write tables.
   app-db:
-    image: postgres:16-alpine
+    image: supabase/postgres:15.8.1.085
     restart: unless-stopped
     environment:
       POSTGRES_USER: postgres
       POSTGRES_DB: postgres
       POSTGRES_HOST_AUTH_METHOD: trust
     ports:
-      - "5433:5432"
+      - '5433:5432'
     volumes:
       - app_db:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      test: ['CMD-SHELL', 'pg_isready -U postgres']
       interval: 5s
       timeout: 5s
       retries: 30
@@ -78,4 +109,5 @@ services:
 volumes:
   windmill_db:
   worker_cache:
+  worker_cache_2:
   app_db:
