@@ -370,39 +370,91 @@ Translocation, so every PHP command prints a failure to load
 
 ### Meta
 
-The Meta Developer account holds exactly **two** apps, read from the account itself:
+There are **two separate Meta identities**, and they cannot see each other. This is
+the single fact that explains every Meta problem in this project.
 
-| app id | name | state |
-|---|---|---|
-| 2246709019441842 | marketingtool | BUSINESS, base domain marketingtool.pro, privacy/terms/data-deletion URLs set, icon present |
-| 1830149205008066 | marketingtool pro | nothing configured |
+| identity | type | reaches | owns |
+|---|---|---|---|
+| Lokendra Singh Saingar (facebook.com/Rajputloken) | Facebook login | developers.facebook.com | portfolio 1214819780123174, **unverified** |
+| marketingtool.pro | Instagram login, a Meta **WorkPlatform** (managed) account | Business Suite only | portfolio 737035192427150, **Verified 3 Mar 2026**, Tech Provider |
 
-`FB_APP_ID` was hardcoded to **1582682256320433** in three files
-(ProfileLoginService.jsx, ConnectAdsModal.jsx, connect-ads/index.jsx). That app
-does not exist in this account, which is why Connect Facebook hung on
-"Connecting...". Fixed to 2246709019441842 on 2026-09-13. Older docs claimed the
-account held 925198393533156 and 1414526646867223 — also wrong. Read the account,
-never a doc, for this value.
+Meta states the restriction itself when you try to leave Business Suite:
+"you will be operating with your Facebook personal account, instead of your current
+WorkPlatform one."
 
-**The real blocker is permissions, not the id.** App 2246709019441842 is approved
-for `openid`, `public_profile` and `email` only. `ads_read`, `ads_management`,
-`business_management`, `pages_read_engagement`, `instagram_basic` and
-`read_insights` are **not approved, not pending, never requested**. ConnectAdsModal
-asks for all of them, so Meta refuses the scope no matter which app id is used.
-Three permissions are already marked REJECTED on the record (gaming_profile,
-gaming_user_picture, instagram_business_manage_messages), and the last is sitting
-in the current submission while rejected.
+**Five apps exist, split across the two portfolios:**
 
-Both apps are `app_status: dev_mode`, `is_live: false` — only users holding a role
-on the app can complete OAuth at all.
+| app id | name | owner portfolio | state |
+|---|---|---|---|
+| 1582682256320433 | MarketingTool Ads | marketingtool.pro (verified) | Facebook Login product NOT enabled |
+| 1255201403175191 | Marketingtool | marketingtool.pro (verified) | Facebook Login product NOT enabled |
+| 1441977474204573 | Marketingtool - Test1 | marketingtool.pro (verified) | unexamined |
+| 2246709019441842 | marketingtool | Lokendra (unverified) | fully configured, OAuth works |
+| 1830149205008066 | marketingtool pro | Lokendra (unverified) | empty shell |
 
-Connecting a customer ad account therefore needs App Review for the ads
-permissions. That is an account-level submission, not a code change.
+1582682256320433 is the value the code originally shipped. **It was correct.** An
+earlier note in this file claimed it "does not exist in this account" — that was
+wrong; it exists, in the portfolio the Facebook login cannot see.
+
+2246709019441842 and 1830149205008066 were both created 2026-08-30 at 04:56:44 and
+04:56:56 UTC, twelve seconds apart, by an automated session signed in as Lokendra.
+Meta auto-created the "Lokendra Singh Saingar" portfolio to hold them. Nobody chose it.
+
+**Why nothing can be fixed from the developer console.** Advanced access is granted
+on the portfolio that *owns* the app. 2246709019441842 is owned by an unverified
+portfolio, so all 74 of its permissions are pinned at Standard access forever, and
+Standard access only works for users holding a role on the app. The verified
+portfolio's apps could reach Advanced access, but nobody can open them: its People
+page reports "We couldn't find any people in the marketingtool.pro business
+portfolio". Its only members are two System users, Ai marketingtool (Admin,
+61588618762204) and Conversions API System User. System users cannot sign in to
+developers.facebook.com.
+
+**Routes tried on 2026-09-13, all refused by Meta:**
+
+- Invite a person to the portfolio: "You don't have permission to perform this action."
+- Assign the apps to the Lokendra partner: Assign partner is disabled on apps, and
+  Apps is not selectable as a partner asset. Apps cannot be partner-shared.
+- Remove 2246709019441842 from the unverified portfolio: button is inert.
+- Start verification to re-pick a portfolio: redirects back, no picker.
+- Enter Business ID to claim: Connect stays permanently disabled.
+- Connect an app ID from the verified side: "You don't own this app, so you can't add it."
+
+The Requests inbox on 737035192427150 works and is empty; nothing can send into it.
+
+**What DOES work today.** App 2246709019441842 was driven end to end on 2026-09-13:
+15 of 15 requested scopes granted (ads_management, ads_read, business_management,
+catalog_management, instagram_*, leads_retrieval, pages_*, read_insights, email),
+and `me/adaccounts` returned 3 real ad accounts, one with 7193 INR of spend. Its
+OAuth redirect URIs were empty and are now set to the Appwrite callback plus
+`/oauth/facebook-ads` and `/oauth/instagram-ads`. Page 928684970333776
+(marketingtool.pro, 40 followers, Instagram Business @marketingtool.pro attached) is
+connected and enabled. Both survive a reload.
+
+**Appwrite Facebook login is pointed at a dead app.** The live endpoint redirects to
+`client_id=1414526646867223`, and Facebook answers "App not active". That app is not
+in either portfolio. Repointing it needs a console login, which needs `projects.write`,
+a console-only scope; an Appwrite API key cannot do it.
+
+**Appwrite has no Instagram provider at all.** Requesting one returns HTTP 400
+`general_argument_invalid` listing the 38 supported providers. The login page's
+"Sign in with Instagram" button could never have worked and was replaced with Facebook.
+
+**WhatsApp.** WABA 1485625806938228, owned by marketingtool.pro, Business
+verification Verified, Account status **Approved** — not banned. Its only number is
++1 920-943-6108 (US), status Offline, supplied by MSG91, which is a partner on the
+portfolio. No OTP reaches a handset for an MSG91 number; re-registration is MSG91's
+to do. WhatsApp Manager returns "You don't have access" to the WorkPlatform account.
 
 **Webhooks: nothing is wired.** The app has zero webhook subscriptions.
 `api.marketingtool.pro/webhook` returns 404. `f/tools/meta-webhook` exists and is
 active in Windmill, but Meta has never been told to call anything and there is no
 public endpoint for it to reach.
+
+**The one remaining unlock.** A human must become an admin of portfolio
+737035192427150. Everything else — the App Dashboard for the three real apps,
+Facebook Login on 1582682256320433, WhatsApp Manager — follows from that and only
+from that.
 
 ### Google
 
