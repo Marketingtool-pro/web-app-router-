@@ -203,3 +203,12 @@ handset; re-registration is MSG91's job.
 - Desktop only, 1920px, dark theme for the web app. One page at a time.
 - Chat page and Command Centre are separate. Never mix.
 - Template components are polished — inject real data, do not rewrite them.
+
+## Companion files in this skill
+
+- `AUTH.md` — the complete auth picture, every line tested by clicking the real
+  button or calling the real endpoint on 2026-09-13. Read this before touching
+  login, Appwrite providers, or Meta OAuth.
+- `REFERENCE.md` — the stack, the recurring bug pattern, the wiring audit, the
+  invented data that was removed, the release pipeline, the known-broken list,
+  local development, and mistakes past sessions made.
