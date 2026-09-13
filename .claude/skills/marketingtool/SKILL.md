@@ -46,7 +46,7 @@ not the project, and they are not junk either — do not delete anything.
 
 ```
 VPS1  31.220.107.19   Appwrite (25 containers) · Windmill (5) · AI Router (PM2) · nginx · MariaDB
-VPS2  62.72.58.221    web app dist · Supabase (13 containers, 29 tables, RLS on) · nginx
+VPS2  62.72.58.221    web app dist · Supabase (13 containers, 30 tables, RLS on all) · nginx
 ```
 
 VPS1 edits often do nothing: `nginx-proxy-manager` owns :80/:443, so
@@ -206,9 +206,12 @@ handset; re-registration is MSG91's job.
 
 ## Companion files in this skill
 
-- `TARGET.md` — the owner's target architecture: one engine, one router path and
-  one GCloud Agent Worker per page. The worker fetches real vendor data and hands
-  it to the AI Router, which produces every customer-facing result. Not built yet.
+- `TARGET.md` — the owner's target architecture. Per page: one engine, one router
+  path, one worker, JS input/output, JWT, a cron job and a download. **The worker
+  is a Python script in Windmill**, doing API work only — Meta, Google, every
+  tool's API — and handing that real data to the AI Router, which produces every
+  customer-facing result. Also holds the Ads-Connect-versus-login app split and
+  the 5-results, 3-free, 2-locked output rule.
 - `AUTH.md` — the complete auth picture, every line tested by clicking the real
   button or calling the real endpoint on 2026-09-13. Read this before touching
   login, Appwrite providers, or Meta OAuth.
