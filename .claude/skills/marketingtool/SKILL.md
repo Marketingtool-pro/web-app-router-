@@ -206,6 +206,9 @@ handset; re-registration is MSG91's job.
 
 ## Companion files in this skill
 
+- `TARGET.md` — the owner's target architecture: one engine, one router path and
+  one GCloud Agent Worker per page. The worker fetches real vendor data and hands
+  it to the AI Router, which produces every customer-facing result. Not built yet.
 - `AUTH.md` — the complete auth picture, every line tested by clicking the real
   button or calling the real endpoint on 2026-09-13. Read this before touching
   login, Appwrite providers, or Meta OAuth.
