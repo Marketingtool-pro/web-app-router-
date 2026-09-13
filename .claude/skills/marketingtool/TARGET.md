@@ -46,6 +46,32 @@ Worker returns data. Router returns results. Never the other way round.
 an image, a video, an analysis — came out of the router. That is what makes
 every result correct and rich in the same way, on every page.
 
+## Ads Connect is SEPARATE from login
+
+Two different Meta apps, two different flows. Confirmed twice: from the owner's
+own architecture note, and independently by reading Business Manager on
+2026-09-13.
+
+| purpose | Meta app | scope |
+|---|---|---|
+| Login | **1255201403175191** "Marketingtool" | email and profile only, through Appwrite OAuth |
+| Ads Connect | **1582682256320433** "MarketingTool Ads" | ads scopes, its own separate OAuth flow |
+
+Appwrite OAuth is login and nothing else. Ads Connect is a separate popup
+(`ConnectAdsModal`) shown on first login, where the customer connects their own
+ad accounts. Google works the same way with the `adwords` scope.
+
+**Each customer's token is theirs.** The token from that flow is saved to
+Supabase `ad_accounts`, keyed by `user_id`. Workers must read **that customer's
+own token** from `ad_accounts` and show **their** real ads. Today the engines
+use one shared account token instead, so every customer sees the same figures.
+That is the bug the worker layer exists to fix.
+
+**Ad creatives are real, never generated.** Images, video and carousels on the
+ads pages come straight from the platform API. The AI Router analyses and
+polishes the result around them, but it never invents the creative. An AI-made
+image where a real ad belongs is fake data.
+
 ## Ten models stay active. Do not cheat.
 
 The router's task table is frozen. Each task uses its own provider. Never
