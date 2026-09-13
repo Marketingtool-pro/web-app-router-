@@ -7,8 +7,16 @@ Everything verified about this project. Read alongside `SKILL.md`.
 React 19.3 · Vite 8.3 · MUI 9.4 (paid SaasAble template) · MUI X Pro 9.13 ·
 Tailwind 4.3 · react-router-dom v7 · pnpm workspaces.
 
-TanStack **Table** is used, in 17 files. TanStack **Router** is installed but is
-dead scaffolding — 4 unmounted `.tsx` files. Routing is react-router-dom.
+TanStack **Table** is used, in 17 files. TanStack **Router** is installed but
+currently unmounted — 4 `.tsx` files nothing imports. Routing today is
+react-router-dom.
+
+**Do not delete the TanStack packages.** Everything in this project is paid,
+including all of TanStack, MUI and MUI X Pro, npm packages, Docker, and even the
+icons, images and GIFs. The only things here that are not paid are **Tailwind,
+Vite and react-router-dom**. An earlier version of this file called the TanStack
+Router scaffold "safe to delete" — that was wrong, and acting on it would throw
+away something the owner paid for. Unused today does not mean disposable.
 
 Composer and `composer.phar` are real and used (Laravel Forge SDK, phpdoc).
 The root `pyproject.toml` belongs to **node-gyp**, not to us; it declared

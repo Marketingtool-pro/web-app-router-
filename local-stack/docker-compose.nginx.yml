@@ -1,0 +1,37 @@
+# nginx serving the built web app, inside the Multipass Ubuntu VM.
+#
+# This is the piece that makes local match VPS2: the customer-facing bundle is
+# served by nginx from a static docroot, with the same Windmill zero-trust
+# allowlist in front of it, rather than by the Vite dev server.
+#
+#   multipass exec docker-dev -- docker compose \
+#     -f /home/ubuntu/local-stack/docker-compose.nginx.yml up -d
+#
+# Then: http://<vm-ip>/          (multipass list shows the IP)
+#
+# WINDMILL_TOKEN is read from the VM's environment. It is never stored here.
+# Without it the proxy still starts; Windmill simply rejects the calls.
+
+name: marketingtool-web
+
+services:
+  web:
+    image: nginx:1.27-alpine
+    restart: unless-stopped
+    ports:
+      - '80:80'
+    volumes:
+      - ./dist:/usr/share/nginx/html:ro
+      - ./nginx/default.conf.template:/etc/nginx/templates/default.conf.template:ro
+    environment:
+      # Defaults keep everything local. Point these at the VPS only on purpose.
+      WINDMILL_UPSTREAM: ${WINDMILL_UPSTREAM:-http://windmill-server:8000}
+      SUPABASE_UPSTREAM: ${SUPABASE_UPSTREAM:-http://app-db:5432}
+      WINDMILL_TOKEN: ${WINDMILL_TOKEN:-}
+    networks:
+      - default
+
+networks:
+  default:
+    name: marketingtool-local_default
+    external: false

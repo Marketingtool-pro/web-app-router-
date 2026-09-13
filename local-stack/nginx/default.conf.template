@@ -1,0 +1,75 @@
+# Local mirror of VPS2's app.marketingtool.pro nginx site.
+#
+# Runs inside the Multipass Ubuntu VM, in Docker, so that what is tested
+# locally is what ships. Differences from VPS2: plain HTTP instead of TLS, and
+# upstreams come from environment variables so nothing touches production
+# unless you point it there on purpose.
+#
+# The Windmill credential is injected from the environment by the nginx image's
+# envsubst step at container start. It is never written into this repo.
+#
+# NOTE: proxy_pass uses variables deliberately. With a literal hostname nginx
+# resolves it at config load and refuses to start if the upstream container is
+# not running yet — which is exactly what happens when the web container comes
+# up before Windmill. Using a variable defers resolution to request time, so
+# nginx starts regardless and only the proxied call fails.
+
+server {
+    listen 80;
+    server_name localhost;
+
+    # Docker's embedded DNS, needed because proxy_pass uses variables.
+    resolver 127.0.0.11 ipv6=off valid=10s;
+
+    root /usr/share/nginx/html;
+    index index.html;
+
+    gzip on;
+    gzip_types text/plain text/css application/json application/javascript text/xml application/xml text/javascript image/svg+xml;
+    gzip_min_length 256;
+
+    # Windmill API proxy — ZERO TRUST.
+    # Same allowlist as VPS2: only the execution path is reachable. Everything
+    # that could enumerate or mutate the workspace returns 403, including
+    # `scripts`, which was missing on VPS2 until 2026-09-11.
+    location /api/w/ {
+        location ~ ^/api/w/[^/]+/(variables|users|workers|workspaces|groups|resources|schedules|settings|configs|oidc|scripts|flows|apps|folders|audit|acls|capture|http_triggers|websocket_triggers) {
+            return 403;
+        }
+        set $windmill_upstream "${WINDMILL_UPSTREAM}";
+        proxy_pass $windmill_upstream$request_uri;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto http;
+        proxy_set_header X-Appwrite-JWT $http_authorization;
+        proxy_set_header Authorization "Bearer ${WINDMILL_TOKEN}";
+        proxy_read_timeout 120;
+        proxy_connect_timeout 10;
+    }
+
+    # Supabase API proxy. Local by default.
+    location /supabase/ {
+        rewrite ^/supabase/(.*) /$1 break;
+        set $supabase_upstream "${SUPABASE_UPSTREAM}";
+        proxy_pass $supabase_upstream$uri$is_args$args;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_read_timeout 86400;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+        proxy_buffering off;
+    }
+
+    location /assets/ {
+        expires 1y;
+        add_header Cache-Control "public, immutable";
+    }
+
+    # SPA fallback — react-router owns every other path.
+    location / {
+        try_files $uri $uri/ /index.html;
+    }
+}

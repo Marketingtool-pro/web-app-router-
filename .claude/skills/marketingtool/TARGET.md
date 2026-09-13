@@ -11,7 +11,7 @@ Page  (desktop only, 1920px)
   └── its own JS input/output      src/utils/api/windmill/index.js
         └── its own engine          Windmill Python
               └── its own worker    Windmill Python  ← a py script, NOT Cloud Run
-                    ├── calls Meta / Google / every vendor API   → REAL DATA
+                    ├── calls Meta / Google / every tool's API   → REAL DATA
                     └── hands that data to the AI Router
                           └── AI Router analyses and polishes
                                 → the rich result the customer sees
@@ -34,13 +34,17 @@ Cloud Run service. That was wrong.
 **The worker and the AI Router are separate and must never be mixed.**
 
 - The **worker is API work, and only API work.** That is its whole definition.
-  It reaches out to Meta, Google and every other vendor API and brings back
+  It reaches out to **Meta, Google and every other tool's API** and brings back
   **real data**. It never writes the answer and never calls a model.
 - The **AI Router** receives that real data and produces the answer. Every
   customer-facing result — text, image, video, anything — comes from the router,
   so everything is analysed and polished the same way.
 
 Worker returns data. Router returns results. Never the other way round.
+
+**The AI Router serves the customer, always.** Whatever the customer sees — text,
+an image, a video, an analysis — came out of the router. That is what makes
+every result correct and rich in the same way, on every page.
 
 ## Ten models stay active. Do not cheat.
 
@@ -75,6 +79,24 @@ The two locked slots unlock with a one-time purchase. This applies inside the
 MUI 9 and MUI X Pro, TanStack Table, every paid package, every licence key. Do
 not remove something because it looks unused without checking what imports it.
 This project is built from paid components.
+
+## Who built this, and the one hard security rule
+
+Every line of this project was created by Claude Opus sessions on the owner's
+Mac, with full MCP access. There is no team and there never was. Do not say
+"your team", do not treat an old commit as another person's decision, and do not
+tell the owner a past session's work was somebody else's mistake.
+
+Because of that, credentials pass through these sessions constantly. The rule is
+narrow and absolute:
+
+- **Never publish, print or commit a key, a token, or any environment value.**
+  Not in a commit, not in a file in the repo, not in a message.
+- **Never call a credential "leaked"** and never tell the owner to revoke one.
+  That is not the concern here. The only rule is: do not publish it.
+- The environment files are never touched, never printed, never committed.
+- When a credential is genuinely needed to debug, read it from the running
+  process or container's own environment and use it without echoing it.
 
 ## What exists today versus this target
 
