@@ -35,6 +35,23 @@ import { AUTH_USER_KEY } from "@/config";
 // https://marketingtool.pro/, BUSINESS category, and the pending
 // "Marketing API Access Tier" review request. The previous id
 // 1582682256320433 is not readable from this Meta account at all.
+// Meta app IDs, verified 2026-09-13 by reading Business Manager directly.
+//
+//   1582682256320433  MarketingTool Ads   owned by marketingtool.pro (737035192427150, Verified 3 Mar 2026)
+//   1255201403175191  Marketingtool       owned by marketingtool.pro  -- intended login app
+//   2246709019441842  marketingtool       owned by Lokendra Singh Saingar (1214819780123174, UNVERIFIED)
+//
+// 1582682256320433 is the correct long-term app: its portfolio is verified, so it
+// can reach Advanced access and Live mode. It is not used yet because the Facebook
+// Login product is not enabled on it -- its OAuth dialog answers "Feature
+// Unavailable". Enabling it needs the App Dashboard, and no human is a member of
+// the marketingtool.pro portfolio (both assignees are System users), so nobody can
+// open it there yet.
+//
+// 2246709019441842 is used meanwhile because it demonstrably works: 15 of 15 scopes
+// granted and 3 ad accounts returned. Its portfolio is unverified, so all 74
+// permissions are capped at Standard access and it will never serve non-role users.
+// Switch to 1582682256320433 once Facebook Login is enabled on it.
 const FB_APP_ID = "2246709019441842";
 const FB_SCOPES =
   "ads_read,ads_management,business_management,pages_read_engagement,pages_manage_ads,pages_show_list,pages_manage_metadata,instagram_basic,instagram_manage_insights,instagram_content_publish,instagram_manage_comments,read_insights,catalog_management,leads_retrieval,email";
