@@ -19,6 +19,13 @@ on:
   schedule:
     - cron: '36 6 * * 2'
 
+# Least privilege at the top level. Without this the workflow inherits the
+# repository default, which code scanning alert 103 (CKV2_GHA_1, severity
+# error) flagged as write-all. The analyze job below grants itself the extra
+# scopes it genuinely needs.
+permissions:
+  contents: read
+
 jobs:
   analyze:
     name: Analyze (${{ matrix.language }})
@@ -47,8 +54,17 @@ jobs:
           build-mode: none
         - language: javascript-typescript
           build-mode: none
-        - language: python
-          build-mode: none
+        # Python is deliberately NOT analysed. This repository contains no
+        # first-party Python; the only .py files come from third-party clones
+        # vendored alongside the app (pylib, direnv, fairseq, rubygems and
+        # others). CodeQL auto-detected Python from those, found nothing it
+        # could build, and failed every single run with:
+        #
+        #   Error: CodeQL could not process any code written in Python.
+        #   ... codeql database finalize ... Exit code was 32
+        #
+        # Re-adding it will break this workflow again unless those directories
+        # are excluded first.
         # CodeQL supports the following values keywords for 'language': 'actions', 'c-cpp', 'csharp', 'go', 'java-kotlin', 'javascript-typescript', 'python', 'ruby', 'rust', 'swift'
         # Use `c-cpp` to analyze code written in C, C++ or both
         # Use 'java-kotlin' to analyze code written in Java, Kotlin or both
