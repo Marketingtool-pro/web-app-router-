@@ -30,8 +30,13 @@ import googleImg from "@/assets/images/social/google.svg";
 import facebookImg from "@/assets/images/social/facebook.svg";
 import instagramImg from "@/assets/images/social/instagram.svg";
 
-// OAuth config
-const FB_APP_ID = "REPLACE_WITH_ACTIVE_META_APP_ID";
+// @project
+import { META_APP_ID } from "@/config";
+
+// OAuth config. META_APP_ID is the Ads app, 1582682256320433. This file held
+// the literal string "REPLACE_WITH_ACTIVE_META_APP_ID", which builds fine and
+// then fails at runtime the moment a customer presses Connect.
+const FB_APP_ID = META_APP_ID;
 const FB_SCOPES =
   "ads_read,ads_management,business_management,pages_read_engagement,pages_manage_ads,pages_show_list,pages_manage_metadata,instagram_basic,instagram_manage_insights,instagram_content_publish,instagram_manage_comments,read_insights,catalog_management,leads_retrieval,email";
 const IG_SCOPES =
