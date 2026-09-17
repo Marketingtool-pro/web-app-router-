@@ -56,19 +56,54 @@ import {
 import { useAuth } from "@/contexts/AuthContext";
 import {
   createCampaign,
-  getRunStatus,
+  duplicateCampaign,
   fetchCampaigns,
   fetchConnectedAccounts,
+  generateCampaignDraft,
+  getRunStatus,
+  pauseResumeMetaCampaign,
 } from "@/utils/api/windmill";
+
+// Supabase `campaigns` rows use campaign_name / campaign_external_id; the table reads name / image / cpa
+function normalizeCampaign(c) {
+  const spend = Number(c.spend) || 0;
+  const results = Number(c.results) || 0;
+  return {
+    ...c,
+    name: c.campaign_name || c.name || "Untitled Campaign",
+    budget: Number(c.budget) || 0,
+    spend,
+    results,
+    cpa: results > 0 ? spend / results : 0,
+    externalId: c.campaign_external_id || "",
+    image:
+      c.platform === "google"
+        ? "/images/icons/marketing-strategy-3d.png"
+        : "/images/icons/facebook-3d.png",
+  };
+}
+
+// The generator returns text; take the first JSON object in it
+function parseDraft(content) {
+  if (!content || typeof content !== "string") return null;
+  const start = content.indexOf("{");
+  const end = content.lastIndexOf("}");
+  if (start < 0 || end <= start) return null;
+  try {
+    return JSON.parse(content.slice(start, end + 1));
+  } catch {
+    return null;
+  }
+}
 
 /***************************  CONSTANTS  ***************************/
 
+// campaigns.status CHECK: draft | queued | launched | failed
 const STATUS_MAP = {
-  active: { label: "Active", color: "success" },
-  paused: { label: "Paused", color: "warning" },
-  completed: { label: "Completed", color: "info" },
+  launched: { label: "Launched", color: "success" },
+  queued: { label: "Queued", color: "info" },
+  failed: { label: "Failed", color: "error" },
   draft: { label: "Draft", color: "default" },
-  review: { label: "In Review", color: "secondary" },
 };
 
 const STEPS = [
@@ -548,6 +583,7 @@ function CampaignBuilder({ onSave, onCancel, accounts }) {
 
   const [aiGenerating, setAiGenerating] = useState(false);
   const [aiSuggestions, setAiSuggestions] = useState(null);
+  const [aiError, setAiError] = useState(null);
 
   const update = (key, val) => setForm((p) => ({ ...p, [key]: val }));
   const objectives = form.platform === "google" ? GOOGLE_OBJECTIVES : META_OBJECTIVES;
@@ -562,50 +598,41 @@ function CampaignBuilder({ onSave, onCancel, accounts }) {
   const handleAiGenerate = async () => {
     if (!form.landingUrl && !form.name) return;
     setAiGenerating(true);
+    setAiError(null);
+    setAiSuggestions(null);
     try {
-      const res = await createCampaign({
+      // Generates copy only — creating a campaign happens on Launch
+      const res = await generateCampaignDraft({
+        userId: user?.id,
         platform: form.platform,
-        accountId: selectedAccount || "",
-        campaignData: {
-          name: form.name || form.landingUrl,
-          objective: form.objective,
-          website_url: form.landingUrl,
-          daily_budget: form.budget,
-          geo: form.locations || "United States",
-          details: `Brand: ${form.name || form.landingUrl}, objective: ${form.objective}`,
-        },
-        userId: user?.id || "anonymous",
+        objective: form.objective,
+        name: form.name,
+        landingUrl: form.landingUrl,
+        budget: form.budget,
+        locations: form.locations,
       });
+      if (res?.success === false) throw new Error(res.error || "AI generation failed");
 
-      if (res?.success && res?.data) {
-        const d = res.data;
-        setAiSuggestions(res);
+      const draft = parseDraft(res?.data?.content);
+      if (!draft) throw new Error("AI returned no usable draft. Try again.");
 
-        // Auto-fill form fields from AI response
-        const campaign = d.campaign || {};
-        const ads = d.ads || [];
-        const adGroups = d.adGroups || d.adSets || [];
-        const firstAd = ads[0] || {};
-
-        setForm((p) => ({
-          ...p,
-          name: p.name || campaign.name || p.name,
-          locations: campaign.location || p.locations,
-          headline: firstAd.headlines?.[0] || firstAd.headline || p.headline,
-          headline2: firstAd.headlines?.[1] || p.headline2,
-          headline3: firstAd.headlines?.[2] || p.headline3,
-          description: firstAd.descriptions?.[0] || firstAd.description || p.description,
-          description2: firstAd.descriptions?.[1] || p.description2,
-          primaryText: firstAd.primaryText || p.primaryText,
-          cta: firstAd.cta || p.cta,
-          interests:
-            adGroups[0]?.keywords?.join(", ") ||
-            adGroups[0]?.targeting?.interests?.join(", ") ||
-            p.interests,
-        }));
-      }
+      const headlines = Array.isArray(draft.headlines) ? draft.headlines : [];
+      const descriptions = Array.isArray(draft.descriptions) ? draft.descriptions : [];
+      setForm((p) => ({
+        ...p,
+        locations: p.locations || draft.locations || "",
+        headline: headlines[0] || p.headline,
+        headline2: headlines[1] || p.headline2,
+        headline3: headlines[2] || p.headline3,
+        description: descriptions[0] || p.description,
+        description2: descriptions[1] || p.description2,
+        primaryText: draft.primaryText || p.primaryText,
+        cta: CTA_OPTIONS.includes(draft.cta) ? draft.cta : p.cta,
+        interests: Array.isArray(draft.interests) ? draft.interests.join(", ") : p.interests,
+      }));
+      setAiSuggestions({ data: {} });
     } catch (err) {
-      console.error("AI generate failed:", err);
+      setAiError(err.message || "AI generation failed");
     } finally {
       setAiGenerating(false);
     }
@@ -661,34 +688,22 @@ function CampaignBuilder({ onSave, onCancel, accounts }) {
         platform: form.platform,
         accountId: selectedAccount || "",
         campaignData,
-        userId: user?.id || "anonymous",
+        userId: user?.id,
       });
+
+      if (response?.success === false || response?.needsConnect) {
+        throw new Error(response?.error || "Campaign creation failed");
+      }
 
       const runId = response?.run_id || response?.job_id;
 
-      // Engine returns directly (new campaign engines)
-      if (response?.success || response?.engine || response?.data) {
+      // Worker returns directly
+      if (response?.success) {
         setLaunchOutput(response);
         setLaunchPhase("done");
         setLaunchProgress(100);
-        setLaunchStatus("Campaign blueprint generated!");
-        onSave({
-          id: response?.campaignId || Date.now(),
-          name: form.name || "Untitled Campaign",
-          platform: form.platform,
-          status: "draft",
-          budget: form.budgetType === "daily" ? form.budget * 30 : form.budget,
-          spend: 0,
-          results: 0,
-          cpa: 0,
-          objective: objectives.find((o) => o.value === form.objective)?.label || form.objective,
-          startDate: form.startDate,
-          image:
-            form.platform === "google"
-              ? "/images/icons/marketing-strategy-3d.png"
-              : "/images/icons/facebook-3d.png",
-          createdAt: new Date().toISOString(),
-        });
+        setLaunchStatus("Campaign created");
+        onSave();
         setSaving(false);
         return;
       }
@@ -712,27 +727,8 @@ function CampaignBuilder({ onSave, onCancel, accounts }) {
             setLaunchProgress(100);
             setLaunchOutput(status.output_json || status.output || status);
             setLaunchPhase("done");
-            setLaunchStatus("Campaign created successfully!");
-
-            const outputData = status.output_json || status.output || {};
-            onSave({
-              id: outputData?.campaign_id || runId,
-              name: form.name || "Untitled Campaign",
-              platform: form.platform,
-              status: "review",
-              budget: form.budgetType === "daily" ? form.budget * 30 : form.budget,
-              spend: 0,
-              results: 0,
-              cpa: 0,
-              objective:
-                objectives.find((o) => o.value === form.objective)?.label || form.objective,
-              startDate: form.startDate,
-              image:
-                form.platform === "google"
-                  ? "/images/icons/marketing-strategy-3d.png"
-                  : "/images/icons/facebook-3d.png",
-              createdAt: new Date().toISOString(),
-            });
+            setLaunchStatus("Campaign created");
+            onSave();
             setSaving(false);
           } else if (status?.status === "failed") {
             cleanupPoll();
@@ -1045,11 +1041,11 @@ function CampaignBuilder({ onSave, onCancel, accounts }) {
                     <Alert severity="success" sx={{ borderRadius: 2 }}>
                       AI filled headlines, descriptions, audience targeting, and CTA. Review each
                       step and adjust as needed.
-                      {aiSuggestions.data.recommendations?.length > 0 && (
-                        <Typography variant="caption" display="block" sx={{ mt: 1, opacity: 0.8 }}>
-                          Tip: {aiSuggestions.data.recommendations[0]}
-                        </Typography>
-                      )}
+                    </Alert>
+                  )}
+                  {aiError && (
+                    <Alert severity="error" sx={{ borderRadius: 2 }}>
+                      {aiError}
                     </Alert>
                   )}
 
@@ -1538,11 +1534,11 @@ function CampaignBuilder({ onSave, onCancel, accounts }) {
                       </Box>
                       <Box>
                         <Typography variant="h5" sx={{ fontWeight: 800, color: "success.main" }}>
-                          Campaign Blueprint Ready
+                          Campaign Created
                         </Typography>
                         <Typography variant="body2" color="text.secondary">
-                          {launchOutput?.engine === "campaign-google" ? "Google Ads" : "Meta Ads"} •
-                          Score: {launchOutput?.score || 0}/100
+                          {launchOutput?.engine === "campaign-google" ? "Google Ads" : "Meta Ads"}
+                          {launchOutput?.metaCampaignId ? ` • ID ${launchOutput.metaCampaignId}` : ""}
                         </Typography>
                       </Box>
                     </Stack>
@@ -2450,8 +2446,12 @@ export default function CampaignsPage() {
   const [campaigns, setCampaigns] = useState([]);
   const [accounts, setAccounts] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [busyId, setBusyId] = useState(null);
+  const [actionError, setActionError] = useState(null);
+  const [reloadKey, setReloadKey] = useState(0);
+  const reload = () => setReloadKey((k) => k + 1);
 
-  // Fetch real campaigns + accounts on mount
+  // Fetch real campaigns + accounts
   useEffect(() => {
     if (!user?.id) return;
     let cancelled = false;
@@ -2464,7 +2464,8 @@ export default function CampaignsPage() {
         ]);
         if (!cancelled) {
           const cData = campaignsRes.status === "fulfilled" ? campaignsRes.value : null;
-          setCampaigns(Array.isArray(cData) ? cData : cData?.campaigns || []);
+          const rows = Array.isArray(cData) ? cData : cData?.campaigns || [];
+          setCampaigns(rows.map(normalizeCampaign));
           const aData = accountsRes.status === "fulfilled" ? accountsRes.value : null;
           setAccounts(Array.isArray(aData) ? aData : aData?.accounts || []);
         }
@@ -2477,7 +2478,50 @@ export default function CampaignsPage() {
     return () => {
       cancelled = true;
     };
-  }, [user?.id]);
+  }, [user?.id, reloadKey]);
+
+  // Paused/active lives on Meta; the campaigns table only tracks draft/queued/launched/failed.
+  // Meta creates campaigns PAUSED, so that is the starting state until the customer resumes.
+  const [runState, setRunState] = useState({});
+  const canRun = (c) => c.platform === "meta" && !!c.externalId;
+  const isRunning = (c) => runState[c.id] === "active";
+
+  const handlePauseResume = async (c) => {
+    const action = isRunning(c) ? "pause" : "resume";
+    setBusyId(c.id);
+    setActionError(null);
+    try {
+      const res = await pauseResumeMetaCampaign({ userId: user.id, externalId: c.externalId, action });
+      const platformError = res?.success === false ? res.error : res?.result?.error;
+      if (platformError) throw new Error(`Meta: ${platformError}`);
+      setRunState((s) => ({ ...s, [c.id]: action === "pause" ? "paused" : "active" }));
+    } catch (err) {
+      setActionError(err.message);
+    } finally {
+      setBusyId(null);
+    }
+  };
+
+  const handleDuplicate = async (c) => {
+    setBusyId(c.id);
+    setActionError(null);
+    try {
+      const res = await duplicateCampaign({ userId: user.id, campaignId: c.id });
+      if (res?.success === false) throw new Error(res.error || "Could not duplicate campaign");
+      reload();
+    } catch (err) {
+      setActionError(err.message);
+    } finally {
+      setBusyId(null);
+    }
+  };
+
+  const viewUrl = (c) => {
+    if (!c.externalId) return null;
+    return c.platform === "google"
+      ? `https://ads.google.com/aw/campaigns?campaignId=${c.externalId}`
+      : `https://adsmanager.facebook.com/adsmanager/manage/campaigns?selected_campaign_ids=${c.externalId}`;
+  };
 
   const filtered = useMemo(() => {
     return campaigns.filter((c) => {
@@ -2491,17 +2535,14 @@ export default function CampaignsPage() {
   const totalSpend = campaigns.reduce((s, c) => s + (c.spend || 0), 0);
   const totalResults = campaigns.reduce((s, c) => s + (c.results || 0), 0);
   const totalBudget = campaigns.reduce((s, c) => s + (c.budget || 0), 0);
-  const activeCount = campaigns.filter((c) => c.status === "active").length;
+  const activeCount = campaigns.filter((c) => c.status === "launched").length;
 
   // Full-page builder mode
   if (creating) {
     return (
       <CampaignBuilder
         accounts={accounts}
-        onSave={(campaign) => {
-          setCampaigns((prev) => [campaign, ...prev]);
-          setCreating(false);
-        }}
+        onSave={reload}
         onCancel={() => setCreating(false)}
       />
     );
@@ -2627,17 +2668,26 @@ export default function CampaignsPage() {
             onChange={(e) => setStatusFilter(e.target.value)}
           >
             <MenuItem value="all">All Status</MenuItem>
-            <MenuItem value="active">Active</MenuItem>
-            <MenuItem value="paused">Paused</MenuItem>
-            <MenuItem value="completed">Completed</MenuItem>
-            <MenuItem value="review">In Review</MenuItem>
+            <MenuItem value="launched">Launched</MenuItem>
+            <MenuItem value="queued">Queued</MenuItem>
+            <MenuItem value="failed">Failed</MenuItem>
             <MenuItem value="draft">Draft</MenuItem>
           </Select>
         </FormControl>
       </Stack>
 
+      {actionError && (
+        <Alert severity="error" onClose={() => setActionError(null)}>
+          {actionError}
+        </Alert>
+      )}
+
       {/* Empty State or Table */}
-      {campaigns.length === 0 ? (
+      {loading && campaigns.length === 0 ? (
+        <Box sx={{ py: 8, textAlign: "center" }}>
+          <CircularProgress />
+        </Box>
+      ) : campaigns.length === 0 ? (
         <Card sx={{ border: "1px solid rgba(255,255,255,0.06)" }}>
           <CardContent sx={{ py: 8, textAlign: "center" }}>
             <img
@@ -2722,24 +2772,55 @@ export default function CampaignsPage() {
                         </TableCell>
                         <TableCell align="center">
                           <Stack direction="row" spacing={0.5} sx={{ justifyContent: "center" }}>
-                            <Tooltip title="View">
-                              <IconButton size="small">
-                                <IconEye size={16} />
-                              </IconButton>
+                            <Tooltip title={viewUrl(c) ? "View in Ads Manager" : "Not on the platform yet"}>
+                              <span>
+                                <IconButton
+                                  size="small"
+                                  disabled={!viewUrl(c)}
+                                  component="a"
+                                  href={viewUrl(c) || undefined}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                >
+                                  <IconEye size={16} />
+                                </IconButton>
+                              </span>
                             </Tooltip>
-                            <Tooltip title={c.status === "active" ? "Pause" : "Activate"}>
-                              <IconButton size="small">
-                                {c.status === "active" ? (
-                                  <IconPlayerPause size={16} />
-                                ) : (
-                                  <IconPlayerPlay size={16} />
-                                )}
-                              </IconButton>
+                            <Tooltip
+                              title={
+                                !canRun(c)
+                                  ? "Only Meta campaigns created on the platform can be paused here"
+                                  : isRunning(c)
+                                    ? "Pause on Meta"
+                                    : "Activate on Meta"
+                              }
+                            >
+                              <span>
+                                <IconButton
+                                  size="small"
+                                  disabled={!canRun(c) || busyId === c.id}
+                                  onClick={() => handlePauseResume(c)}
+                                >
+                                  {busyId === c.id ? (
+                                    <CircularProgress size={14} />
+                                  ) : isRunning(c) ? (
+                                    <IconPlayerPause size={16} />
+                                  ) : (
+                                    <IconPlayerPlay size={16} />
+                                  )}
+                                </IconButton>
+                              </span>
                             </Tooltip>
                             <Tooltip title="Duplicate">
-                              <IconButton size="small">
-                                <IconCopy size={16} />
-                              </IconButton>
+                              <span>
+                                <IconButton
+                                  size="small"
+                                  disabled={busyId === c.id}
+                                  onClick={() => handleDuplicate(c)}
+                                >
+                                  <IconCopy size={16} />
+                                </IconButton>
+                              </span>
                             </Tooltip>
                           </Stack>
                         </TableCell>

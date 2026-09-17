@@ -542,8 +542,9 @@ export async function checkSubscription({ userId }) {
  * @returns {Promise<Object>} { success, run_id } or error
  */
 export async function createCampaign({ platform, accountId, campaignData, userId }) {
-  const script =
-    platform === "google" ? "f/tools/engine-campaign-google" : "f/tools/engine-campaign-meta";
+  // Workers validate the JWT, create on the platform, then save the row.
+  // The engines are raw platform access and default to action "list".
+  const script = platform === "google" ? "f/tools/worker-cg-create" : "f/tools/worker-cm-create";
   return apiFetch(`/jobs/run_wait_result/p/${script}`, {
     method: "POST",
     timeout: 180000,
@@ -600,6 +601,46 @@ export async function pauseResumeCampaign({ userId, campaignId, action }) {
     method: "POST",
     timeout: 15000,
     body: JSON.stringify({ userId, campaignId, action }),
+  });
+}
+
+/**
+ * Pause or resume a campaign on Meta itself (worker-campaign-pause only updates Supabase)
+ * @param {string} externalId - Meta campaign ID
+ * @param {string} action - 'pause' | 'resume'
+ * @returns {Promise<Object>} { success, action, campaignId, result }
+ */
+export async function pauseResumeMetaCampaign({ userId, externalId, action }) {
+  const script = action === "pause" ? "f/tools/worker-cm-pause" : "f/tools/worker-cm-resume";
+  return apiFetch(`/jobs/run_wait_result/p/${script}`, {
+    method: "POST",
+    timeout: 30000,
+    body: JSON.stringify({ userId, campaignId: externalId }),
+  });
+}
+
+/**
+ * Generate a campaign draft (headlines, copy, audience) without creating anything
+ * @returns {Promise<Object>} { success, data: { content } } — content is expected to hold JSON
+ */
+export async function generateCampaignDraft({ userId, platform, objective, name, landingUrl, budget, locations }) {
+  const input = [
+    `Plan a ${platform === "google" ? "Google Ads" : "Meta Ads"} campaign.`,
+    `Brand or campaign: ${name || landingUrl}. Landing page: ${landingUrl || "not given"}.`,
+    `Objective: ${objective || "not set"}. Daily budget: ${budget}. Locations: ${locations || "not given"}.`,
+    "Reply with ONLY a JSON object, no prose, with keys:",
+    '{"headlines":[3 strings],"descriptions":[2 strings],"primaryText":string,"cta":string,"interests":[strings],"locations":string}',
+  ].join("\n");
+  return apiFetch("/jobs/run_wait_result/p/f/tools/ai-campaign-manager", {
+    method: "POST",
+    timeout: 120000,
+    body: JSON.stringify({
+      toolSlug: "ai-campaign-manager",
+      toolName: "AI Campaign Manager",
+      input,
+      additionalInputs: { platform, objective },
+      userId,
+    }),
   });
 }
 
