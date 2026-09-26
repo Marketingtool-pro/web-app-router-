@@ -13,8 +13,11 @@ export const CSS_VAR_PREFIX = '';
 
 /***************************  AUTH CONSTANT  ***************************/
 
-export const AUTH_USER_KEY = 'mt-auth-user';
-export const AUTH_CONFIG_KEY = 'mt-auth-config';
+// localStorage entry names (not secrets).
+export const AUTH_USER_STORAGE = 'mt-auth-user';
+export const AUTH_CONFIG_STORAGE = 'mt-auth-config';
+export const AUTH_USER_KEY = AUTH_USER_STORAGE;
+export const AUTH_CONFIG_KEY = AUTH_CONFIG_STORAGE;
 export const AUTH_PROVIDER = AuthType.APPWRITE;
 export const SOCIAL_AUTH_PROVIDER = 'appwrite';
 
