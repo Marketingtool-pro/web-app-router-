@@ -2,12 +2,6 @@ import { useNavigate, useLocation, useParams } from 'react-router-dom';
 
 const DANGEROUS_PROTOCOLS = new Set(['javascript:', 'data:', 'vbscript:', 'file:']);
 
-// Keep this allowlist limited to trusted external destinations only.
-// Add origins as needed, for example: 'https://docs.example.com'
-const ALLOWED_EXTERNAL_ORIGINS = new Set();
-
-const isAllowedExternalOrigin = (origin) => ALLOWED_EXTERNAL_ORIGINS.has(origin);
-
 const getSafeNavigationTarget = (path) => {
   const appOrigin = window.location.origin;
 
@@ -29,6 +23,28 @@ const getSafeNavigationTarget = (path) => {
   }
 };
 
+// Router navigation is same-origin only. External links should be rendered as
+// plain <a href> elements, never pushed through the SPA router.
+
+/**
+ * Returns a same-origin, path-only route ("/x?y#z") for `path`, or null.
+ * Only the path/search/hash of a same-origin URL are ever returned, so the
+ * result can never send the browser to another host.
+ */
+const toInternalRoute = (path) => {
+  const target = getSafeNavigationTarget(path);
+  if (!target) return null;
+  const { appOrigin, url } = target;
+  if (url.origin !== appOrigin) {
+    console.warn('Blocked navigation to external origin:', url.origin);
+    return null;
+  }
+  const route = url.pathname + url.search + url.hash;
+  // Reject protocol-relative forms such as "//evil.example".
+  if (!route.startsWith('/') || route.startsWith('//')) return null;
+  return route;
+};
+
 export function useRouter() {
   const navigate = useNavigate();
   const location = useLocation();
@@ -36,20 +52,8 @@ export function useRouter() {
 
   const push = (path) => {
     try {
-      const target = getSafeNavigationTarget(path);
-      if (!target) return;
-
-      const { appOrigin, url } = target;
-
-      if (url.origin === appOrigin) {
-        // Internal route: use SPA navigation
-        navigate(url.pathname + url.search + url.hash);
-      } else if (isAllowedExternalOrigin(url.origin)) {
-        // External URL (allowlisted): full page reload
-        window.location.href = url.href;
-      } else {
-        console.warn('Blocked navigation to non-allowlisted external origin:', url.origin);
-      }
+      const route = toInternalRoute(path);
+      if (route) navigate(route);
     } catch (error) {
       console.error('Navigation push failed for target:', path, error);
     }
@@ -57,18 +61,8 @@ export function useRouter() {
 
   const replace = (path) => {
     try {
-      const target = getSafeNavigationTarget(path);
-      if (!target) return;
-
-      const { appOrigin, url } = target;
-
-      if (url.origin === appOrigin) {
-        navigate(url.pathname + url.search + url.hash, { replace: true });
-      } else if (isAllowedExternalOrigin(url.origin)) {
-        window.location.replace(url.href);
-      } else {
-        console.warn('Blocked replace to non-allowlisted external origin:', url.origin);
-      }
+      const route = toInternalRoute(path);
+      if (route) navigate(route, { replace: true });
     } catch (error) {
       console.error('Navigation replace failed for target:', path, error);
     }
