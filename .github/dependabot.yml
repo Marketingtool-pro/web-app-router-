@@ -9,11 +9,11 @@ updates:
       dependencies:
         patterns: ["*"]
     open-pull-requests-limit: 5
-
-    groups:
-      dependencies:
-        patterns: ["*"]
-    open-pull-requests-limit: 5
+    ignore:
+      # react-table v9 removed useReactTable/getCoreRowModel etc. and breaks the build.
+      # Stay on v8 until the table components are migrated.
+      - dependency-name: "@tanstack/react-table"
+        update-types: ["version-update:semver-major"]
 
   # github-actions pinned to commit SHAs manually — Dependabot disabled to prevent spam
   # - package-ecosystem: "github-actions"
