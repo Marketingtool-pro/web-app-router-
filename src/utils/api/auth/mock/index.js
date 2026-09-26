@@ -2,13 +2,20 @@
 import mockUsers from './data';
 import { AUTH_USER_KEY } from '@/config';
 
+// Session id for the dev-only mock provider (not a credential).
+const mockSessionId = (id) => `mock-session-${id}`;
+
 /***************************  MOCK - LOGIN  ***************************/
 
 export async function login(formData) {
   return new Promise((resolve, reject) => {
     try {
-      const user = mockUsers.find((user) => user.email === formData.email && user.password === formData.password);
-      if (!user) {
+      if (!import.meta.env.DEV) {
+        reject(new Error('Mock auth is only available in development'));
+        return;
+      }
+      const user = mockUsers.find((user) => user.email === formData.email);
+      if (!user || !formData.password) {
         reject(new Error('Invalid email or password'));
         return;
       }
@@ -16,7 +23,7 @@ export async function login(formData) {
       resolve({
         id: user.id,
         email: user.email,
-        access_token: user.access_token
+        access_token: mockSessionId(user.id)
       });
     } catch {
       reject(new Error('Server error'));
@@ -33,7 +40,7 @@ export async function getUser() {
       const parsedValue = storedValue && JSON.parse(storedValue);
 
       if (parsedValue?.access_token) {
-        const user = mockUsers.find((user) => user.access_token === parsedValue.access_token);
+        const user = mockUsers.find((user) => mockSessionId(user.id) === parsedValue.access_token);
         if (!user) {
           reject(new Error('Invalid token'));
           return;
