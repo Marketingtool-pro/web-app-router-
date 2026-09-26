@@ -1,0 +1,99 @@
+# Build a container image and deploy it to OpenShift.
+# Runs only when the OpenShift secrets are set AND a Dockerfile exists;
+# otherwise it reports "skipped" instead of failing. To enable:
+#   Settings > Secrets and variables > Actions
+#     secrets:   OPENSHIFT_SERVER, OPENSHIFT_TOKEN
+#     variables: OPENSHIFT_NAMESPACE (optional), APP_PORT (optional, default 3000)
+name: OpenShift
+
+on:
+  push:
+    branches: ["main"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  IMAGE_REGISTRY: ghcr.io/${{ github.repository_owner }}
+  APP_NAME: web-app-router
+
+jobs:
+  config:
+    name: Check OpenShift configuration
+    runs-on: ubuntu-latest
+    outputs:
+      ready: ${{ steps.check.outputs.ready }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+      - id: check
+        env:
+          SERVER: ${{ secrets.OPENSHIFT_SERVER }}
+          TOKEN: ${{ secrets.OPENSHIFT_TOKEN }}
+        run: |
+          missing=""
+          [ -n "$SERVER" ] || missing="$missing OPENSHIFT_SERVER"
+          [ -n "$TOKEN" ]  || missing="$missing OPENSHIFT_TOKEN"
+          [ -f Dockerfile ] || missing="$missing Dockerfile"
+          if [ -z "$missing" ]; then
+            echo "ready=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "ready=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::OpenShift deploy skipped, missing:$missing"
+          fi
+
+  deploy:
+    name: Build and deploy to OpenShift
+    needs: config
+    if: needs.config.outputs.ready == 'true'
+    runs-on: ubuntu-latest
+    environment: production
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+
+      - name: Build image
+        id: build-image
+        uses: redhat-actions/buildah-build@719e3c40d8af9790c23eca13f7daa339f2867034  # v3.1.0
+        with:
+          image: ${{ env.APP_NAME }}
+          tags: latest ${{ github.sha }}
+          containerfiles: ./Dockerfile
+
+      - name: Push to GHCR
+        id: push-image
+        uses: redhat-actions/push-to-registry@94ade333c38ecc0e60e94785125d9a52ca423b37  # v3.0.0
+        with:
+          image: ${{ steps.build-image.outputs.image }}
+          tags: ${{ steps.build-image.outputs.tags }}
+          registry: ${{ env.IMAGE_REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Install oc
+        uses: redhat-actions/openshift-tools-installer@37eb3cfb20ac2df6f0511ffa71cd917e4d49cabf  # v3.1
+        with:
+          oc: 4
+
+      - name: Log in to OpenShift
+        uses: redhat-actions/oc-login@2a1614bc977c054c8786c8e35fc9534bd0ddc156  # v2.0.1
+        with:
+          openshift_server_url: ${{ secrets.OPENSHIFT_SERVER }}
+          openshift_token: ${{ secrets.OPENSHIFT_TOKEN }}
+          namespace: ${{ vars.OPENSHIFT_NAMESPACE }}
+
+      - name: Create and expose app
+        id: deploy-and-expose
+        uses: redhat-actions/oc-new-app@b23fc3d5c790ef4871d8e9af1054377db317f5dd  # v2.0.0
+        with:
+          app_name: ${{ env.APP_NAME }}
+          image: ${{ steps.push-image.outputs.registry-path }}
+          namespace: ${{ vars.OPENSHIFT_NAMESPACE }}
+          port: ${{ vars.APP_PORT || '3000' }}
+
+      - name: Print application URL
+        env:
+          ROUTE: ${{ steps.deploy-and-expose.outputs.route }}
+        run: echo "App available at $ROUTE"
