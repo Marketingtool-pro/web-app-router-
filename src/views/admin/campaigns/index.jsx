@@ -56,6 +56,21 @@ import {
 import { useAuth } from '@/contexts/AuthContext';
 import { createCampaign, getRunStatus, fetchCampaigns, fetchConnectedAccounts } from '@/utils/api/windmill';
 
+// Only allow image sources that cannot execute script: same-origin paths,
+// http(s) URLs, blob: object URLs and data:image/* (from the file picker).
+const safeImageSrc = (src) => {
+  if (typeof src !== 'string' || !src) return undefined;
+  if (src.startsWith('/') && !src.startsWith('//')) return src;
+  if (/^data:image\/(png|jpe?g|gif|webp|avif|svg\+xml);base64,/i.test(src)) return src;
+  try {
+    const u = new URL(src, window.location.origin);
+    return u.protocol === 'https:' || u.protocol === 'http:' || u.protocol === 'blob:' ? u.href : undefined;
+  } catch {
+    return undefined;
+  }
+};
+
+
 /***************************  CONSTANTS  ***************************/
 
 const STATUS_MAP = {
@@ -140,7 +155,7 @@ function ImageUploader({ images, onAdd, onRemove, platform }) {
         <Stack direction="row" spacing={1.5} sx={{ mt: 2, flexWrap: 'wrap', gap: 1.5 }}>
           {images.map((img, i) => (
             <Box key={i} sx={{ position: 'relative', width: 120, height: 120, borderRadius: 2, overflow: 'hidden', border: '1px solid rgba(255,255,255,0.1)' }}>
-              <img src={img.url} alt={img.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+              <img src={safeImageSrc(img.url)} alt={img.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
               <IconButton
                 size="small"
                 onClick={(e) => { e.stopPropagation(); onRemove(i); }}
@@ -182,7 +197,7 @@ function AdPreview({ platform, form }) {
             </Typography>
             <Box sx={{ width: '100%', aspectRatio: '1/1', bgcolor: 'rgba(255,255,255,0.03)', borderRadius: 1.5, display: 'flex', alignItems: 'center', justifyContent: 'center', mb: 2, overflow: 'hidden', border: '1px solid rgba(255,255,255,0.06)' }}>
               {form.images?.length > 0 ? (
-                <img src={form.images[0].url} alt="Ad" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                <img src={safeImageSrc(form.images[0].url)} alt="Ad" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
               ) : (
                 <Stack sx={{ alignItems: 'center', gap: 1 }}>
                   <IconPhoto size={48} style={{ opacity: 0.15 }} />
@@ -533,7 +548,7 @@ function CampaignBuilder({ onSave, onCancel, accounts }) {
                       transition: 'all 0.2s'
                     }}
                   >
-                    <img src={p.img} alt={p.name} width={72} height={72} style={{ objectFit: 'contain' }} />
+                    <img src={safeImageSrc(p.img)} alt={p.name} width={72} height={72} style={{ objectFit: 'contain' }} />
                     <Typography variant="h6" sx={{ fontWeight: 600, mt: 2 }}>{p.name}</Typography>
                     <Typography variant="body2" color="text.secondary">{p.sub}</Typography>
                     {form.platform === p.key && <Chip label="Selected" size="small" color="primary" sx={{ mt: 1.5 }} />}
@@ -926,7 +941,7 @@ function CampaignBuilder({ onSave, onCancel, accounts }) {
                                 {/* AI Image */}
                                 {ad.imageUrl && (
                                   <Box sx={{ borderRadius: 2, overflow: 'hidden', mb: 1.5, aspectRatio: '1.91 / 1', bgcolor: 'rgba(0,0,0,0.3)' }}>
-                                    <Box component="img" src={ad.imageUrl} alt="" sx={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                    <Box component="img" src={safeImageSrc(ad.imageUrl)} alt="" sx={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                                   </Box>
                                 )}
                                 {/* Headlines */}
@@ -1104,7 +1119,7 @@ function CampaignBuilder({ onSave, onCancel, accounts }) {
                       <Stack direction="row" spacing={1} sx={{ mt: 2 }}>
                         {form.images.map((img, i) => (
                           <Box key={i} sx={{ width: 80, height: 80, borderRadius: 1.5, overflow: 'hidden', border: '1px solid rgba(255,255,255,0.1)' }}>
-                            <img src={img.url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                            <img src={safeImageSrc(img.url)} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                           </Box>
                         ))}
                       </Stack>
@@ -1318,7 +1333,7 @@ export default function CampaignsPage() {
                       <TableRow key={c.id} hover>
                         <TableCell>
                           <Stack direction="row" sx={{ alignItems: 'center', gap: 1.5 }}>
-                            <img src={c.image} alt="" width={28} height={28} style={{ objectFit: 'contain' }} />
+                            <img src={safeImageSrc(c.image)} alt="" width={28} height={28} style={{ objectFit: 'contain' }} />
                             <Box>
                               <Typography variant="subtitle2">{c.name}</Typography>
                               <Typography variant="caption" color="text.disabled">{c.objective}</Typography>
