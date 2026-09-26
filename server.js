@@ -88,6 +88,9 @@ async function fileAt(candidate) {
 
 const ASSETS = path.join(ROOT, 'assets') + path.sep;
 
+// Plain HTTP is intentional: TLS is terminated in front of this process
+// (Cloud Run / nginx), which forwards to it on the private port.
+// deepcode ignore HttpToHttps: TLS is terminated by the platform proxy in front of this server
 const server = createServer(async (req, res) => {
   if (req.method !== 'GET' && req.method !== 'HEAD') {
     res.writeHead(405, { allow: 'GET, HEAD' });
@@ -141,6 +144,14 @@ const server = createServer(async (req, res) => {
   stream.on('error', () => res.destroy());
   stream.pipe(res);
 });
+
+// Resource limits, so slow or abusive clients cannot tie up the process.
+server.headersTimeout = 15_000; // max time to receive request headers
+server.requestTimeout = 30_000; // max time for a whole request
+server.keepAliveTimeout = 5_000;
+server.maxHeadersCount = 100;
+server.maxRequestsPerSocket = 1_000;
+server.maxConnections = 1_024;
 
 server.listen(PORT, HOST, () => {
   console.log(`web-app-router serving ${ROOT} on ${HOST}:${PORT}`);
