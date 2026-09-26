@@ -1,0 +1,63 @@
+# APIsec API security scan.
+# Runs only when the APIsec credentials are configured; otherwise it reports
+# "skipped" instead of failing. To enable:
+#   Settings > Secrets and variables > Actions
+#     secrets:   APISEC_USERNAME, APISEC_PASSWORD
+#     variables: APISEC_PROJECT  (the project name registered in APIsec)
+name: APIsec
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+    branches: ["main"]
+  schedule:
+    - cron: '39 19 * * 0'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  config:
+    name: Check APIsec configuration
+    runs-on: ubuntu-latest
+    outputs:
+      ready: ${{ steps.check.outputs.ready }}
+    steps:
+      - id: check
+        env:
+          USER: ${{ secrets.APISEC_USERNAME }}
+          PASS: ${{ secrets.APISEC_PASSWORD }}
+          PROJECT: ${{ vars.APISEC_PROJECT }}
+        run: |
+          if [ -n "$USER" ] && [ -n "$PASS" ] && [ -n "$PROJECT" ]; then
+            echo "ready=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "ready=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::APIsec not configured (APISEC_USERNAME / APISEC_PASSWORD secrets and APISEC_PROJECT variable). Scan skipped."
+          fi
+
+  scan:
+    name: APIsec scan
+    needs: config
+    if: needs.config.outputs.ready == 'true'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write
+      actions: read
+    steps:
+      - name: APIsec scan
+        uses: apisec-inc/apisec-run-scan@8f66ce948afb779712a1d57ecb0a528d7ded5a45  # v1.0.7
+        with:
+          apisec-username: ${{ secrets.APISEC_USERNAME }}
+          apisec-password: ${{ secrets.APISEC_PASSWORD }}
+          apisec-project: ${{ vars.APISEC_PROJECT }}
+          sarif-result-file: "apisec-results.sarif"
+      - name: Upload results to code scanning
+        if: hashFiles('apisec-results.sarif') != ''
+        uses: github/codeql-action/upload-sarif@b96794f015dfd88f77b49b1c93e0fa7110f94c63  # v4
+        with:
+          sarif_file: ./apisec-results.sarif
+          category: apisec
