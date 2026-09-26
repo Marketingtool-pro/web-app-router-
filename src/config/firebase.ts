@@ -1,19 +1,22 @@
-import { initializeApp } from "firebase/app";
-import { getAnalytics } from "firebase/analytics";
+import { getApp, getApps, initializeApp } from 'firebase/app';
+import { getAnalytics } from 'firebase/analytics';
 
-// Your web app's Firebase configuration
+// Firebase web config comes from the environment (see env.template), the same
+// VITE_APP_FIREBASE_* variables used by src/utils/auth-client/firebase.js.
+// Keeping it out of source means it can be rotated per environment.
 const firebaseConfig = {
-  apiKey: "AIzaSyCDxVv55xSNHnN7bydIViiIZxJf7yWmFvg",
-  authDomain: "marketing-tool-484720.firebaseapp.com",
-  projectId: "marketing-tool-484720",
-  storageBucket: "marketing-tool-484720.firebasestorage.app",
-  messagingSenderId: "911925145433",
-  appId: "1:911925145433:web:18d502cd9b2c2d5c112648",
-  measurementId: "G-EDY5FPHF3N"
+  apiKey: import.meta.env.VITE_APP_FIREBASE_API_KEY,
+  authDomain: import.meta.env.VITE_APP_FIREBASE_AUTH_DOMAIN,
+  projectId: import.meta.env.VITE_APP_FIREBASE_PROJECT_ID,
+  storageBucket: import.meta.env.VITE_APP_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: import.meta.env.VITE_APP_FIREBASE_MESSAGING_SENDER_ID,
+  appId: import.meta.env.VITE_APP_FIREBASE_APP_ID,
+  measurementId: import.meta.env.VITE_APP_FIREBASE_MEASUREMENT_ID
 };
 
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
-const analytics = typeof window !== 'undefined' ? getAnalytics(app) : null;
+const configured = Boolean(firebaseConfig.apiKey && firebaseConfig.projectId && firebaseConfig.appId);
+
+const app = configured ? (getApps().length ? getApp() : initializeApp(firebaseConfig)) : null;
+const analytics = app && typeof window !== 'undefined' && firebaseConfig.measurementId ? getAnalytics(app) : null;
 
 export { app, analytics };
