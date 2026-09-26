@@ -3,6 +3,10 @@ import { AuthRole } from '@/enum';
 
 /***************************  DATA - USERS  ***************************/
 
+// Demo profiles for the local-only mock auth provider. No passwords or tokens are
+// stored here: the mock provider is disabled outside `vite dev` and issues a
+// throwaway session id at login time.
+
 const mockUsers = [
   {
     id: '1',
@@ -11,9 +15,7 @@ const mockUsers = [
     contact: '123456789',
     dialcode: '+1',
     firstname: 'John',
-    lastname: 'Charly',
-    password: 'Super@123',
-    access_token: 'super_admin_acess_token'
+    lastname: 'Charly'
   },
   {
     id: '2',
@@ -22,9 +24,7 @@ const mockUsers = [
     contact: '123456789',
     dialcode: '+91',
     firstname: 'Mark',
-    lastname: 'Davidson',
-    password: 'Admin@123',
-    access_token: 'admin_acess_token'
+    lastname: 'Davidson'
   },
   {
     id: '3',
@@ -33,9 +33,7 @@ const mockUsers = [
     contact: '123456789',
     dialcode: '+91',
     firstname: 'Bob',
-    lastname: 'Dylan',
-    password: 'User@123',
-    access_token: 'user_acess_token'
+    lastname: 'Dylan'
   }
 ];
 
