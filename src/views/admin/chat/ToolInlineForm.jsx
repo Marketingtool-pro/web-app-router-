@@ -71,6 +71,7 @@ import {
   IconCpu,
   IconCloud,
   IconDatabase,
+  IconLayout,
 } from "@tabler/icons-react";
 
 // @project
