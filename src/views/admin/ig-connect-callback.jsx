@@ -49,12 +49,17 @@ export default function IgConnectCallback() {
                 "Content-Type": "application/json",
                 Authorization: `Bearer ${getAppwriteJwt()}`,
               },
-              body: JSON.stringify({ accessToken, userId: user?.id, platform: "instagram" }),
+              body: JSON.stringify({ accessToken, userId: user?.id, platform: "instagram", appwriteJwt: getAppwriteJwt() }),
             },
           );
 
           if (!response.ok) {
             throw new Error(`Windmill sync failed with status ${response.status}`);
+          }
+
+          const result = await response.json().catch(() => ({}));
+          if (!result?.success) {
+            throw new Error(result?.error || "Instagram connect failed");
           }
 
           synced = true;
