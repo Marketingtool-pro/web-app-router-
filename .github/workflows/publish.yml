@@ -1,4 +1,7 @@
+# .github/workflows/publish.yml
+
 name: Publish
+
 on:
   push:
     branches:
@@ -9,8 +12,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
-      id-token: write
+      id-token: write # The OIDC ID token is used for authentication with JSR.
     steps:
       - uses: actions/checkout@v6
-      - name: Publish package
-        run: npx jsr publish
+      - run: npx jsr publish
