@@ -81,7 +81,8 @@ const CATEGORIES = [
 ];
 
 const HERO_VIDEO = "/videos/hero-ai-robot.mp4";
-const APP_LINK = "https://play.google.com/store/apps/details?id=pro.marketingtool.app";
+const APP_LINK =
+  "https://play.google.com/store/apps/details?id=pro.marketingtool.app";
 
 const IMG = "/images/ad-library/images";
 const VID = "/images/ad-library/videos";
@@ -135,7 +136,14 @@ function AdCard({ ad, saved, onSave, onClick }) {
       }}
     >
       {/* Image / Video */}
-      <Box sx={{ height: 200, bgcolor: "grey.900", overflow: "hidden", position: "relative" }}>
+      <Box
+        sx={{
+          height: 200,
+          bgcolor: "grey.900",
+          overflow: "hidden",
+          position: "relative",
+        }}
+      >
         {/* Fallback thumbnail image */}
         {ad.thumbnail ? (
           <img
@@ -263,7 +271,11 @@ function AdCard({ ad, saved, onSave, onClick }) {
               "&:hover": { bgcolor: "rgba(0,0,0,0.7)" },
             }}
           >
-            {saved ? <IconBookmarkFilled size={14} /> : <IconBookmark size={14} />}
+            {saved ? (
+              <IconBookmarkFilled size={14} />
+            ) : (
+              <IconBookmark size={14} />
+            )}
           </IconButton>
         </Stack>
 
@@ -319,7 +331,12 @@ function AdCard({ ad, saved, onSave, onClick }) {
 
       <CardContent sx={{ p: 2, "&:last-child": { pb: 2 } }}>
         {/* Advertiser */}
-        <Stack direction="row" spacing={0.75} alignItems="center" sx={{ mb: 0.75 }}>
+        <Stack
+          direction="row"
+          spacing={0.75}
+          alignItems="center"
+          sx={{ mb: 0.75 }}
+        >
           <Box
             sx={{
               width: 20,
@@ -339,7 +356,11 @@ function AdCard({ ad, saved, onSave, onClick }) {
           </Box>
           <Typography
             variant="caption"
-            sx={{ fontWeight: 600, fontSize: "0.7rem", color: "text.secondary" }}
+            sx={{
+              fontWeight: 600,
+              fontSize: "0.7rem",
+              color: "text.secondary",
+            }}
           >
             {ad.advertiser}
           </Typography>
@@ -389,7 +410,10 @@ function AdCard({ ad, saved, onSave, onClick }) {
         )}
 
         {/* Meta row */}
-        <Stack direction="row" sx={{ justifyContent: "space-between", alignItems: "center" }}>
+        <Stack
+          direction="row"
+          sx={{ justifyContent: "space-between", alignItems: "center" }}
+        >
           <Stack direction="row" spacing={0.5}>
             {ad.ctr && (
               <Chip
@@ -462,10 +486,15 @@ function TrendingCard({ ad, onClick }) {
           sx={{
             position: "absolute",
             inset: 0,
-            background: "linear-gradient(180deg, transparent 50%, rgba(0,0,0,0.6) 100%)",
+            background:
+              "linear-gradient(180deg, transparent 50%, rgba(0,0,0,0.6) 100%)",
           }}
         />
-        <Stack direction="row" spacing={0.5} sx={{ position: "absolute", bottom: 8, left: 8 }}>
+        <Stack
+          direction="row"
+          spacing={0.5}
+          sx={{ position: "absolute", bottom: 8, left: 8 }}
+        >
           <Chip
             label={ad.platform}
             size="small"
@@ -537,7 +566,10 @@ function TrendingCard({ ad, onClick }) {
         </Typography>
         <Stack direction="row" spacing={0.5} sx={{ mt: 0.75 }}>
           {ad.impressions && (
-            <Typography variant="caption" sx={{ fontSize: "0.6rem", color: "text.disabled" }}>
+            <Typography
+              variant="caption"
+              sx={{ fontSize: "0.6rem", color: "text.disabled" }}
+            >
               {(ad.impressions / 1000000).toFixed(1)}M views
             </Typography>
           )}
@@ -559,7 +591,14 @@ function TrendingCard({ ad, onClick }) {
 
 function StatCard({ icon: Icon, label, value, color, trend }) {
   return (
-    <Card sx={{ border: "1px solid", borderColor: "divider", borderRadius: 3, flex: 1 }}>
+    <Card
+      sx={{
+        border: "1px solid",
+        borderColor: "divider",
+        borderRadius: 3,
+        flex: 1,
+      }}
+    >
       <CardContent sx={{ p: 2, "&:last-child": { pb: 2 } }}>
         <Stack direction="row" spacing={1.5} alignItems="center">
           <Box
@@ -584,7 +623,10 @@ function StatCard({ icon: Icon, label, value, color, trend }) {
               {value}
             </Typography>
             <Stack direction="row" spacing={0.5} alignItems="center">
-              <Typography variant="caption" sx={{ color: "text.secondary", fontSize: "0.7rem" }}>
+              <Typography
+                variant="caption"
+                sx={{ color: "text.secondary", fontSize: "0.7rem" }}
+              >
                 {label}
               </Typography>
               {trend && (
@@ -620,8 +662,18 @@ function LoadingGrid() {
           >
             <Skeleton variant="rectangular" height={200} animation="wave" />
             <CardContent sx={{ p: 2 }}>
-              <Skeleton width="35%" height={12} sx={{ mb: 0.75 }} animation="wave" />
-              <Skeleton width="85%" height={16} sx={{ mb: 0.5 }} animation="wave" />
+              <Skeleton
+                width="35%"
+                height={12}
+                sx={{ mb: 0.75 }}
+                animation="wave"
+              />
+              <Skeleton
+                width="85%"
+                height={16}
+                sx={{ mb: 0.5 }}
+                animation="wave"
+              />
               <Skeleton width="65%" height={14} animation="wave" />
             </CardContent>
           </Card>
@@ -671,7 +723,11 @@ function AdDetailDialog({ ad, open, onClose, saved, onSave }) {
                     muted
                     loop
                     playsInline
-                    style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                    style={{
+                      width: "100%",
+                      height: "100%",
+                      objectFit: "cover",
+                    }}
                   >
                     <source src={ad.video} type="video/mp4" />
                   </video>
@@ -679,7 +735,11 @@ function AdDetailDialog({ ad, open, onClose, saved, onSave }) {
                   <img
                     src={ad.thumbnail}
                     alt=""
-                    style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                    style={{
+                      width: "100%",
+                      height: "100%",
+                      objectFit: "cover",
+                    }}
                     onError={(e) => {
                       e.target.style.display = "none";
                     }}
@@ -736,10 +796,19 @@ function AdDetailDialog({ ad, open, onClose, saved, onSave }) {
             <Box sx={{ p: 3 }}>
               <Stack
                 direction="row"
-                sx={{ justifyContent: "space-between", alignItems: "flex-start", mb: 2 }}
+                sx={{
+                  justifyContent: "space-between",
+                  alignItems: "flex-start",
+                  mb: 2,
+                }}
               >
                 <Box sx={{ flex: 1, mr: 2 }}>
-                  <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 1 }}>
+                  <Stack
+                    direction="row"
+                    spacing={1}
+                    alignItems="center"
+                    sx={{ mb: 1 }}
+                  >
                     {PlatformIcon && (
                       <Box
                         sx={{
@@ -752,10 +821,16 @@ function AdDetailDialog({ ad, open, onClose, saved, onSave }) {
                           justifyContent: "center",
                         }}
                       >
-                        <PlatformIcon size={16} color={PLATFORM_COLORS[ad.platform]} />
+                        <PlatformIcon
+                          size={16}
+                          color={PLATFORM_COLORS[ad.platform]}
+                        />
                       </Box>
                     )}
-                    <Typography variant="caption" sx={{ fontWeight: 600, color: "text.secondary" }}>
+                    <Typography
+                      variant="caption"
+                      sx={{ fontWeight: 600, color: "text.secondary" }}
+                    >
                       {ad.advertiser}
                     </Typography>
                     {ad.country && (
@@ -769,12 +844,21 @@ function AdDetailDialog({ ad, open, onClose, saved, onSave }) {
                   </Stack>
                   <Typography
                     variant="h5"
-                    sx={{ fontWeight: 700, mb: 1, lineHeight: 1.3, letterSpacing: "-0.02em" }}
+                    sx={{
+                      fontWeight: 700,
+                      mb: 1,
+                      lineHeight: 1.3,
+                      letterSpacing: "-0.02em",
+                    }}
                   >
                     {ad.headline || ad.title || "Untitled Ad"}
                   </Typography>
                   {ad.body && (
-                    <Typography variant="body2" color="text.secondary" sx={{ lineHeight: 1.7 }}>
+                    <Typography
+                      variant="body2"
+                      color="text.secondary"
+                      sx={{ lineHeight: 1.7 }}
+                    >
                       {ad.body}
                     </Typography>
                   )}
@@ -801,13 +885,26 @@ function AdDetailDialog({ ad, open, onClose, saved, onSave }) {
               </Stack>
 
               {/* Tags */}
-              <Stack direction="row" sx={{ gap: 0.75, flexWrap: "wrap", mb: 3 }}>
+              <Stack
+                direction="row"
+                sx={{ gap: 0.75, flexWrap: "wrap", mb: 3 }}
+              >
                 {ad.platform && (
-                  <Chip label={ad.platform} size="small" sx={{ textTransform: "capitalize" }} />
+                  <Chip
+                    label={ad.platform}
+                    size="small"
+                    sx={{ textTransform: "capitalize" }}
+                  />
                 )}
-                {ad.format && <Chip label={ad.format} size="small" variant="outlined" />}
+                {ad.format && (
+                  <Chip label={ad.format} size="small" variant="outlined" />
+                )}
                 {ad.startDate && (
-                  <Chip label={`Since ${ad.startDate}`} size="small" variant="outlined" />
+                  <Chip
+                    label={`Since ${ad.startDate}`}
+                    size="small"
+                    variant="outlined"
+                  />
                 )}
                 {ad.cta && <Chip label={ad.cta} size="small" color="primary" />}
                 {ad.category && (
@@ -841,7 +938,10 @@ function AdDetailDialog({ ad, open, onClose, saved, onSave }) {
                         >
                           Impressions
                         </Typography>
-                        <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>
+                        <Typography
+                          variant="subtitle2"
+                          sx={{ fontWeight: 700 }}
+                        >
                           {(ad.impressions / 1000000).toFixed(1)}M
                         </Typography>
                       </Box>
@@ -865,7 +965,10 @@ function AdDetailDialog({ ad, open, onClose, saved, onSave }) {
                         >
                           CTR
                         </Typography>
-                        <Typography variant="subtitle2" sx={{ fontWeight: 700, color: "#10B981" }}>
+                        <Typography
+                          variant="subtitle2"
+                          sx={{ fontWeight: 700, color: "#10B981" }}
+                        >
                           {ad.ctr}%
                         </Typography>
                       </Box>
@@ -889,7 +992,10 @@ function AdDetailDialog({ ad, open, onClose, saved, onSave }) {
                         >
                           Spend
                         </Typography>
-                        <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>
+                        <Typography
+                          variant="subtitle2"
+                          sx={{ fontWeight: 700 }}
+                        >
                           ${(ad.spend / 1000).toFixed(0)}K
                         </Typography>
                       </Box>
@@ -971,10 +1077,15 @@ export default function AdLibraryPage() {
     try {
       const data = await searchAdLibrary({
         query: q,
-        platform: platformTabs[platformTab] !== "all" ? platformTabs[platformTab] : undefined,
+        platform:
+          platformTabs[platformTab] !== "all"
+            ? platformTabs[platformTab]
+            : undefined,
         dateRange,
       });
-      setApiResults(Array.isArray(data) ? data : data?.ads || data?.results || []);
+      setApiResults(
+        Array.isArray(data) ? data : data?.ads || data?.results || [],
+      );
     } catch (err) {
       const msg = err.message || "Search failed";
       if (msg.includes("404") || msg.includes("not found")) {
@@ -995,7 +1106,9 @@ export default function AdLibraryPage() {
   };
 
   const toggleSave = (id) => {
-    setSavedIds((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]));
+    setSavedIds((prev) =>
+      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id],
+    );
   };
 
   // Filter sample ads
@@ -1070,7 +1183,9 @@ export default function AdLibraryPage() {
           />
         </Box>
 
-        <CardContent sx={{ p: { xs: 3, md: 4 }, position: "relative", zIndex: 1 }}>
+        <CardContent
+          sx={{ p: { xs: 3, md: 4 }, position: "relative", zIndex: 1 }}
+        >
           <Stack
             direction={{ xs: "column", md: "row" }}
             spacing={3}
@@ -1078,7 +1193,12 @@ export default function AdLibraryPage() {
             justifyContent="space-between"
           >
             <Box sx={{ flex: 1 }}>
-              <Stack direction="row" spacing={1.5} alignItems="center" sx={{ mb: 1.5 }}>
+              <Stack
+                direction="row"
+                spacing={1.5}
+                alignItems="center"
+                sx={{ mb: 1.5 }}
+              >
                 <Box
                   sx={{
                     width: 42,
@@ -1087,7 +1207,8 @@ export default function AdLibraryPage() {
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
-                    background: "linear-gradient(135deg, #805AF5 0%, #06b6d4 100%)",
+                    background:
+                      "linear-gradient(135deg, #805AF5 0%, #06b6d4 100%)",
                     boxShadow: "0 4px 12px rgba(128,90,245,0.4)",
                   }}
                 >
@@ -1105,7 +1226,10 @@ export default function AdLibraryPage() {
                   >
                     Ad Library
                   </Typography>
-                  <Typography variant="body2" sx={{ color: "rgba(255,255,255,0.7)", mt: 0.25 }}>
+                  <Typography
+                    variant="body2"
+                    sx={{ color: "rgba(255,255,255,0.7)", mt: 0.25 }}
+                  >
                     Discover winning ads from top brands across platforms
                   </Typography>
                 </Box>
@@ -1117,20 +1241,23 @@ export default function AdLibraryPage() {
 
       {/* QUICK STATS */}
       <Stack direction={{ xs: "column", sm: "row" }} spacing={1.5}>
-        <StatCard icon={IconAd2} label="Ads Tracked" value="10K+" color="#805AF5" trend="+12%" />
+        <StatCard
+          icon={IconAd2}
+          label="Ads Tracked"
+          value={String((apiResults ?? []).length)}
+          color="#805AF5"
+        />
         <StatCard
           icon={IconEye}
           label="Total Impressions"
-          value="84M"
+          value="0"
           color="#06b6d4"
-          trend="+8%"
         />
         <StatCard
           icon={IconTrendingUp}
           label="Avg CTR"
-          value="3.5%"
+          value="0%"
           color="#10B981"
-          trend="+0.4%"
         />
         <StatCard
           icon={IconHeart}
@@ -1147,7 +1274,11 @@ export default function AdLibraryPage() {
         </Alert>
       )}
       {error && error !== "api_not_configured" && (
-        <Alert severity="error" sx={{ borderRadius: 2 }} onClose={() => setError(null)}>
+        <Alert
+          severity="error"
+          sx={{ borderRadius: 2 }}
+          onClose={() => setError(null)}
+        >
           {error}
         </Alert>
       )}
@@ -1155,7 +1286,11 @@ export default function AdLibraryPage() {
       {/* SEARCH RESULTS MODE */}
       {isSearchMode && !loading && (
         <>
-          <Stack direction="row" justifyContent="space-between" alignItems="center">
+          <Stack
+            direction="row"
+            justifyContent="space-between"
+            alignItems="center"
+          >
             <Stack direction="row" spacing={1} alignItems="center">
               <Button
                 size="small"
@@ -1172,7 +1307,13 @@ export default function AdLibraryPage() {
             <Button
               variant={showSaved ? "contained" : "outlined"}
               size="small"
-              startIcon={showSaved ? <IconBookmarkFilled size={14} /> : <IconBookmark size={14} />}
+              startIcon={
+                showSaved ? (
+                  <IconBookmarkFilled size={14} />
+                ) : (
+                  <IconBookmark size={14} />
+                )
+              }
               onClick={() => setShowSaved(!showSaved)}
               sx={{ borderRadius: 2 }}
             >
@@ -1194,7 +1335,13 @@ export default function AdLibraryPage() {
               ))}
             </Grid>
           ) : (
-            <Card sx={{ border: "1px solid", borderColor: "divider", borderRadius: 3 }}>
+            <Card
+              sx={{
+                border: "1px solid",
+                borderColor: "divider",
+                borderRadius: 3,
+              }}
+            >
               <CardContent sx={{ py: 6, textAlign: "center" }}>
                 <Typography variant="h6" sx={{ fontWeight: 600, mb: 0.5 }}>
                   No ads found
@@ -1237,7 +1384,10 @@ export default function AdLibraryPage() {
                 >
                   <IconTrendingUp size={16} />
                 </Box>
-                <Typography variant="h6" sx={{ fontWeight: 700, letterSpacing: "-0.02em" }}>
+                <Typography
+                  variant="h6"
+                  sx={{ fontWeight: 700, letterSpacing: "-0.02em" }}
+                >
                   Trending Now
                 </Typography>
                 <Chip
@@ -1256,14 +1406,24 @@ export default function AdLibraryPage() {
                 <IconButton
                   size="small"
                   onClick={() => scrollTrending(-1)}
-                  sx={{ border: "1px solid", borderColor: "divider", width: 30, height: 30 }}
+                  sx={{
+                    border: "1px solid",
+                    borderColor: "divider",
+                    width: 30,
+                    height: 30,
+                  }}
                 >
                   <IconChevronLeft size={16} />
                 </IconButton>
                 <IconButton
                   size="small"
                   onClick={() => scrollTrending(1)}
-                  sx={{ border: "1px solid", borderColor: "divider", width: 30, height: 30 }}
+                  sx={{
+                    border: "1px solid",
+                    borderColor: "divider",
+                    width: 30,
+                    height: 30,
+                  }}
                 >
                   <IconChevronRight size={16} />
                 </IconButton>
@@ -1280,7 +1440,10 @@ export default function AdLibraryPage() {
                 scrollSnapType: "x mandatory",
                 scrollBehavior: "smooth",
                 "&::-webkit-scrollbar": { height: 4 },
-                "&::-webkit-scrollbar-thumb": { bgcolor: "divider", borderRadius: 2 },
+                "&::-webkit-scrollbar-thumb": {
+                  bgcolor: "divider",
+                  borderRadius: 2,
+                },
               }}
             >
               {trendingAds.map((ad) => (
@@ -1313,7 +1476,10 @@ export default function AdLibraryPage() {
                 >
                   <IconLayoutGrid size={16} />
                 </Box>
-                <Typography variant="h6" sx={{ fontWeight: 700, letterSpacing: "-0.02em" }}>
+                <Typography
+                  variant="h6"
+                  sx={{ fontWeight: 700, letterSpacing: "-0.02em" }}
+                >
                   Browse Ads
                 </Typography>
                 <Typography variant="caption" color="text.disabled">
@@ -1326,7 +1492,11 @@ export default function AdLibraryPage() {
                   variant={showSaved ? "contained" : "outlined"}
                   size="small"
                   startIcon={
-                    showSaved ? <IconBookmarkFilled size={14} /> : <IconBookmark size={14} />
+                    showSaved ? (
+                      <IconBookmarkFilled size={14} />
+                    ) : (
+                      <IconBookmark size={14} />
+                    )
                   }
                   onClick={() => setShowSaved(!showSaved)}
                   sx={{ borderRadius: 2 }}
@@ -1337,7 +1507,11 @@ export default function AdLibraryPage() {
             </Stack>
 
             {/* Search bar */}
-            <Stack direction={{ xs: "column", sm: "row" }} spacing={1} sx={{ mb: 2 }}>
+            <Stack
+              direction={{ xs: "column", sm: "row" }}
+              spacing={1}
+              sx={{ mb: 2 }}
+            >
               <TextField
                 placeholder="Search by brand, keyword, or industry..."
                 value={query}
@@ -1349,7 +1523,9 @@ export default function AdLibraryPage() {
                   flex: 1,
                   "& .MuiOutlinedInput-root": {
                     borderRadius: 2.5,
-                    "&.Mui-focused": { boxShadow: "0 0 0 3px rgba(128,90,245,0.1)" },
+                    "&.Mui-focused": {
+                      boxShadow: "0 0 0 3px rgba(128,90,245,0.1)",
+                    },
                   },
                 }}
                 slotProps={{
@@ -1378,10 +1554,15 @@ export default function AdLibraryPage() {
                   minWidth: 100,
                   px: 3,
                   fontWeight: 700,
-                  background: "linear-gradient(135deg, #805AF5 0%, #6366f1 100%)",
+                  background:
+                    "linear-gradient(135deg, #805AF5 0%, #6366f1 100%)",
                 }}
               >
-                {loading ? <CircularProgress size={20} color="inherit" /> : "Search"}
+                {loading ? (
+                  <CircularProgress size={20} color="inherit" />
+                ) : (
+                  "Search"
+                )}
               </Button>
             </Stack>
 
@@ -1405,13 +1586,28 @@ export default function AdLibraryPage() {
               }}
             >
               <Tab label="All Platforms" />
-              <Tab icon={<IconBrandFacebook size={14} />} iconPosition="start" label="Facebook" />
-              <Tab icon={<IconBrandInstagram size={14} />} iconPosition="start" label="Instagram" />
-              <Tab icon={<IconBrandGoogle size={14} />} iconPosition="start" label="Google" />
+              <Tab
+                icon={<IconBrandFacebook size={14} />}
+                iconPosition="start"
+                label="Facebook"
+              />
+              <Tab
+                icon={<IconBrandInstagram size={14} />}
+                iconPosition="start"
+                label="Instagram"
+              />
+              <Tab
+                icon={<IconBrandGoogle size={14} />}
+                iconPosition="start"
+                label="Google"
+              />
             </Tabs>
 
             {/* Category Chips */}
-            <Stack direction="row" sx={{ gap: 0.75, flexWrap: "wrap", mb: 2.5 }}>
+            <Stack
+              direction="row"
+              sx={{ gap: 0.75, flexWrap: "wrap", mb: 2.5 }}
+            >
               {CATEGORIES.map((cat) => (
                 <Chip
                   key={cat.key}
@@ -1450,12 +1646,24 @@ export default function AdLibraryPage() {
                 ))}
               </Grid>
             ) : (
-              <Card sx={{ border: "1px solid", borderColor: "divider", borderRadius: 3 }}>
+              <Card
+                sx={{
+                  border: "1px solid",
+                  borderColor: "divider",
+                  borderRadius: 3,
+                }}
+              >
                 <CardContent sx={{ py: 6, textAlign: "center" }}>
                   {showSaved ? (
                     <>
-                      <IconBookmark size={44} style={{ opacity: 0.12, marginBottom: 12 }} />
-                      <Typography variant="h6" sx={{ fontWeight: 600, mb: 0.5 }}>
+                      <IconBookmark
+                        size={44}
+                        style={{ opacity: 0.12, marginBottom: 12 }}
+                      />
+                      <Typography
+                        variant="h6"
+                        sx={{ fontWeight: 600, mb: 0.5 }}
+                      >
                         No saved ads
                       </Typography>
                       <Typography variant="body2" color="text.secondary">
@@ -1464,8 +1672,14 @@ export default function AdLibraryPage() {
                     </>
                   ) : (
                     <>
-                      <IconFilter size={44} style={{ opacity: 0.12, marginBottom: 12 }} />
-                      <Typography variant="h6" sx={{ fontWeight: 600, mb: 0.5 }}>
+                      <IconFilter
+                        size={44}
+                        style={{ opacity: 0.12, marginBottom: 12 }}
+                      />
+                      <Typography
+                        variant="h6"
+                        sx={{ fontWeight: 600, mb: 0.5 }}
+                      >
                         No ads match your filters
                       </Typography>
                       <Typography variant="body2" color="text.secondary">

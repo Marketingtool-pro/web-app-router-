@@ -64,78 +64,20 @@ const metricOptions = [
   { id: "video_views", label: "Video Views", category: "Engagement" },
 ];
 
-// Scheduled reports data
-const scheduledReports = [
-  {
-    id: 1,
-    name: "Weekly Performance Summary",
-    frequency: "Weekly",
-    nextRun: "Mon, 9:00 AM",
-    recipients: "team@company.com",
-    platforms: ["Google", "Meta"],
-    enabled: true,
-  },
-  {
-    id: 2,
-    name: "Monthly Client Report",
-    frequency: "Monthly",
-    nextRun: "1st, 8:00 AM",
-    recipients: "client@agency.com",
-    platforms: ["Google", "Meta"],
-    enabled: true,
-  },
-  {
-    id: 3,
-    name: "Daily Spend Alert",
-    frequency: "Daily",
-    nextRun: "6:00 PM",
-    recipients: "manager@company.com",
-    platforms: ["Google"],
-    enabled: false,
-  },
-];
+// No scheduled reports are stored yet; the list renders empty rather than showing samples.
+const scheduledReports = [];
 
-// Report history data
-const reportHistory = [
-  {
-    id: 1,
-    name: "Weekly Performance Summary",
-    generatedAt: "Feb 24, 2026 - 9:00 AM",
-    period: "Feb 17 - Feb 23, 2026",
-    status: "delivered",
-    size: "2.4 MB",
-  },
-  {
-    id: 2,
-    name: "Monthly Client Report",
-    generatedAt: "Feb 1, 2026 - 8:00 AM",
-    period: "Jan 1 - Jan 31, 2026",
-    status: "delivered",
-    size: "5.8 MB",
-  },
-  {
-    id: 3,
-    name: "Ad Hoc Campaign Analysis",
-    generatedAt: "Feb 20, 2026 - 3:45 PM",
-    period: "Feb 1 - Feb 20, 2026",
-    status: "downloaded",
-    size: "1.2 MB",
-  },
-  {
-    id: 4,
-    name: "Weekly Performance Summary",
-    generatedAt: "Feb 17, 2026 - 9:00 AM",
-    period: "Feb 10 - Feb 16, 2026",
-    status: "delivered",
-    size: "2.1 MB",
-  },
-];
+// No report history is stored yet; the list renders empty rather than showing samples.
+const reportHistory = [];
 
 function KpiCard({ title, value, subtitle, icon: Icon }) {
   return (
     <Card>
       <CardContent>
-        <Stack direction="row" sx={{ justifyContent: "space-between", alignItems: "flex-start" }}>
+        <Stack
+          direction="row"
+          sx={{ justifyContent: "space-between", alignItems: "flex-start" }}
+        >
           <Box>
             <Typography variant="h4" sx={{ fontWeight: 700 }}>
               {value}
@@ -144,7 +86,12 @@ function KpiCard({ title, value, subtitle, icon: Icon }) {
               {title}
             </Typography>
             {subtitle && (
-              <Typography variant="caption" display="block" color="text.secondary" sx={{ mt: 0.5 }}>
+              <Typography
+                variant="caption"
+                display="block"
+                color="text.secondary"
+                sx={{ mt: 0.5 }}
+              >
                 {subtitle}
               </Typography>
             )}
@@ -234,7 +181,9 @@ function ReportBuilder() {
                   <Chip
                     icon={<IconBrandGoogle size={16} />}
                     label="Google Ads"
-                    variant={platforms.includes("google") ? "filled" : "outlined"}
+                    variant={
+                      platforms.includes("google") ? "filled" : "outlined"
+                    }
                     color="primary"
                   />
                   <Chip
@@ -260,7 +209,11 @@ function ReportBuilder() {
                             sx={{ "&.Mui-checked": { color: PRIMARY_COLOR } }}
                           />
                         }
-                        label={<Typography variant="body2">{metric.label}</Typography>}
+                        label={
+                          <Typography variant="body2">
+                            {metric.label}
+                          </Typography>
+                        }
                       />
                     </Grid>
                   ))}
@@ -282,7 +235,9 @@ function ReportBuilder() {
                   <Typography variant="caption" color="text.secondary">
                     Name
                   </Typography>
-                  <Typography variant="body2">{reportName || "Untitled Report"}</Typography>
+                  <Typography variant="body2">
+                    {reportName || "Untitled Report"}
+                  </Typography>
                 </Box>
               </Stack>
             </CardContent>
@@ -296,7 +251,12 @@ function ReportBuilder() {
           >
             Generate Report
           </Button>
-          <Button variant="outlined" size="large" startIcon={<IconDownload size={18} />} fullWidth>
+          <Button
+            variant="outlined"
+            size="large"
+            startIcon={<IconDownload size={18} />}
+            fullWidth
+          >
             Download Template
           </Button>
         </Stack>
@@ -308,7 +268,10 @@ function ReportBuilder() {
 function ScheduledReportsTab() {
   return (
     <Stack spacing={3}>
-      <Stack direction="row" sx={{ justifyContent: "space-between", alignItems: "center" }}>
+      <Stack
+        direction="row"
+        sx={{ justifyContent: "space-between", alignItems: "center" }}
+      >
         <Box>
           <Typography variant="h6">Scheduled Reports</Typography>
         </Box>
@@ -381,7 +344,9 @@ function ReportHistoryTab() {
                   <Chip
                     label={report.status}
                     size="small"
-                    color={report.status === "delivered" ? "success" : "primary"}
+                    color={
+                      report.status === "delivered" ? "success" : "primary"
+                    }
                   />
                 </TableCell>
                 <TableCell align="right">
@@ -420,16 +385,24 @@ export default function ReportsPage() {
       </Tabs>
       <Grid container spacing={2}>
         <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-          <KpiCard title="Reports Generated" value="24" icon={IconReportAnalytics} />
+          <KpiCard
+            title="Reports Generated"
+            value="0"
+            icon={IconReportAnalytics}
+          />
         </Grid>
         <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-          <KpiCard title="Reports Delivered" value="18" icon={IconMail} />
+          <KpiCard title="Reports Delivered" value="0" icon={IconMail} />
         </Grid>
         <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-          <KpiCard title="Downloads" value="12" icon={IconDownload} />
+          <KpiCard title="Downloads" value="0" icon={IconDownload} />
         </Grid>
         <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-          <KpiCard title="Scheduled Active" value="3" icon={IconCalendar} />
+          <KpiCard
+            title="Scheduled Active"
+            value={String(scheduledReports.filter((r) => r.enabled).length)}
+            icon={IconCalendar}
+          />
         </Grid>
       </Grid>
       <Box>

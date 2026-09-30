@@ -69,14 +69,6 @@ const main = {
       icon: "IconFileAnalytics",
       iconImage: "/images/sidebar/reports.png",
     },
-    {
-      id: "charts",
-      title: "chart",
-      type: "item",
-      url: "/chart",
-      icon: "IconChartHistogram",
-      iconImage: "/images/sidebar/analytics.png",
-    },
   ],
 };
 
