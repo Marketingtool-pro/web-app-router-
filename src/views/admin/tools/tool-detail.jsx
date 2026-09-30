@@ -72,6 +72,51 @@ const getIconImage = (badge) => {
 
 /***************************  TOOL - FULL PAGE  ***************************/
 
+// Structured engine responses (e.g. { data: { variants: [...] } }) used to be
+// dumped as raw JSON, base64 image data included. Turn them into readable text
+// and pull images out so they render as pictures.
+const IMAGE_VALUE =
+  /^(data:image\/|https?:\/\/\S+\.(png|jpe?g|webp|gif)(\?\S*)?$)/i;
+function humanize(key) {
+  return key.replace(/[_-]+/g, " ").replace(/^./, (c) => c.toUpperCase());
+}
+function formatResult(response) {
+  if (typeof response === "string") return { text: response, images: [] };
+  const payload = response?.result ?? response?.data ?? response;
+  if (typeof payload === "string") return { text: payload, images: [] };
+  const lines = [];
+  const images = [];
+  const walk = (value, key, depth) => {
+    const pad = "  ".repeat(depth);
+    if (value == null) return;
+    if (typeof value === "string" && IMAGE_VALUE.test(value)) {
+      images.push(value);
+      return;
+    }
+    if (Array.isArray(value)) {
+      if (key) lines.push(`${pad}${humanize(key)}:`);
+      value.forEach((item, i) => {
+        if (item && typeof item === "object") {
+          lines.push(`${pad}  ${i + 1}.`);
+          walk(item, "", depth + 2);
+        } else {
+          walk(item, "", depth + 1);
+        }
+      });
+      return;
+    }
+    if (typeof value === "object") {
+      if (key) lines.push(`${pad}${humanize(key)}:`);
+      Object.entries(value).forEach(([k, v]) =>
+        walk(v, k, key ? depth + 1 : depth),
+      );
+      return;
+    }
+    lines.push(key ? `${pad}${humanize(key)}: ${value}` : `${pad}- ${value}`);
+  };
+  walk(payload, "", 0);
+  return { text: lines.join("\n"), images };
+}
 export default function ToolDetailPage() {
   const theme = useTheme();
   const { slug } = useParams();
@@ -80,10 +125,14 @@ export default function ToolDetailPage() {
   const downMD = useMediaQuery(theme.breakpoints.down("md"));
 
   const tool = useMemo(() => getToolBySlug(slug), [slug]);
-  const relatedTools = useMemo(() => (tool ? getRelatedTools(slug, 4) : []), [slug, tool]);
+  const relatedTools = useMemo(
+    () => (tool ? getRelatedTools(slug, 4) : []),
+    [slug, tool],
+  );
 
   const [formData, setFormData] = useState({});
   const [result, setResult] = useState(null);
+  const [resultImages, setResultImages] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [copied, setCopied] = useState(false);
@@ -115,6 +164,7 @@ export default function ToolDetailPage() {
     setLoading(true);
     setError(null);
     setResult(null);
+    setResultImages([]);
 
     try {
       const additionalInputs = { ...formData };
@@ -128,11 +178,9 @@ export default function ToolDetailPage() {
         userId: user?.id || "anonymous",
       });
 
-      setResult(
-        typeof response === "string"
-          ? response
-          : response?.result || JSON.stringify(response, null, 2),
-      );
+      const formatted = formatResult(response);
+      setResult(formatted.text);
+      setResultImages(formatted.images);
     } catch (err) {
       setError(err.message || "Generation failed. Please try again.");
     } finally {
@@ -174,7 +222,9 @@ export default function ToolDetailPage() {
       case "textarea":
         return (
           <Box key={field.name}>
-            <InputLabel sx={{ mb: 0.5, color: "text.secondary" }}>{field.label}</InputLabel>
+            <InputLabel sx={{ mb: 0.5, color: "text.secondary" }}>
+              {field.label}
+            </InputLabel>
             <TextField
               placeholder={field.placeholder}
               required={field.required}
@@ -190,7 +240,9 @@ export default function ToolDetailPage() {
       case "select":
         return (
           <Box key={field.name}>
-            <InputLabel sx={{ mb: 0.5, color: "text.secondary" }}>{field.label}</InputLabel>
+            <InputLabel sx={{ mb: 0.5, color: "text.secondary" }}>
+              {field.label}
+            </InputLabel>
             <FormControl fullWidth>
               <Select
                 value={formData[field.name] || ""}
@@ -213,7 +265,9 @@ export default function ToolDetailPage() {
       case "number":
         return (
           <Box key={field.name}>
-            <InputLabel sx={{ mb: 0.5, color: "text.secondary" }}>{field.label}</InputLabel>
+            <InputLabel sx={{ mb: 0.5, color: "text.secondary" }}>
+              {field.label}
+            </InputLabel>
             <TextField
               placeholder={field.placeholder}
               required={field.required}
@@ -232,7 +286,9 @@ export default function ToolDetailPage() {
             control={
               <Checkbox
                 checked={!!formData[field.name]}
-                onChange={(e) => handleFieldChange(field.name, e.target.checked)}
+                onChange={(e) =>
+                  handleFieldChange(field.name, e.target.checked)
+                }
               />
             }
             label={field.label}
@@ -241,7 +297,9 @@ export default function ToolDetailPage() {
       default:
         return (
           <Box key={field.name}>
-            <InputLabel sx={{ mb: 0.5, color: "text.secondary" }}>{field.label}</InputLabel>
+            <InputLabel sx={{ mb: 0.5, color: "text.secondary" }}>
+              {field.label}
+            </InputLabel>
             <TextField
               placeholder={field.placeholder}
               required={field.required}
@@ -295,7 +353,12 @@ export default function ToolDetailPage() {
               <Box>
                 <Stack
                   direction="row"
-                  sx={{ alignItems: "center", gap: 1.5, mb: 1, flexWrap: "wrap" }}
+                  sx={{
+                    alignItems: "center",
+                    gap: 1.5,
+                    mb: 1,
+                    flexWrap: "wrap",
+                  }}
                 >
                   <Typography variant="h4" sx={{ fontWeight: 700 }}>
                     {tool.name}
@@ -303,7 +366,10 @@ export default function ToolDetailPage() {
                   <Chip
                     label={tool.badge}
                     size="small"
-                    sx={{ bgcolor: "rgba(255,255,255,0.1)", color: "text.primary" }}
+                    sx={{
+                      bgcolor: "rgba(255,255,255,0.1)",
+                      color: "text.primary",
+                    }}
                   />
                 </Stack>
                 <Typography variant="body1" color="text.secondary">
@@ -353,7 +419,10 @@ export default function ToolDetailPage() {
           <Grid size={{ xs: 12, md: 8 }} sx={{ ml: "-1px" }}>
             <Stack sx={{ gap: 3, p: { xs: 2.5, md: 4 } }}>
               <Box>
-                <Stack direction="row" sx={{ alignItems: "center", gap: 1, mb: 0.5 }}>
+                <Stack
+                  direction="row"
+                  sx={{ alignItems: "center", gap: 1, mb: 0.5 }}
+                >
                   <IconSparkles size={20} />
                   <Typography variant="h5" sx={{ fontWeight: 700 }}>
                     Generate
@@ -364,7 +433,9 @@ export default function ToolDetailPage() {
                 </Typography>
               </Box>
 
-              <Stack spacing={2.5}>{tool.formFields.map(renderFormField)}</Stack>
+              <Stack spacing={2.5}>
+                {tool.formFields.map(renderFormField)}
+              </Stack>
 
               <Button
                 variant="contained"
@@ -393,7 +464,11 @@ export default function ToolDetailPage() {
                 <Box>
                   <Stack
                     direction="row"
-                    sx={{ alignItems: "center", justifyContent: "space-between", mb: 2 }}
+                    sx={{
+                      alignItems: "center",
+                      justifyContent: "space-between",
+                      mb: 2,
+                    }}
                   >
                     <Typography variant="h6" sx={{ fontWeight: 700 }}>
                       Result
@@ -432,13 +507,35 @@ export default function ToolDetailPage() {
                   >
                     {result}
                   </Box>
+                  {resultImages.length > 0 && (
+                    <Stack
+                      direction="row"
+                      sx={{ flexWrap: "wrap", gap: 1.5, mt: 2 }}
+                    >
+                      {resultImages.map((src, i) => (
+                        <Box
+                          key={i}
+                          component="img"
+                          src={src}
+                          alt={`Generated image ${i + 1}`}
+                          sx={{
+                            maxWidth: 240,
+                            borderRadius: 2,
+                            border: "1px solid rgba(255,255,255,0.06)",
+                          }}
+                        />
+                      ))}
+                    </Stack>
+                  )}
                 </Box>
               )}
             </Stack>
           </Grid>
 
           <Divider
-            {...(!downMD ? { orientation: "vertical", flexItem: true } : { sx: { width: 1 } })}
+            {...(!downMD
+              ? { orientation: "vertical", flexItem: true }
+              : { sx: { width: 1 } })}
           />
 
           {/* Right: Sidebar */}
@@ -452,8 +549,18 @@ export default function ToolDetailPage() {
                 </Typography>
               </Stack>
               {tool.tips.map((tip, i) => (
-                <Box key={i} sx={{ p: 2, borderRadius: 2, bgcolor: "rgba(255,255,255,0.03)" }}>
-                  <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 0.5 }}>
+                <Box
+                  key={i}
+                  sx={{
+                    p: 2,
+                    borderRadius: 2,
+                    bgcolor: "rgba(255,255,255,0.03)",
+                  }}
+                >
+                  <Typography
+                    variant="subtitle2"
+                    sx={{ fontWeight: 600, mb: 0.5 }}
+                  >
                     {tip.title}
                   </Typography>
                   <Typography variant="caption" color="text.secondary">
@@ -485,9 +592,15 @@ export default function ToolDetailPage() {
                     >
                       <Stack
                         direction="row"
-                        sx={{ alignItems: "center", justifyContent: "space-between" }}
+                        sx={{
+                          alignItems: "center",
+                          justifyContent: "space-between",
+                        }}
                       >
-                        <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
+                        <Typography
+                          variant="subtitle2"
+                          sx={{ fontWeight: 600 }}
+                        >
                           {rt.name}
                         </Typography>
                         <IconArrowRight size={16} />
