@@ -66,7 +66,11 @@ const BADGE_FOLDER = {
   Campaign: { folder: "/images/tools/instagram", prefix: "i-", count: 67 },
   Budget: { folder: "/images/tools/instagram", prefix: "i-", count: 67 },
   Grader: { folder: "/images/tools/instagram", prefix: "i-", count: 67 },
-  "Text Editing": { folder: "/images/tools/instagram", prefix: "i-", count: 67 },
+  "Text Editing": {
+    folder: "/images/tools/instagram",
+    prefix: "i-",
+    count: 67,
+  },
 
   // ai-tools (57): AI Agent(10) + Marketing(13) + Advertising(7) + Developer(4) + Branding(2) + Education(2) + Automation(2) + PPC Optimization(9) = 49
   "AI Agent": { folder: "/images/tools/ai-tools", prefix: "ai-", count: 57 },
@@ -76,19 +80,35 @@ const BADGE_FOLDER = {
   Branding: { folder: "/images/tools/ai-tools", prefix: "ai-", count: 57 },
   Education: { folder: "/images/tools/ai-tools", prefix: "ai-", count: 57 },
   Automation: { folder: "/images/tools/ai-tools", prefix: "ai-", count: 57 },
-  "PPC Optimization": { folder: "/images/tools/ai-tools", prefix: "ai-", count: 57 },
+  "PPC Optimization": {
+    folder: "/images/tools/ai-tools",
+    prefix: "ai-",
+    count: 57,
+  },
 
   // meta (39): Facebook/Meta(37) = 37
   "Facebook/Meta": { folder: "/images/tools/meta", prefix: "m-", count: 39 },
 
   // social-media (20): Social Media(8) + Pinterest(1) + Twitter/X(1) + Creative(8) = 18
-  "Social Media": { folder: "/images/tools/social-media", prefix: "sm-", count: 20 },
+  "Social Media": {
+    folder: "/images/tools/social-media",
+    prefix: "sm-",
+    count: 20,
+  },
   Pinterest: { folder: "/images/tools/social-media", prefix: "sm-", count: 20 },
-  "Twitter/X": { folder: "/images/tools/social-media", prefix: "sm-", count: 20 },
+  "Twitter/X": {
+    folder: "/images/tools/social-media",
+    prefix: "sm-",
+    count: 20,
+  },
   Creative: { folder: "/images/tools/social-media", prefix: "sm-", count: 20 },
 
   // content (15): Content Writing(15) = 15
-  "Content Writing": { folder: "/images/tools/content", prefix: "ct-", count: 15 },
+  "Content Writing": {
+    folder: "/images/tools/content",
+    prefix: "ct-",
+    count: 15,
+  },
 
   // ecommerce (53): E-commerce(45) + Shopify(8) = 53 ✓
   "E-commerce": { folder: "/images/tools/ecommerce", prefix: "ec-", count: 53 },
@@ -101,7 +121,11 @@ const BADGE_FOLDER = {
   SEO: { folder: "/images/tools/seo", prefix: "seo-", count: 11 },
 
   // roi (6): ROI & Attribution(5) = 5
-  "ROI & Attribution": { folder: "/images/tools/roi", prefix: "roi-", count: 6 },
+  "ROI & Attribution": {
+    folder: "/images/tools/roi",
+    prefix: "roi-",
+    count: 6,
+  },
 
   // youtube (6): YouTube(3) + Email(3) = 6 ✓
   YouTube: { folder: "/images/tools/youtube", prefix: "yt-", count: 6 },
@@ -131,7 +155,8 @@ const TOOL_IMAGE_MAP = (() => {
     const idx = counters[key];
     counters[key] += 1;
     const num = (idx % cfg.count) + 1;
-    map[tool.slug] = `${cfg.folder}/${cfg.prefix}${String(num).padStart(2, "0")}.jpg`;
+    map[tool.slug] =
+      `${cfg.folder}/${cfg.prefix}${String(num).padStart(2, "0")}.jpg`;
   });
   return map;
 })();
@@ -194,7 +219,8 @@ function BentoToolCard({ tool, image }) {
           sx={{
             position: "absolute",
             inset: 0,
-            background: "linear-gradient(180deg, transparent 30%, rgba(14,12,21,0.7) 100%)",
+            background:
+              "linear-gradient(180deg, transparent 30%, rgba(14,12,21,0.7) 100%)",
             pointerEvents: "none",
           }}
         />
@@ -249,7 +275,13 @@ function BentoToolCard({ tool, image }) {
         </Typography>
         <Typography
           variant="body2"
-          sx={{ fontWeight: 600, display: "flex", alignItems: "center", gap: 0.5, color: ACCENT }}
+          sx={{
+            fontWeight: 600,
+            display: "flex",
+            alignItems: "center",
+            gap: 0.5,
+            color: ACCENT,
+          }}
         >
           Run workflow <IconArrowRight size={14} />
         </Typography>
@@ -280,7 +312,13 @@ export default function ToolsCataloguePage() {
   );
 
   const results = useMemo(
-    () => searchTools({ query, category: selectedCategory, page, perPage: PER_PAGE }),
+    () =>
+      searchTools({
+        query,
+        category: selectedCategory,
+        page,
+        perPage: PER_PAGE,
+      }),
     [query, selectedCategory, page],
   );
 
@@ -342,11 +380,14 @@ export default function ToolsCataloguePage() {
         }}
       >
         <Box>
-          <Typography variant="h4" sx={{ fontWeight: 700, letterSpacing: "-0.02em", mb: 0.5 }}>
+          <Typography
+            variant="h4"
+            sx={{ fontWeight: 700, letterSpacing: "-0.02em", mb: 0.5 }}
+          >
             AI Tools
           </Typography>
           <Typography variant="body2" color="text.secondary">
-            {allTools.length} tools across {categories.length} categories
+            Search AI marketing tools by name, category, or task
           </Typography>
         </Box>
 
@@ -376,7 +417,7 @@ export default function ToolsCataloguePage() {
 
         <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.75 }}>
           <Chip
-            label={`All (${allTools.length})`}
+            label="All"
             variant={selectedCategory === "" ? "filled" : "outlined"}
             color={selectedCategory === "" ? "primary" : "default"}
             onClick={() => handleCategoryClick("")}
@@ -386,7 +427,7 @@ export default function ToolsCataloguePage() {
           {categories.map((cat) => (
             <Chip
               key={cat.name}
-              label={`${cat.name} (${cat.count})`}
+              label={cat.name}
               variant={selectedCategory === cat.name ? "filled" : "outlined"}
               color={selectedCategory === cat.name ? "primary" : "default"}
               onClick={() => handleCategoryClick(cat.name)}
@@ -396,21 +437,15 @@ export default function ToolsCataloguePage() {
           ))}
         </Box>
 
-        {results.total > 0 && (
-          <Typography variant="body2" color="text.secondary">
-            Showing {(page - 1) * PER_PAGE + 1}–{Math.min(page * PER_PAGE, results.total)} of{" "}
-            {results.total} tools
-            {selectedCategory && ` in ${selectedCategory}`}
-            {query && ` matching "${query}"`}
-          </Typography>
-        )}
-
         <Grid container spacing={2}>
           {results.tools.map((tool) => (
             <Grid key={tool.slug} size={{ xs: 12, sm: 6, md: 4, lg: 3 }}>
               <BentoToolCard
                 tool={tool}
-                image={TOOL_IMAGE_MAP[tool.slug] || "/images/tools/ai-tools/ai-01.jpg"}
+                image={
+                  TOOL_IMAGE_MAP[tool.slug] ||
+                  "/images/tools/ai-tools/ai-01.jpg"
+                }
               />
             </Grid>
           ))}
