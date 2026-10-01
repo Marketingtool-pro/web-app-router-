@@ -1,0 +1,5 @@
+{
+  "name": "@marketingtool/weather-server-typescript",
+  "version": "1.0.0",
+  "exports": "./src/index.ts"
+}
