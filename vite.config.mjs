@@ -34,6 +34,16 @@ export default defineConfig(({ mode }) => {
         "website/**",
         "vcpkg/**",
       ],
+      coverage: {
+        provider: "v8",
+        reporter: ["cobertura"],
+        reportsDirectory: "./coverage",
+        include: ["src/**/*.{js,jsx,ts,tsx}"],
+        exclude: [
+          "src/setupTests.js",
+          "**/*.test.{js,jsx,ts,tsx}",
+        ],
+      },
     },
   };
 });
