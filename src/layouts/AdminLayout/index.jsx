@@ -14,6 +14,7 @@ import ConnectAdsModal from "@/components/ConnectAdsModal";
 import { handlerDrawerOpen, useGetMenuMaster } from "@/states/menu";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import Loader from "@/components/Loader";
+import Copyright from "@/sections/auth/Copyright";
 import { DRAWER_WIDTH } from "@/config";
 import useConfig from "@/hooks/useConfig";
 import { useAuth } from "@/contexts/AuthContext";
@@ -92,6 +93,9 @@ export default function DashboardLayout() {
           width: `calc(100% - ${DRAWER_WIDTH}px)`,
           flexGrow: 1,
           p: { xs: 2, sm: 3 },
+          display: "flex",
+          flexDirection: "column",
+          minHeight: "100vh",
         }}
       >
         <Toolbar sx={{ minHeight: { xs: 54, sm: 46, md: 76 } }} />
@@ -114,6 +118,20 @@ export default function DashboardLayout() {
         >
           <Outlet />
         </Container>
+        {/* Legal links on every signed-in page, reusing the auth pages' bar.
+            Google and Meta app review expect Privacy and Terms reachable from the app. */}
+        <Box
+          component="footer"
+          sx={{
+            mt: "auto",
+            pt: 4,
+            pb: 1,
+            borderTop: 1,
+            borderColor: "divider",
+          }}
+        >
+          <Copyright />
+        </Box>
       </Box>
     </Stack>
   );
