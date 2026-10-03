@@ -11,16 +11,16 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # 1. Check out the repository code
+      # 1. Check out the repository code (pinned to v4.2.2)
       - name: Checkout Repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
 
-      # 2. Install Deno and configure caching
+      # 2. Install Deno and configure caching (pinned to v2.0.5)
       - name: Setup Deno
-        uses: denoland/setup-deno@v2
+        uses: denoland/setup-deno@495ca4068351f7fb62ba13c0b05b38d38e0c8b0e # v2.0.5
         with:
-          deno-version: v2.x # Pin to the latest stable Deno 2 major version
-          cache: true        # Caches dependencies automatically between runs
+          deno-version: v2.x 
+          cache: true        
 
       # 3. Cleanly install project dependencies using the lockfile
       - name: Install Dependencies
