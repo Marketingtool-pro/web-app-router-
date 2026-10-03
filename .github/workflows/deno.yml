@@ -1,42 +1,39 @@
-# This workflow uses actions that are not certified by GitHub.
-# They are provided by a third-party and are governed by
-# separate terms of service, privacy policy, and support
-# documentation.
-
-# This workflow will install Deno then run `deno lint` and `deno test`.
-# For more information see: https://github.com/denoland/setup-deno
-
-name: Deno
+name: CI
 
 on:
   push:
-    branches: ["main"]
+    branches: [main]
   pull_request:
-    branches: ["main"]
-
-permissions:
-  contents: read
+    branches: [main]
 
 jobs:
-  test:
+  validate:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Setup repo
+      # 1. Check out the repository code
+      - name: Checkout Repository
         uses: actions/checkout@v4
 
+      # 2. Install Deno and configure caching
       - name: Setup Deno
-        # uses: denoland/setup-deno@v1
-        uses: denoland/setup-deno@61fe2df320078202e33d7d5ad347e7dcfa0e8f31  # v1.1.2
+        uses: denoland/setup-deno@v2
         with:
-          deno-version: v1.x
+          deno-version: v2.x # Pin to the latest stable Deno 2 major version
+          cache: true        # Caches dependencies automatically between runs
 
-      # Uncomment this step to verify the use of 'deno fmt' on each commit.
-      # - name: Verify formatting
-      #   run: deno fmt --check
+      # 3. Cleanly install project dependencies using the lockfile
+      - name: Install Dependencies
+        run: deno ci
 
-      - name: Run linter
+      # 4. Check if code aligns with Deno's default formatting
+      - name: Verify Formatting
+        run: deno fmt --check
+
+      # 5. Run static analysis code linter
+      - name: Run Linter
         run: deno lint
 
-      - name: Run tests
-        run: deno test -A
+      # 6. Execute test suite
+      - name: Run Tests
+        run: deno test --allow-all
