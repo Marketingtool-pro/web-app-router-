@@ -215,16 +215,17 @@ function TooLargeNotice({ onDownload }) {
 }
 
 // Decide how much of the output to render: everything, a collapsible preview, or
-// (past maxRenderChars) a fixed preview with a download offer.
-function useRenderPlan(text, { collapseAt, collapsedBlocks, maxRenderChars }) {
+// (past maxRenderChars) a fixed preview with a download offer. The preview is cut by
+// characters as well as blocks, so one huge code block or paragraph still collapses.
+function useRenderPlan(text, expanded, { collapseAt, maxRenderChars }) {
   const tooLarge = text.length > maxRenderChars;
+  const collapsible = !tooLarge && text.length > collapseAt;
+  const preview = tooLarge || (collapsible && !expanded);
   const sections = useMemo(
-    () => splitSections(parseMarkdown(tooLarge ? text.slice(0, collapseAt) : text)),
-    [text, tooLarge, collapseAt]
+    () => splitSections(parseMarkdown(preview ? text.slice(0, collapseAt) : text)),
+    [text, preview, collapseAt]
   );
-  const totalBlocks = sections.reduce((n, s) => n + s.blocks.length, 0);
-  const collapsible = !tooLarge && text.length > collapseAt && totalBlocks > collapsedBlocks;
-  return { sections, tooLarge, collapsible };
+  return { sections, tooLarge, collapsible, preview };
 }
 
 function CollapseToggle({ expanded, onToggle }) {
@@ -249,12 +250,11 @@ export default function MarkdownRenderer({
   onDownload
 }) {
   const [expanded, setExpanded] = useState(false);
-  const { sections, tooLarge, collapsible } = useRenderPlan(String(content ?? ''), { collapseAt, collapsedBlocks, maxRenderChars });
-  const showAll = !tooLarge && (!collapsible || expanded);
+  const { sections, tooLarge, collapsible, preview } = useRenderPlan(String(content ?? ''), expanded, { collapseAt, maxRenderChars });
 
   return (
     <Box sx={{ wordBreak: 'break-word', '& > :first-of-type': { mt: 0 } }} data-testid="markdown-renderer">
-      {renderBlocks(sections, showAll ? Infinity : collapsedBlocks, sectionCopy)}
+      {renderBlocks(sections, preview ? collapsedBlocks : Infinity, sectionCopy)}
       {collapsible && <CollapseToggle expanded={expanded} onToggle={() => setExpanded((v) => !v)} />}
       {tooLarge && <TooLargeNotice onDownload={onDownload} />}
     </Box>

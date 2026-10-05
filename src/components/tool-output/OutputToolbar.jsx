@@ -174,7 +174,8 @@ const BACKEND_ACTIONS = [
       icon: <IconShare size={18} />,
       fn: async () => {
         const url = await onShare();
-        if (url) await copyText(url);
+        if (typeof url !== 'string' || !url.trim()) throw new Error('No share link was returned.');
+        await copyText(url);
       }
     })
   },

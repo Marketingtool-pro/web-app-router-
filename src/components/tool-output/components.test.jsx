@@ -34,6 +34,14 @@ describe('MarkdownRenderer', () => {
     expect(screen.getByText(/Paragraph 39/)).toBeInTheDocument();
   });
 
+  it('collapses a single huge block by characters, not just block count', () => {
+    const json = JSON.stringify({ rows: Array.from({ length: 400 }, (_, i) => ({ id: i, label: `row-${i}` })) }, null, 2);
+    const { container } = render(<MarkdownRenderer content={json} collapseAt={1000} />);
+    expect(container.textContent.length).toBeLessThan(1200);
+    fireEvent.click(screen.getByRole('button', { name: /Show full result/ }));
+    expect(container.textContent).toContain('row-399');
+  });
+
   it('offers download instead of rendering a huge output', () => {
     const onDownload = vi.fn();
     render(<MarkdownRenderer content={'y'.repeat(2000)} maxRenderChars={1000} collapseAt={100} onDownload={onDownload} />);
@@ -84,6 +92,13 @@ describe('OutputToolbar', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Copy share link' }));
     await waitFor(() => expect(status('share')).toBe('success'));
     expect(navigator.clipboard.writeText).toHaveBeenCalledWith('https://app.marketingtool.pro/share/abc');
+  });
+
+  it('reports an error when onShare returns no link', async () => {
+    render(<OutputToolbar output="x" onShare={vi.fn().mockResolvedValue(undefined)} />);
+    fireEvent.click(screen.getByRole('button', { name: 'Copy share link' }));
+    await waitFor(() => expect(status('share')).toBe('error'));
+    expect(navigator.clipboard.writeText).not.toHaveBeenCalled();
   });
 
   it('passes the thumb value to onRate', async () => {
