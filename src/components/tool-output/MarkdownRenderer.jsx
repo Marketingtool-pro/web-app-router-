@@ -1,0 +1,266 @@
+import PropTypes from 'prop-types';
+import { Fragment, useMemo, useState } from 'react';
+
+// @mui
+import Box from '@mui/material/Box';
+import Button from '@mui/material/Button';
+import IconButton from '@mui/material/IconButton';
+import Link from '@mui/material/Link';
+import Stack from '@mui/material/Stack';
+import Tooltip from '@mui/material/Tooltip';
+import Typography from '@mui/material/Typography';
+
+// @assets
+import { IconCheck, IconChevronDown, IconChevronUp, IconCopy } from '@tabler/icons-react';
+
+// @project
+import { blockToPlainText, parseInline, parseMarkdown, splitSections } from './markdown';
+
+/***************************  MARKDOWN RENDERER  ***************************/
+
+// Renders AI tool output as formatted text: H1–H4, lists, bold/italic, inline and
+// block code, quotes, tables and safe links. Copy fidelity is preserved because the
+// caller always copies the original markdown, never the rendered DOM.
+// Large outputs start collapsed; past `maxRenderChars` only a preview is rendered and
+// the reader is pointed at the download instead of expanding a huge DOM.
+
+const HEADING_VARIANT = { 1: 'h4', 2: 'h5', 3: 'h6', 4: 'subtitle1' };
+const codeSx = {
+  fontFamily: 'monospace',
+  fontSize: '0.92em',
+  px: 0.6,
+  py: 0.1,
+  borderRadius: 1,
+  bgcolor: 'rgba(255,255,255,0.06)'
+};
+
+function Inline({ text }) {
+  return parseInline(text).map((t, i) => {
+    switch (t.type) {
+      case 'bold':
+        return (
+          <Box key={i} component="strong" sx={{ fontWeight: 700, color: 'text.primary' }}>
+            {t.value}
+          </Box>
+        );
+      case 'italic':
+        return (
+          <Box key={i} component="em">
+            {t.value}
+          </Box>
+        );
+      case 'code':
+        return (
+          <Box key={i} component="code" sx={codeSx}>
+            {t.value}
+          </Box>
+        );
+      case 'link':
+        return (
+          <Link key={i} href={t.href} target="_blank" rel="noopener noreferrer nofollow" underline="hover">
+            {t.value}
+          </Link>
+        );
+      default:
+        return <Fragment key={i}>{t.value}</Fragment>;
+    }
+  });
+}
+
+function CopySectionButton({ text }) {
+  const [copied, setCopied] = useState(false);
+  const copy = async () => {
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1500);
+    } catch {
+      // clipboard blocked by the browser — leave the icon unchanged
+    }
+  };
+  return (
+    <Tooltip title={copied ? 'Copied' : 'Copy section'}>
+      <IconButton size="small" onClick={copy} aria-label="Copy section" sx={{ color: 'text.secondary', '@media print': { display: 'none' } }}>
+        {copied ? <IconCheck size={16} /> : <IconCopy size={16} />}
+      </IconButton>
+    </Tooltip>
+  );
+}
+
+function Block({ block, sectionText }) {
+  const body = { color: 'text.secondary', lineHeight: 1.75 };
+  switch (block.type) {
+    case 'heading':
+      return (
+        <Stack direction="row" sx={{ alignItems: 'center', gap: 1, mt: block.level <= 2 ? 2.5 : 2, mb: 1 }}>
+          <Typography variant={HEADING_VARIANT[block.level]} component={`h${block.level + 1}`} sx={{ fontWeight: 700, flex: 1 }}>
+            <Inline text={block.text} />
+          </Typography>
+          {sectionText && <CopySectionButton text={sectionText} />}
+        </Stack>
+      );
+    case 'paragraph':
+      return (
+        <Typography variant="body2" sx={{ ...body, mb: 1.5 }}>
+          <Inline text={block.text} />
+        </Typography>
+      );
+    case 'ul':
+    case 'ol':
+      return (
+        <Box
+          component={block.type}
+          start={block.type === 'ol' ? block.start : undefined}
+          sx={{ ...body, pl: 3, my: 1, '& li': { mb: 0.5 }, '& li::marker': { color: 'primary.main' } }}
+        >
+          {block.items.map((it, i) => (
+            <Typography key={i} component="li" variant="body2" sx={body}>
+              <Inline text={it} />
+            </Typography>
+          ))}
+        </Box>
+      );
+    case 'code':
+      return (
+        <Box
+          component="pre"
+          sx={{
+            m: 0,
+            my: 1.5,
+            p: 2,
+            borderRadius: 2,
+            bgcolor: 'rgba(0,0,0,0.3)',
+            border: '1px solid rgba(255,255,255,0.06)',
+            overflowX: 'auto',
+            fontFamily: 'monospace',
+            fontSize: 13,
+            lineHeight: 1.6
+          }}
+        >
+          <code>{block.text}</code>
+        </Box>
+      );
+    case 'quote':
+      return (
+        <Box sx={{ borderLeft: '3px solid', borderColor: 'primary.main', pl: 2, my: 1.5 }}>
+          <Typography variant="body2" sx={{ ...body, fontStyle: 'italic' }}>
+            <Inline text={block.text} />
+          </Typography>
+        </Box>
+      );
+    case 'hr':
+      return <Box component="hr" sx={{ border: 0, height: '1px', bgcolor: 'divider', my: 2 }} />;
+    case 'table':
+      return (
+        <Box sx={{ overflowX: 'auto', my: 1.5 }}>
+          <Box component="table" sx={{ width: '100%', borderCollapse: 'collapse', fontSize: 14 }}>
+            <thead>
+              <tr>
+                {block.header.map((h, i) => (
+                  <Box
+                    key={i}
+                    component="th"
+                    sx={{ textAlign: 'left', p: 1, color: 'text.primary', fontWeight: 600, borderBottom: '1px solid', borderColor: 'divider' }}
+                  >
+                    <Inline text={h} />
+                  </Box>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {block.rows.map((r, ri) => (
+                <tr key={ri}>
+                  {r.map((c, ci) => (
+                    <Box
+                      key={ci}
+                      component="td"
+                      sx={{ p: 1, color: 'text.secondary', borderBottom: '1px solid rgba(255,255,255,0.06)' }}
+                    >
+                      <Inline text={c} />
+                    </Box>
+                  ))}
+                </tr>
+              ))}
+            </tbody>
+          </Box>
+        </Box>
+      );
+    default:
+      return null;
+  }
+}
+
+export default function MarkdownRenderer({
+  content,
+  collapseAt = 6000,
+  collapsedBlocks = 12,
+  maxRenderChars = 500000,
+  sectionCopy = true,
+  onDownload
+}) {
+  const [expanded, setExpanded] = useState(false);
+  const text = String(content ?? '');
+  const tooLarge = text.length > maxRenderChars;
+
+  const sections = useMemo(() => {
+    const source = tooLarge ? text.slice(0, collapseAt) : text;
+    return splitSections(parseMarkdown(source));
+  }, [text, tooLarge, collapseAt]);
+
+  const totalBlocks = sections.reduce((n, s) => n + s.blocks.length, 0);
+  const collapsible = !tooLarge && text.length > collapseAt && totalBlocks > collapsedBlocks;
+  const limit = tooLarge || (collapsible && !expanded) ? collapsedBlocks : Infinity;
+
+  let shown = 0;
+  const rendered = [];
+  for (const [si, section] of sections.entries()) {
+    const sectionText = sectionCopy && section.title ? section.blocks.map(blockToPlainText).filter(Boolean).join('\n\n') : null;
+    for (const [bi, block] of section.blocks.entries()) {
+      if (shown >= limit) break;
+      rendered.push(<Block key={`${si}-${bi}`} block={block} sectionText={bi === 0 ? sectionText : null} />);
+      shown++;
+    }
+  }
+
+  return (
+    <Box sx={{ wordBreak: 'break-word', '& > :first-of-type': { mt: 0 } }} data-testid="markdown-renderer">
+      {rendered}
+
+      {collapsible && (
+        <Button
+          size="small"
+          onClick={() => setExpanded((v) => !v)}
+          endIcon={expanded ? <IconChevronUp size={16} /> : <IconChevronDown size={16} />}
+          sx={{ mt: 1, '@media print': { display: 'none' } }}
+        >
+          {expanded ? 'Show less' : 'Show full result'}
+        </Button>
+      )}
+
+      {tooLarge && (
+        <Stack direction="row" sx={{ alignItems: 'center', gap: 1.5, mt: 2 }}>
+          <Typography variant="caption" color="text.secondary">
+            This result is too large to show in full here.
+          </Typography>
+          {onDownload && (
+            <Button size="small" variant="outlined" onClick={onDownload}>
+              Download full result
+            </Button>
+          )}
+        </Stack>
+      )}
+    </Box>
+  );
+}
+
+Inline.propTypes = { text: PropTypes.string };
+CopySectionButton.propTypes = { text: PropTypes.string };
+Block.propTypes = { block: PropTypes.object, sectionText: PropTypes.string };
+MarkdownRenderer.propTypes = {
+  content: PropTypes.string,
+  collapseAt: PropTypes.number,
+  collapsedBlocks: PropTypes.number,
+  maxRenderChars: PropTypes.number,
+  sectionCopy: PropTypes.bool,
+  onDownload: PropTypes.func
+};

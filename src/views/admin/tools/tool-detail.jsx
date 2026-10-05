@@ -16,7 +16,6 @@ import Button from '@mui/material/Button';
 import Chip from '@mui/material/Chip';
 import Stack from '@mui/material/Stack';
 import Divider from '@mui/material/Divider';
-import IconButton from '@mui/material/IconButton';
 import CircularProgress from '@mui/material/CircularProgress';
 import Alert from '@mui/material/Alert';
 import Checkbox from '@mui/material/Checkbox';
@@ -26,17 +25,16 @@ import FormControlLabel from '@mui/material/FormControlLabel';
 import {
   IconArrowLeft,
   IconSparkles,
-  IconCopy,
-  IconDownload,
-  IconRefresh,
   IconBulb,
-  IconArrowRight
+  IconArrowRight,
+  IconSearch
 } from '@tabler/icons-react';
 
 // @project
 import { getToolBySlug, getRelatedTools } from '@/utils/api/tools';
 import { executeGeneration } from '@/utils/api/windmill';
 import { useAuth } from '@/contexts/AuthContext';
+import { EmptyState, MarkdownRenderer, OutputToolbar, downloadTxt } from '@/components/tool-output';
 
 /***************************  GLASS TOKENS (same as Command Centre)  ***************************/
 
@@ -86,16 +84,16 @@ export default function ToolDetailPage() {
   const [result, setResult] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [copied, setCopied] = useState(false);
 
   if (!tool) {
     return (
-      <Box sx={{ textAlign: 'center', py: 8 }}>
-        <Typography variant="h5">Tool not found</Typography>
-        <Button onClick={() => navigate('/tools')} sx={{ mt: 2 }}>
-          Back to Tools
-        </Button>
-      </Box>
+      <EmptyState
+        icon={<IconSearch size={24} />}
+        title="Tool not found"
+        description="This tool does not exist or has moved."
+        actionLabel="Back to Tools"
+        onAction={() => navigate('/tools')}
+      />
     );
   }
 
@@ -133,26 +131,6 @@ export default function ToolDetailPage() {
       setError(err.message || 'Generation failed. Please try again.');
     } finally {
       setLoading(false);
-    }
-  };
-
-  const handleCopy = () => {
-    if (result) {
-      navigator.clipboard.writeText(result);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    }
-  };
-
-  const handleDownload = () => {
-    if (result) {
-      const blob = new Blob([result], { type: 'text/plain' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `${tool.slug}-output.txt`;
-      a.click();
-      URL.revokeObjectURL(url);
     }
   };
 
@@ -349,43 +327,29 @@ export default function ToolDetailPage() {
 
               {result && (
                 <Box>
-                  <Stack direction="row" sx={{ alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
+                  <Stack direction="row" sx={{ alignItems: 'center', justifyContent: 'space-between', mb: 2, gap: 1 }}>
                     <Typography variant="h6" sx={{ fontWeight: 700 }}>
                       Result
                     </Typography>
-                    <Stack direction="row" spacing={1}>
-                      <IconButton size="small" onClick={handleCopy}>
-                        <IconCopy size={18} />
-                      </IconButton>
-                      <IconButton size="small" onClick={handleDownload}>
-                        <IconDownload size={18} />
-                      </IconButton>
-                      <IconButton size="small" onClick={handleGenerate}>
-                        <IconRefresh size={18} />
-                      </IconButton>
-                    </Stack>
+                    <OutputToolbar
+                      output={result}
+                      title={tool.name}
+                      fileName={`${tool.slug}-output`}
+                      onRegenerate={handleGenerate}
+                      regenerating={loading}
+                    />
                   </Stack>
-                  {copied && (
-                    <Alert severity="success" sx={{ mb: 2 }}>
-                      Copied
-                    </Alert>
-                  )}
                   <Box
                     sx={{
                       bgcolor: 'rgba(0,0,0,0.3)',
                       borderRadius: 2,
                       p: 2.5,
-                      fontFamily: 'monospace',
-                      fontSize: 13,
-                      lineHeight: 1.7,
-                      whiteSpace: 'pre-wrap',
-                      wordBreak: 'break-word',
-                      maxHeight: 500,
+                      maxHeight: 640,
                       overflow: 'auto',
                       border: '1px solid rgba(255,255,255,0.06)'
                     }}
                   >
-                    {result}
+                    <MarkdownRenderer content={result} onDownload={() => downloadTxt(result, `${tool.slug}-output`)} />
                   </Box>
                 </Box>
               )}
