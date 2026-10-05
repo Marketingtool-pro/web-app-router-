@@ -75,12 +75,23 @@ export function useActionStates() {
   return [states, run];
 }
 
+const STATUS_COLOR = { error: 'error.main', success: 'success.main' };
+const STATUS_ICON = {
+  loading: <CircularProgress size={16} color="inherit" />,
+  success: <IconCheck size={18} />,
+  error: <IconAlertTriangle size={18} />
+};
+
+function tooltipFor(label, state, successLabel) {
+  if (state?.status === 'error') return `${label} failed: ${state.message}`;
+  if (state?.status === 'success') return successLabel || 'Done';
+  return label;
+}
+
 function ActionButton({ id, label, icon, state, disabled, onClick, successLabel }) {
   const status = state?.status || 'idle';
-  const title =
-    status === 'error' ? `${label} failed: ${state.message}` : status === 'success' ? successLabel || 'Done' : label;
   return (
-    <Tooltip title={title}>
+    <Tooltip title={tooltipFor(label, state, successLabel)}>
       <span>
         <IconButton
           size="small"
@@ -89,45 +100,107 @@ function ActionButton({ id, label, icon, state, disabled, onClick, successLabel 
           data-status={status}
           disabled={disabled || status === 'loading'}
           onClick={onClick}
-          sx={{ color: status === 'error' ? 'error.main' : status === 'success' ? 'success.main' : 'text.secondary' }}
+          sx={{ color: STATUS_COLOR[status] || 'text.secondary' }}
         >
-          {status === 'loading' ? (
-            <CircularProgress size={16} color="inherit" />
-          ) : status === 'success' ? (
-            <IconCheck size={18} />
-          ) : status === 'error' ? (
-            <IconAlertTriangle size={18} />
-          ) : (
-            icon
-          )}
+          {STATUS_ICON[status] || icon}
         </IconButton>
       </span>
     </Tooltip>
   );
 }
 
-export default function OutputToolbar({
-  output,
-  title = 'Result',
-  fileName,
-  onSave,
-  onRegenerate,
-  onShare,
-  onRate,
-  onLaunch,
-  regenerating = false,
-  saved = false
-}) {
-  const [states, run] = useActionStates();
+function RateButtons({ onRate, states, run, disabled }) {
   const [rating, setRating] = useState(null);
-  const hasOutput = typeof output === 'string' && output.trim().length > 0;
-  const disabled = !hasOutput;
-
   const rate = (thumb) =>
     run('rate', async () => {
       await onRate({ thumb });
       setRating(thumb);
     });
+  const busy = states.rate?.status === 'loading';
+  return (
+    <>
+      <ActionButton
+        id="rate-up"
+        label="Good result"
+        successLabel="Thanks for rating"
+        icon={rating === 'up' ? <IconThumbUpFilled size={18} /> : <IconThumbUp size={18} />}
+        state={rating === 'up' ? states.rate : undefined}
+        disabled={disabled || busy}
+        onClick={() => rate('up')}
+      />
+      <ActionButton
+        id="rate-down"
+        label="Poor result"
+        successLabel="Thanks for rating"
+        icon={rating === 'down' ? <IconThumbDownFilled size={18} /> : <IconThumbDown size={18} />}
+        state={rating === 'down' ? states.rate : undefined}
+        disabled={disabled || busy}
+        onClick={() => rate('down')}
+      />
+    </>
+  );
+}
+
+// Actions that need a backend: rendered only for the handlers the page provides.
+function BackendActions({ states, run, disabled, onSave, onRegenerate, onShare, onRate, onLaunch, regenerating, saved }) {
+  const shareAndCopy = async () => {
+    const url = await onShare();
+    if (url) await copyText(url);
+  };
+  return (
+    <>
+      {onSave && (
+        <ActionButton
+          id="save"
+          label={saved ? 'Saved' : LABELS.save}
+          successLabel="Saved"
+          icon={saved ? <IconCheck size={18} /> : <IconDeviceFloppy size={18} />}
+          state={states.save}
+          disabled={disabled || saved}
+          onClick={() => run('save', onSave)}
+        />
+      )}
+      {onRegenerate && (
+        <ActionButton
+          id="regenerate"
+          label={LABELS.regenerate}
+          icon={regenerating ? STATUS_ICON.loading : <IconRefresh size={18} />}
+          state={states.regenerate}
+          disabled={disabled || regenerating}
+          onClick={() => run('regenerate', onRegenerate)}
+        />
+      )}
+      {onShare && (
+        <ActionButton
+          id="share"
+          label={LABELS.share}
+          successLabel="Share link copied"
+          icon={<IconShare size={18} />}
+          state={states.share}
+          disabled={disabled}
+          onClick={() => run('share', shareAndCopy)}
+        />
+      )}
+      {onRate && <RateButtons onRate={onRate} states={states} run={run} disabled={disabled} />}
+      {onLaunch && (
+        <ActionButton
+          id="launch"
+          label={LABELS.launch}
+          successLabel="Campaign draft created"
+          icon={<IconRocket size={18} />}
+          state={states.launch}
+          disabled={disabled}
+          onClick={() => run('launch', onLaunch)}
+        />
+      )}
+    </>
+  );
+}
+
+export default function OutputToolbar({ output, title = 'Result', fileName, ...backend }) {
+  const [states, run] = useActionStates();
+  const disabled = !(typeof output === 'string' && output.trim().length > 0);
+  const hasBackend = ['onSave', 'onRegenerate', 'onShare', 'onRate', 'onLaunch'].some((k) => backend[k]);
 
   return (
     <Stack
@@ -163,84 +236,26 @@ export default function OutputToolbar({
         disabled={disabled}
         onClick={() => run('pdf', () => printAsPdf(output, title))}
       />
-
-      {(onSave || onRegenerate || onShare || onRate || onLaunch) && (
-        <Divider orientation="vertical" flexItem sx={{ mx: 0.5, my: 0.75 }} />
-      )}
-
-      {onSave && (
-        <ActionButton
-          id="save"
-          label={saved ? 'Saved' : LABELS.save}
-          successLabel="Saved"
-          icon={saved ? <IconCheck size={18} /> : <IconDeviceFloppy size={18} />}
-          state={states.save}
-          disabled={disabled || saved}
-          onClick={() => run('save', onSave)}
-        />
-      )}
-      {onRegenerate && (
-        <ActionButton
-          id="regenerate"
-          label={LABELS.regenerate}
-          icon={regenerating ? <CircularProgress size={16} color="inherit" /> : <IconRefresh size={18} />}
-          state={states.regenerate}
-          disabled={disabled || regenerating}
-          onClick={() => run('regenerate', onRegenerate)}
-        />
-      )}
-      {onShare && (
-        <ActionButton
-          id="share"
-          label={LABELS.share}
-          successLabel="Share link copied"
-          icon={<IconShare size={18} />}
-          state={states.share}
-          disabled={disabled}
-          onClick={() =>
-            run('share', async () => {
-              const url = await onShare();
-              if (url) await copyText(url);
-            })
-          }
-        />
-      )}
-      {onRate && (
-        <>
-          <ActionButton
-            id="rate-up"
-            label="Good result"
-            successLabel="Thanks for rating"
-            icon={rating === 'up' ? <IconThumbUpFilled size={18} /> : <IconThumbUp size={18} />}
-            state={rating === 'up' ? states.rate : undefined}
-            disabled={disabled || states.rate?.status === 'loading'}
-            onClick={() => rate('up')}
-          />
-          <ActionButton
-            id="rate-down"
-            label="Poor result"
-            successLabel="Thanks for rating"
-            icon={rating === 'down' ? <IconThumbDownFilled size={18} /> : <IconThumbDown size={18} />}
-            state={rating === 'down' ? states.rate : undefined}
-            disabled={disabled || states.rate?.status === 'loading'}
-            onClick={() => rate('down')}
-          />
-        </>
-      )}
-      {onLaunch && (
-        <ActionButton
-          id="launch"
-          label={LABELS.launch}
-          successLabel="Campaign draft created"
-          icon={<IconRocket size={18} />}
-          state={states.launch}
-          disabled={disabled}
-          onClick={() => run('launch', onLaunch)}
-        />
-      )}
+      {hasBackend && <Divider orientation="vertical" flexItem sx={{ mx: 0.5, my: 0.75 }} />}
+      <BackendActions states={states} run={run} disabled={disabled} {...backend} />
     </Stack>
   );
 }
+
+RateButtons.propTypes = { onRate: PropTypes.func, states: PropTypes.object, run: PropTypes.func, disabled: PropTypes.bool };
+
+BackendActions.propTypes = {
+  states: PropTypes.object,
+  run: PropTypes.func,
+  disabled: PropTypes.bool,
+  onSave: PropTypes.func,
+  onRegenerate: PropTypes.func,
+  onShare: PropTypes.func,
+  onRate: PropTypes.func,
+  onLaunch: PropTypes.func,
+  regenerating: PropTypes.bool,
+  saved: PropTypes.bool
+};
 
 ActionButton.propTypes = {
   id: PropTypes.string,

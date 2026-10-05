@@ -61,107 +61,95 @@ const splitRow = (line) =>
     .split('|')
     .map((c) => c.trim());
 
+// Collect consecutive lines matching `re` starting at `i`; returns [matches, nextIndex].
+function takeWhile(lines, i, re) {
+  const out = [];
+  while (i < lines.length && re.test(lines[i])) out.push(lines[i++].match(re));
+  return [out, i];
+}
+
+const STARTS_BLOCK = [RE.fence, RE.heading, RE.hr, RE.bullet, RE.ordered, RE.quote, RE.tableRow];
+const startsBlock = (line) => line.trim() === '' || STARTS_BLOCK.some((re) => re.test(line));
+
+// Each reader looks at lines[i]; if it recognises a block it returns [block, nextIndex], else null.
+const READERS = [
+  function readFence(lines, i) {
+    const fence = lines[i].match(RE.fence);
+    if (!fence) return null;
+    let j = i + 1;
+    const code = [];
+    while (j < lines.length && !RE.fence.test(lines[j])) code.push(lines[j++]);
+    return [{ type: 'code', lang: fence[1] || '', text: code.join('\n') }, j + 1];
+  },
+  function readHeading(lines, i) {
+    const h = lines[i].match(RE.heading);
+    return h ? [{ type: 'heading', level: Math.min(h[1].length, 4), text: h[2] }, i + 1] : null;
+  },
+  function readRule(lines, i) {
+    return RE.hr.test(lines[i]) ? [{ type: 'hr' }, i + 1] : null;
+  },
+  function readTable(lines, i) {
+    const isTable = RE.tableRow.test(lines[i]) && RE.tableSep.test(lines[i + 1] ?? '');
+    if (!isTable) return null;
+    const [rows, next] = takeWhile(lines, i + 2, RE.tableRow);
+    return [{ type: 'table', header: splitRow(lines[i]), rows: rows.map((m) => splitRow(m[0])) }, next];
+  },
+  function readBullets(lines, i) {
+    const [items, next] = takeWhile(lines, i, RE.bullet);
+    return items.length ? [{ type: 'ul', items: items.map((m) => m[1]) }, next] : null;
+  },
+  function readOrdered(lines, i) {
+    const [items, next] = takeWhile(lines, i, RE.ordered);
+    if (!items.length) return null;
+    return [{ type: 'ol', start: Number(items[0][1]) || 1, items: items.map((m) => m[2]) }, next];
+  },
+  function readQuote(lines, i) {
+    const [quote, next] = takeWhile(lines, i, RE.quote);
+    return quote.length ? [{ type: 'quote', text: quote.map((m) => m[1]).join(' ') }, next] : null;
+  }
+];
+
+// Paragraph: gather until a blank line or the start of another block.
+function readParagraph(lines, i) {
+  const para = [lines[i].trim()];
+  let j = i + 1;
+  while (j < lines.length && !startsBlock(lines[j])) para.push(lines[j++].trim());
+  return [{ type: 'paragraph', text: para.join(' ') }, j];
+}
+
+// Some engines answer with a JSON payload rather than markdown — keep its layout.
+function asJsonBlock(raw) {
+  const trimmed = raw.trim();
+  if (!/^[[{]/.test(trimmed)) return null;
+  try {
+    JSON.parse(trimmed);
+    return { type: 'code', lang: 'json', text: trimmed };
+  } catch {
+    return null;
+  }
+}
+
 /**
  * Parse markdown into a flat list of blocks.
  * Block types: heading {level 1-4}, paragraph, ul, ol {start}, code {lang}, quote, hr, table {header, rows}.
  */
 export function parseMarkdown(source) {
   const raw = String(source ?? '');
-  // Some engines answer with a JSON payload rather than markdown — keep its layout.
-  const trimmed = raw.trim();
-  if (/^[[{]/.test(trimmed)) {
-    try {
-      JSON.parse(trimmed);
-      return [{ type: 'code', lang: 'json', text: trimmed }];
-    } catch {
-      // not JSON — fall through to markdown
-    }
-  }
+  const json = asJsonBlock(raw);
+  if (json) return [json];
+
   const lines = raw.replace(/\r\n?/g, '\n').split('\n');
   const blocks = [];
   let i = 0;
-
   while (i < lines.length) {
-    const line = lines[i];
-
-    if (line.trim() === '') {
+    if (lines[i].trim() === '') {
       i++;
       continue;
     }
-
-    const fence = line.match(RE.fence);
-    if (fence) {
-      const code = [];
-      i++;
-      while (i < lines.length && !RE.fence.test(lines[i])) code.push(lines[i++]);
-      i++; // closing fence (or EOF)
-      blocks.push({ type: 'code', lang: fence[1] || '', text: code.join('\n') });
-      continue;
-    }
-
-    const heading = line.match(RE.heading);
-    if (heading) {
-      blocks.push({ type: 'heading', level: Math.min(heading[1].length, 4), text: heading[2] });
-      i++;
-      continue;
-    }
-
-    if (RE.hr.test(line)) {
-      blocks.push({ type: 'hr' });
-      i++;
-      continue;
-    }
-
-    if (RE.tableRow.test(line) && i + 1 < lines.length && RE.tableSep.test(lines[i + 1])) {
-      const header = splitRow(line);
-      const rows = [];
-      i += 2;
-      while (i < lines.length && RE.tableRow.test(lines[i])) rows.push(splitRow(lines[i++]));
-      blocks.push({ type: 'table', header, rows });
-      continue;
-    }
-
-    if (RE.bullet.test(line)) {
-      const items = [];
-      while (i < lines.length && RE.bullet.test(lines[i])) items.push(lines[i++].match(RE.bullet)[1]);
-      blocks.push({ type: 'ul', items });
-      continue;
-    }
-
-    if (RE.ordered.test(line)) {
-      const start = Number(line.match(RE.ordered)[1]) || 1;
-      const items = [];
-      while (i < lines.length && RE.ordered.test(lines[i])) items.push(lines[i++].match(RE.ordered)[2]);
-      blocks.push({ type: 'ol', start, items });
-      continue;
-    }
-
-    if (RE.quote.test(line)) {
-      const quote = [];
-      while (i < lines.length && RE.quote.test(lines[i])) quote.push(lines[i++].match(RE.quote)[1]);
-      blocks.push({ type: 'quote', text: quote.join(' ') });
-      continue;
-    }
-
-    // paragraph: gather until a blank line or the start of another block
-    const para = [line.trim()];
-    i++;
-    while (
-      i < lines.length &&
-      lines[i].trim() !== '' &&
-      !RE.fence.test(lines[i]) &&
-      !RE.heading.test(lines[i]) &&
-      !RE.hr.test(lines[i]) &&
-      !RE.bullet.test(lines[i]) &&
-      !RE.ordered.test(lines[i]) &&
-      !RE.quote.test(lines[i]) &&
-      !RE.tableRow.test(lines[i])
-    ) {
-      para.push(lines[i++].trim());
-    }
-    blocks.push({ type: 'paragraph', text: para.join(' ') });
+    const hit = READERS.reduce((found, read) => found || read(lines, i), null) || readParagraph(lines, i);
+    blocks.push(hit[0]);
+    i = hit[1];
   }
-
   return blocks;
 }
 
@@ -183,56 +171,41 @@ function inlineToHtml(text) {
     .join('');
 }
 
+const listHtml = (b) => b.items.map((it) => `<li>${inlineToHtml(it)}</li>`).join('');
+const rowHtml = (cells, tag) => `<tr>${cells.map((c) => `<${tag}>${inlineToHtml(c)}</${tag}>`).join('')}</tr>`;
+
+const HTML = {
+  heading: (b) => `<h${b.level}>${inlineToHtml(b.text)}</h${b.level}>`,
+  paragraph: (b) => `<p>${inlineToHtml(b.text)}</p>`,
+  ul: (b) => `<ul>${listHtml(b)}</ul>`,
+  ol: (b) => `<ol start="${b.start}">${listHtml(b)}</ol>`,
+  code: (b) => `<pre><code>${escapeHtml(b.text)}</code></pre>`,
+  quote: (b) => `<blockquote>${inlineToHtml(b.text)}</blockquote>`,
+  hr: () => '<hr/>',
+  table: (b) => `<table><thead>${rowHtml(b.header, 'th')}</thead><tbody>${b.rows.map((r) => rowHtml(r, 'td')).join('')}</tbody></table>`
+};
+
 /** Escaped HTML for a print/PDF document. Never passes input HTML through. */
 export function blocksToHtml(blocks) {
-  return blocks
-    .map((b) => {
-      switch (b.type) {
-        case 'heading':
-          return `<h${b.level}>${inlineToHtml(b.text)}</h${b.level}>`;
-        case 'paragraph':
-          return `<p>${inlineToHtml(b.text)}</p>`;
-        case 'ul':
-          return `<ul>${b.items.map((it) => `<li>${inlineToHtml(it)}</li>`).join('')}</ul>`;
-        case 'ol':
-          return `<ol start="${b.start}">${b.items.map((it) => `<li>${inlineToHtml(it)}</li>`).join('')}</ol>`;
-        case 'code':
-          return `<pre><code>${escapeHtml(b.text)}</code></pre>`;
-        case 'quote':
-          return `<blockquote>${inlineToHtml(b.text)}</blockquote>`;
-        case 'hr':
-          return '<hr/>';
-        case 'table':
-          return `<table><thead><tr>${b.header.map((h) => `<th>${inlineToHtml(h)}</th>`).join('')}</tr></thead><tbody>${b.rows
-            .map((r) => `<tr>${r.map((c) => `<td>${inlineToHtml(c)}</td>`).join('')}</tr>`)
-            .join('')}</tbody></table>`;
-        default:
-          return '';
-      }
-    })
-    .join('\n');
+  return blocks.map((b) => (HTML[b.type] ? HTML[b.type](b) : '')).join('\n');
 }
+
+const stripInline = (s) =>
+  parseInline(s)
+    .map((t) => (t.type === 'link' ? `${t.value} (${t.href})` : t.value))
+    .join('');
+
+const PLAIN = {
+  ul: (b) => b.items.map((it) => `• ${stripInline(it)}`).join('\n'),
+  ol: (b) => b.items.map((it, n) => `${b.start + n}. ${stripInline(it)}`).join('\n'),
+  code: (b) => b.text,
+  hr: () => '',
+  table: (b) => [b.header, ...b.rows].map((r) => r.map(stripInline).join('\t')).join('\n')
+};
 
 /** Plain text with markdown markers stripped — used for "Copy section". */
 export function blockToPlainText(block) {
-  const strip = (s) =>
-    parseInline(s)
-      .map((t) => (t.type === 'link' ? `${t.value} (${t.href})` : t.value))
-      .join('');
-  switch (block.type) {
-    case 'ul':
-      return block.items.map((it) => `• ${strip(it)}`).join('\n');
-    case 'ol':
-      return block.items.map((it, n) => `${block.start + n}. ${strip(it)}`).join('\n');
-    case 'code':
-      return block.text;
-    case 'hr':
-      return '';
-    case 'table':
-      return [block.header, ...block.rows].map((r) => r.map(strip).join('\t')).join('\n');
-    default:
-      return strip(block.text);
-  }
+  return PLAIN[block.type] ? PLAIN[block.type](block) : stripInline(block.text);
 }
 
 /**

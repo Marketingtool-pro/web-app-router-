@@ -34,37 +34,32 @@ const codeSx = {
   bgcolor: 'rgba(255,255,255,0.06)'
 };
 
+const INLINE = {
+  bold: (t, k) => (
+    <Box key={k} component="strong" sx={{ fontWeight: 700, color: 'text.primary' }}>
+      {t.value}
+    </Box>
+  ),
+  italic: (t, k) => (
+    <Box key={k} component="em">
+      {t.value}
+    </Box>
+  ),
+  code: (t, k) => (
+    <Box key={k} component="code" sx={codeSx}>
+      {t.value}
+    </Box>
+  ),
+  link: (t, k) => (
+    <Link key={k} href={t.href} target="_blank" rel="noopener noreferrer nofollow" underline="hover">
+      {t.value}
+    </Link>
+  ),
+  text: (t, k) => <Fragment key={k}>{t.value}</Fragment>
+};
+
 function Inline({ text }) {
-  return parseInline(text).map((t, i) => {
-    switch (t.type) {
-      case 'bold':
-        return (
-          <Box key={i} component="strong" sx={{ fontWeight: 700, color: 'text.primary' }}>
-            {t.value}
-          </Box>
-        );
-      case 'italic':
-        return (
-          <Box key={i} component="em">
-            {t.value}
-          </Box>
-        );
-      case 'code':
-        return (
-          <Box key={i} component="code" sx={codeSx}>
-            {t.value}
-          </Box>
-        );
-      case 'link':
-        return (
-          <Link key={i} href={t.href} target="_blank" rel="noopener noreferrer nofollow" underline="hover">
-            {t.value}
-          </Link>
-        );
-      default:
-        return <Fragment key={i}>{t.value}</Fragment>;
-    }
-  });
+  return parseInline(text).map((t, i) => INLINE[t.type](t, i));
 }
 
 function CopySectionButton({ text }) {
@@ -190,6 +185,35 @@ function Block({ block, sectionText }) {
   }
 }
 
+// Flatten sections into rendered blocks, stopping at `limit`. The first block of a
+// titled section carries that section's plain text for the copy button.
+function renderBlocks(sections, limit, sectionCopy) {
+  const out = [];
+  for (const [si, section] of sections.entries()) {
+    const sectionText = sectionCopy && section.title ? section.blocks.map(blockToPlainText).filter(Boolean).join('\n\n') : null;
+    for (const [bi, block] of section.blocks.entries()) {
+      if (out.length >= limit) return out;
+      out.push(<Block key={`${si}-${bi}`} block={block} sectionText={bi === 0 ? sectionText : null} />);
+    }
+  }
+  return out;
+}
+
+function TooLargeNotice({ onDownload }) {
+  return (
+    <Stack direction="row" sx={{ alignItems: 'center', gap: 1.5, mt: 2 }}>
+      <Typography variant="caption" color="text.secondary">
+        This result is too large to show in full here.
+      </Typography>
+      {onDownload && (
+        <Button size="small" variant="outlined" onClick={onDownload}>
+          Download full result
+        </Button>
+      )}
+    </Stack>
+  );
+}
+
 export default function MarkdownRenderer({
   content,
   collapseAt = 6000,
@@ -202,29 +226,18 @@ export default function MarkdownRenderer({
   const text = String(content ?? '');
   const tooLarge = text.length > maxRenderChars;
 
-  const sections = useMemo(() => {
-    const source = tooLarge ? text.slice(0, collapseAt) : text;
-    return splitSections(parseMarkdown(source));
-  }, [text, tooLarge, collapseAt]);
+  const sections = useMemo(
+    () => splitSections(parseMarkdown(tooLarge ? text.slice(0, collapseAt) : text)),
+    [text, tooLarge, collapseAt]
+  );
 
   const totalBlocks = sections.reduce((n, s) => n + s.blocks.length, 0);
   const collapsible = !tooLarge && text.length > collapseAt && totalBlocks > collapsedBlocks;
-  const limit = tooLarge || (collapsible && !expanded) ? collapsedBlocks : Infinity;
-
-  let shown = 0;
-  const rendered = [];
-  for (const [si, section] of sections.entries()) {
-    const sectionText = sectionCopy && section.title ? section.blocks.map(blockToPlainText).filter(Boolean).join('\n\n') : null;
-    for (const [bi, block] of section.blocks.entries()) {
-      if (shown >= limit) break;
-      rendered.push(<Block key={`${si}-${bi}`} block={block} sectionText={bi === 0 ? sectionText : null} />);
-      shown++;
-    }
-  }
+  const showAll = !tooLarge && (!collapsible || expanded);
 
   return (
     <Box sx={{ wordBreak: 'break-word', '& > :first-of-type': { mt: 0 } }} data-testid="markdown-renderer">
-      {rendered}
+      {renderBlocks(sections, showAll ? Infinity : collapsedBlocks, sectionCopy)}
 
       {collapsible && (
         <Button
@@ -237,24 +250,14 @@ export default function MarkdownRenderer({
         </Button>
       )}
 
-      {tooLarge && (
-        <Stack direction="row" sx={{ alignItems: 'center', gap: 1.5, mt: 2 }}>
-          <Typography variant="caption" color="text.secondary">
-            This result is too large to show in full here.
-          </Typography>
-          {onDownload && (
-            <Button size="small" variant="outlined" onClick={onDownload}>
-              Download full result
-            </Button>
-          )}
-        </Stack>
-      )}
+      {tooLarge && <TooLargeNotice onDownload={onDownload} />}
     </Box>
   );
 }
 
 Inline.propTypes = { text: PropTypes.string };
 CopySectionButton.propTypes = { text: PropTypes.string };
+TooLargeNotice.propTypes = { onDownload: PropTypes.func };
 Block.propTypes = { block: PropTypes.object, sectionText: PropTypes.string };
 MarkdownRenderer.propTypes = {
   content: PropTypes.string,

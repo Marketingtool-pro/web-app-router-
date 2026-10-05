@@ -14,16 +14,23 @@ import { IconSparkles } from '@tabler/icons-react';
 // One shape for "nothing here yet" across the tool pages: before a run, an unknown
 // tool slug, an empty history. Real empty — never filled with sample data.
 
+const SIZES = {
+  regular: { py: 6, circle: 56, iconSize: 24, titleVariant: 'h6' },
+  compact: { py: 3, circle: 44, iconSize: 20, titleVariant: 'subtitle1' }
+};
+
 export default function EmptyState({ icon, title, description, actionLabel, onAction, compact = false }) {
+  const size = SIZES[compact ? 'compact' : 'regular'];
+  const showAction = Boolean(actionLabel && onAction);
   return (
     <Stack
       role="status"
-      sx={{ alignItems: 'center', textAlign: 'center', gap: 1.25, py: compact ? 3 : 6, px: 2 }}
+      sx={{ alignItems: 'center', textAlign: 'center', gap: 1.25, py: size.py, px: 2 }}
     >
       <Box
         sx={{
-          width: compact ? 44 : 56,
-          height: compact ? 44 : 56,
+          width: size.circle,
+          height: size.circle,
           borderRadius: '50%',
           display: 'grid',
           placeItems: 'center',
@@ -32,9 +39,9 @@ export default function EmptyState({ icon, title, description, actionLabel, onAc
           border: '1px solid rgba(255,255,255,0.06)'
         }}
       >
-        {icon || <IconSparkles size={compact ? 20 : 24} />}
+        {icon || <IconSparkles size={size.iconSize} />}
       </Box>
-      <Typography variant={compact ? 'subtitle1' : 'h6'} sx={{ fontWeight: 700 }}>
+      <Typography variant={size.titleVariant} sx={{ fontWeight: 700 }}>
         {title}
       </Typography>
       {description && (
@@ -42,7 +49,7 @@ export default function EmptyState({ icon, title, description, actionLabel, onAc
           {description}
         </Typography>
       )}
-      {actionLabel && onAction && (
+      {showAction && (
         <Button variant="outlined" size="small" onClick={onAction} sx={{ mt: 1 }}>
           {actionLabel}
         </Button>
