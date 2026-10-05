@@ -214,6 +214,32 @@ function TooLargeNotice({ onDownload }) {
   );
 }
 
+// Decide how much of the output to render: everything, a collapsible preview, or
+// (past maxRenderChars) a fixed preview with a download offer.
+function useRenderPlan(text, { collapseAt, collapsedBlocks, maxRenderChars }) {
+  const tooLarge = text.length > maxRenderChars;
+  const sections = useMemo(
+    () => splitSections(parseMarkdown(tooLarge ? text.slice(0, collapseAt) : text)),
+    [text, tooLarge, collapseAt]
+  );
+  const totalBlocks = sections.reduce((n, s) => n + s.blocks.length, 0);
+  const collapsible = !tooLarge && text.length > collapseAt && totalBlocks > collapsedBlocks;
+  return { sections, tooLarge, collapsible };
+}
+
+function CollapseToggle({ expanded, onToggle }) {
+  return (
+    <Button
+      size="small"
+      onClick={onToggle}
+      endIcon={expanded ? <IconChevronUp size={16} /> : <IconChevronDown size={16} />}
+      sx={{ mt: 1, '@media print': { display: 'none' } }}
+    >
+      {expanded ? 'Show less' : 'Show full result'}
+    </Button>
+  );
+}
+
 export default function MarkdownRenderer({
   content,
   collapseAt = 6000,
@@ -223,33 +249,13 @@ export default function MarkdownRenderer({
   onDownload
 }) {
   const [expanded, setExpanded] = useState(false);
-  const text = String(content ?? '');
-  const tooLarge = text.length > maxRenderChars;
-
-  const sections = useMemo(
-    () => splitSections(parseMarkdown(tooLarge ? text.slice(0, collapseAt) : text)),
-    [text, tooLarge, collapseAt]
-  );
-
-  const totalBlocks = sections.reduce((n, s) => n + s.blocks.length, 0);
-  const collapsible = !tooLarge && text.length > collapseAt && totalBlocks > collapsedBlocks;
+  const { sections, tooLarge, collapsible } = useRenderPlan(String(content ?? ''), { collapseAt, collapsedBlocks, maxRenderChars });
   const showAll = !tooLarge && (!collapsible || expanded);
 
   return (
     <Box sx={{ wordBreak: 'break-word', '& > :first-of-type': { mt: 0 } }} data-testid="markdown-renderer">
       {renderBlocks(sections, showAll ? Infinity : collapsedBlocks, sectionCopy)}
-
-      {collapsible && (
-        <Button
-          size="small"
-          onClick={() => setExpanded((v) => !v)}
-          endIcon={expanded ? <IconChevronUp size={16} /> : <IconChevronDown size={16} />}
-          sx={{ mt: 1, '@media print': { display: 'none' } }}
-        >
-          {expanded ? 'Show less' : 'Show full result'}
-        </Button>
-      )}
-
+      {collapsible && <CollapseToggle expanded={expanded} onToggle={() => setExpanded((v) => !v)} />}
       {tooLarge && <TooLargeNotice onDownload={onDownload} />}
     </Box>
   );
@@ -258,6 +264,7 @@ export default function MarkdownRenderer({
 Inline.propTypes = { text: PropTypes.string };
 CopySectionButton.propTypes = { text: PropTypes.string };
 TooLargeNotice.propTypes = { onDownload: PropTypes.func };
+CollapseToggle.propTypes = { expanded: PropTypes.bool, onToggle: PropTypes.func };
 Block.propTypes = { block: PropTypes.object, sectionText: PropTypes.string };
 HeadingBlock.propTypes = { block: PropTypes.object, sectionText: PropTypes.string };
 ListBlock.propTypes = { block: PropTypes.object };

@@ -218,19 +218,12 @@ export function blockToPlainText(block) {
  * heading forms an untitled leading section.
  */
 export function splitSections(blocks) {
-  const sections = [];
-  let current = null;
-  for (const b of blocks) {
-    if (b.type === 'heading' && b.level <= 2) {
-      current = { title: b.text, blocks: [b] };
-      sections.push(current);
-    } else {
-      if (!current) {
-        current = { title: null, blocks: [] };
-        sections.push(current);
-      }
-      current.blocks.push(b);
+  const startsSection = (b) => b.type === 'heading' && b.level <= 2;
+  return blocks.reduce((sections, b) => {
+    if (startsSection(b) || sections.length === 0) {
+      sections.push({ title: startsSection(b) ? b.text : null, blocks: [] });
     }
-  }
-  return sections;
+    sections[sections.length - 1].blocks.push(b);
+    return sections;
+  }, []);
 }
