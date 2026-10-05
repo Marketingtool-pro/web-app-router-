@@ -141,58 +141,63 @@ function RateButtons({ onRate, states, run, disabled }) {
   );
 }
 
-// Actions that need a backend: rendered only for the handlers the page provides.
-function BackendActions({ states, run, disabled, onSave, onRegenerate, onShare, onRate, onLaunch, regenerating, saved }) {
-  const shareAndCopy = async () => {
-    const url = await onShare();
-    if (url) await copyText(url);
-  };
+// Actions that need a backend. Each entry builds its button props from the
+// toolbar props; entries whose handler the page did not pass are skipped.
+const BACKEND_ACTIONS = [
+  {
+    handler: 'onSave',
+    build: ({ onSave, saved }) => ({
+      id: 'save',
+      label: saved ? 'Saved' : LABELS.save,
+      successLabel: 'Saved',
+      icon: saved ? <IconCheck size={18} /> : <IconDeviceFloppy size={18} />,
+      blocked: saved,
+      fn: onSave
+    })
+  },
+  {
+    handler: 'onRegenerate',
+    build: ({ onRegenerate, regenerating }) => ({
+      id: 'regenerate',
+      label: LABELS.regenerate,
+      icon: regenerating ? STATUS_ICON.loading : <IconRefresh size={18} />,
+      blocked: regenerating,
+      fn: onRegenerate
+    })
+  },
+  {
+    handler: 'onShare',
+    build: ({ onShare }) => ({
+      id: 'share',
+      label: LABELS.share,
+      successLabel: 'Share link copied',
+      icon: <IconShare size={18} />,
+      fn: async () => {
+        const url = await onShare();
+        if (url) await copyText(url);
+      }
+    })
+  },
+  {
+    handler: 'onLaunch',
+    build: ({ onLaunch }) => ({
+      id: 'launch',
+      label: LABELS.launch,
+      successLabel: 'Campaign draft created',
+      icon: <IconRocket size={18} />,
+      fn: onLaunch
+    })
+  }
+];
+
+function BackendActions({ states, run, disabled, ...props }) {
+  const buttons = BACKEND_ACTIONS.filter((a) => props[a.handler]).map((a) => a.build(props));
   return (
     <>
-      {onSave && (
-        <ActionButton
-          id="save"
-          label={saved ? 'Saved' : LABELS.save}
-          successLabel="Saved"
-          icon={saved ? <IconCheck size={18} /> : <IconDeviceFloppy size={18} />}
-          state={states.save}
-          disabled={disabled || saved}
-          onClick={() => run('save', onSave)}
-        />
-      )}
-      {onRegenerate && (
-        <ActionButton
-          id="regenerate"
-          label={LABELS.regenerate}
-          icon={regenerating ? STATUS_ICON.loading : <IconRefresh size={18} />}
-          state={states.regenerate}
-          disabled={disabled || regenerating}
-          onClick={() => run('regenerate', onRegenerate)}
-        />
-      )}
-      {onShare && (
-        <ActionButton
-          id="share"
-          label={LABELS.share}
-          successLabel="Share link copied"
-          icon={<IconShare size={18} />}
-          state={states.share}
-          disabled={disabled}
-          onClick={() => run('share', shareAndCopy)}
-        />
-      )}
-      {onRate && <RateButtons onRate={onRate} states={states} run={run} disabled={disabled} />}
-      {onLaunch && (
-        <ActionButton
-          id="launch"
-          label={LABELS.launch}
-          successLabel="Campaign draft created"
-          icon={<IconRocket size={18} />}
-          state={states.launch}
-          disabled={disabled}
-          onClick={() => run('launch', onLaunch)}
-        />
-      )}
+      {buttons.map(({ id, fn, blocked, ...rest }) => (
+        <ActionButton key={id} id={id} {...rest} state={states[id]} disabled={disabled || Boolean(blocked)} onClick={() => run(id, fn)} />
+      ))}
+      {props.onRate && <RateButtons onRate={props.onRate} states={states} run={run} disabled={disabled} />}
     </>
   );
 }

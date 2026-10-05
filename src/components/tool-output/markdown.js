@@ -17,29 +17,34 @@ export function isSafeUrl(url) {
  * Split one line of text into inline tokens.
  * @returns {Array<{type:'text'|'bold'|'italic'|'code'|'link', value:string, href?:string}>}
  */
+const INLINE_RE = /(`[^`]+`|\*\*[^*]+\*\*|(?<!\w)__[^_]+__(?!\w)|\[[^\]]+\]\([^)\s]+\)|\*[^*\s][^*]*\*|(?<!\w)_[^_\s][^_]*_(?!\w))/g;
+const LINK_RE = /^\[([^\]]+)\]\(([^)\s]+)\)$/;
+
+function linkToken(tok) {
+  const [, label, href] = tok.match(LINK_RE);
+  return isSafeUrl(href) ? { type: 'link', value: label, href } : { type: 'text', value: label };
+}
+
+// Ordered: the first rule whose prefix matches the token decides its type.
+const INLINE_RULES = [
+  ['`', (tok) => ({ type: 'code', value: tok.slice(1, -1) })],
+  ['**', (tok) => ({ type: 'bold', value: tok.slice(2, -2) })],
+  ['__', (tok) => ({ type: 'bold', value: tok.slice(2, -2) })],
+  ['[', linkToken],
+  ['', (tok) => ({ type: 'italic', value: tok.slice(1, -1) })]
+];
+
+const tokenFor = (tok) => INLINE_RULES.find(([prefix]) => tok.startsWith(prefix))[1](tok);
+
 export function parseInline(text) {
   const tokens = [];
-  if (!text) return tokens;
-  const re = /(`[^`]+`|\*\*[^*]+\*\*|(?<!\w)__[^_]+__(?!\w)|\[[^\]]+\]\([^)\s]+\)|\*[^*\s][^*]*\*|(?<!\w)_[^_\s][^_]*_(?!\w))/g;
   let last = 0;
-  let m;
-  while ((m = re.exec(text)) !== null) {
+  for (const m of String(text ?? '').matchAll(INLINE_RE)) {
     if (m.index > last) tokens.push({ type: 'text', value: text.slice(last, m.index) });
-    const tok = m[0];
-    if (tok.startsWith('`')) {
-      tokens.push({ type: 'code', value: tok.slice(1, -1) });
-    } else if (tok.startsWith('**') || tok.startsWith('__')) {
-      tokens.push({ type: 'bold', value: tok.slice(2, -2) });
-    } else if (tok.startsWith('[')) {
-      const lm = tok.match(/^\[([^\]]+)\]\(([^)\s]+)\)$/);
-      if (lm && isSafeUrl(lm[2])) tokens.push({ type: 'link', value: lm[1], href: lm[2] });
-      else tokens.push({ type: 'text', value: lm ? lm[1] : tok });
-    } else {
-      tokens.push({ type: 'italic', value: tok.slice(1, -1) });
-    }
-    last = m.index + tok.length;
+    tokens.push(tokenFor(m[0]));
+    last = m.index + m[0].length;
   }
-  if (last < text.length) tokens.push({ type: 'text', value: text.slice(last) });
+  if (text && last < text.length) tokens.push({ type: 'text', value: text.slice(last) });
   return tokens;
 }
 

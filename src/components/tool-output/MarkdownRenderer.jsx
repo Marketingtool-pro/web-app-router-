@@ -82,107 +82,107 @@ function CopySectionButton({ text }) {
   );
 }
 
-function Block({ block, sectionText }) {
-  const body = { color: 'text.secondary', lineHeight: 1.75 };
-  switch (block.type) {
-    case 'heading':
-      return (
-        <Stack direction="row" sx={{ alignItems: 'center', gap: 1, mt: block.level <= 2 ? 2.5 : 2, mb: 1 }}>
-          <Typography variant={HEADING_VARIANT[block.level]} component={`h${block.level + 1}`} sx={{ fontWeight: 700, flex: 1 }}>
-            <Inline text={block.text} />
-          </Typography>
-          {sectionText && <CopySectionButton text={sectionText} />}
-        </Stack>
-      );
-    case 'paragraph':
-      return (
-        <Typography variant="body2" sx={{ ...body, mb: 1.5 }}>
-          <Inline text={block.text} />
+const bodySx = { color: 'text.secondary', lineHeight: 1.75 };
+
+function HeadingBlock({ block, sectionText }) {
+  return (
+    <Stack direction="row" sx={{ alignItems: 'center', gap: 1, mt: block.level <= 2 ? 2.5 : 2, mb: 1 }}>
+      <Typography variant={HEADING_VARIANT[block.level]} component={`h${block.level + 1}`} sx={{ fontWeight: 700, flex: 1 }}>
+        <Inline text={block.text} />
+      </Typography>
+      {sectionText && <CopySectionButton text={sectionText} />}
+    </Stack>
+  );
+}
+
+function ListBlock({ block }) {
+  return (
+    <Box
+      component={block.type}
+      start={block.start}
+      sx={{ ...bodySx, pl: 3, my: 1, '& li': { mb: 0.5 }, '& li::marker': { color: 'primary.main' } }}
+    >
+      {block.items.map((it, i) => (
+        <Typography key={i} component="li" variant="body2" sx={bodySx}>
+          <Inline text={it} />
         </Typography>
-      );
-    case 'ul':
-    case 'ol':
-      return (
-        <Box
-          component={block.type}
-          start={block.type === 'ol' ? block.start : undefined}
-          sx={{ ...body, pl: 3, my: 1, '& li': { mb: 0.5 }, '& li::marker': { color: 'primary.main' } }}
-        >
-          {block.items.map((it, i) => (
-            <Typography key={i} component="li" variant="body2" sx={body}>
-              <Inline text={it} />
-            </Typography>
-          ))}
-        </Box>
-      );
-    case 'code':
-      return (
-        <Box
-          component="pre"
-          sx={{
-            m: 0,
-            my: 1.5,
-            p: 2,
-            borderRadius: 2,
-            bgcolor: 'rgba(0,0,0,0.3)',
-            border: '1px solid rgba(255,255,255,0.06)',
-            overflowX: 'auto',
-            fontFamily: 'monospace',
-            fontSize: 13,
-            lineHeight: 1.6
-          }}
-        >
-          <code>{block.text}</code>
-        </Box>
-      );
-    case 'quote':
-      return (
-        <Box sx={{ borderLeft: '3px solid', borderColor: 'primary.main', pl: 2, my: 1.5 }}>
-          <Typography variant="body2" sx={{ ...body, fontStyle: 'italic' }}>
-            <Inline text={block.text} />
-          </Typography>
-        </Box>
-      );
-    case 'hr':
-      return <Box component="hr" sx={{ border: 0, height: '1px', bgcolor: 'divider', my: 2 }} />;
-    case 'table':
-      return (
-        <Box sx={{ overflowX: 'auto', my: 1.5 }}>
-          <Box component="table" sx={{ width: '100%', borderCollapse: 'collapse', fontSize: 14 }}>
-            <thead>
-              <tr>
-                {block.header.map((h, i) => (
-                  <Box
-                    key={i}
-                    component="th"
-                    sx={{ textAlign: 'left', p: 1, color: 'text.primary', fontWeight: 600, borderBottom: '1px solid', borderColor: 'divider' }}
-                  >
-                    <Inline text={h} />
-                  </Box>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {block.rows.map((r, ri) => (
-                <tr key={ri}>
-                  {r.map((c, ci) => (
-                    <Box
-                      key={ci}
-                      component="td"
-                      sx={{ p: 1, color: 'text.secondary', borderBottom: '1px solid rgba(255,255,255,0.06)' }}
-                    >
-                      <Inline text={c} />
-                    </Box>
-                  ))}
-                </tr>
+      ))}
+    </Box>
+  );
+}
+
+function TableBlock({ block }) {
+  const cell = { p: 1, borderBottom: '1px solid' };
+  return (
+    <Box sx={{ overflowX: 'auto', my: 1.5 }}>
+      <Box component="table" sx={{ width: '100%', borderCollapse: 'collapse', fontSize: 14 }}>
+        <thead>
+          <tr>
+            {block.header.map((h, i) => (
+              <Box key={i} component="th" sx={{ ...cell, textAlign: 'left', color: 'text.primary', fontWeight: 600, borderColor: 'divider' }}>
+                <Inline text={h} />
+              </Box>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          {block.rows.map((r, ri) => (
+            <tr key={ri}>
+              {r.map((c, ci) => (
+                <Box key={ci} component="td" sx={{ ...cell, color: 'text.secondary', borderColor: 'rgba(255,255,255,0.06)' }}>
+                  <Inline text={c} />
+                </Box>
               ))}
-            </tbody>
-          </Box>
-        </Box>
-      );
-    default:
-      return null;
-  }
+            </tr>
+          ))}
+        </tbody>
+      </Box>
+    </Box>
+  );
+}
+
+const BLOCKS = {
+  heading: HeadingBlock,
+  paragraph: ({ block }) => (
+    <Typography variant="body2" sx={{ ...bodySx, mb: 1.5 }}>
+      <Inline text={block.text} />
+    </Typography>
+  ),
+  ul: ListBlock,
+  ol: ListBlock,
+  code: ({ block }) => (
+    <Box
+      component="pre"
+      sx={{
+        m: 0,
+        my: 1.5,
+        p: 2,
+        borderRadius: 2,
+        bgcolor: 'rgba(0,0,0,0.3)',
+        border: '1px solid rgba(255,255,255,0.06)',
+        overflowX: 'auto',
+        fontFamily: 'monospace',
+        fontSize: 13,
+        lineHeight: 1.6
+      }}
+    >
+      <code>{block.text}</code>
+    </Box>
+  ),
+  quote: ({ block }) => (
+    <Box sx={{ borderLeft: '3px solid', borderColor: 'primary.main', pl: 2, my: 1.5 }}>
+      <Typography variant="body2" sx={{ ...bodySx, fontStyle: 'italic' }}>
+        <Inline text={block.text} />
+      </Typography>
+    </Box>
+  ),
+  hr: () => <Box component="hr" sx={{ border: 0, height: '1px', bgcolor: 'divider', my: 2 }} />,
+  table: TableBlock
+};
+
+function Block({ block, sectionText }) {
+  const Component = BLOCKS[block.type];
+  return Component ? <Component block={block} sectionText={sectionText} /> : null;
 }
 
 // Flatten sections into rendered blocks, stopping at `limit`. The first block of a
@@ -259,6 +259,9 @@ Inline.propTypes = { text: PropTypes.string };
 CopySectionButton.propTypes = { text: PropTypes.string };
 TooLargeNotice.propTypes = { onDownload: PropTypes.func };
 Block.propTypes = { block: PropTypes.object, sectionText: PropTypes.string };
+HeadingBlock.propTypes = { block: PropTypes.object, sectionText: PropTypes.string };
+ListBlock.propTypes = { block: PropTypes.object };
+TableBlock.propTypes = { block: PropTypes.object };
 MarkdownRenderer.propTypes = {
   content: PropTypes.string,
   collapseAt: PropTypes.number,
