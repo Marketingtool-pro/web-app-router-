@@ -67,3 +67,6 @@ jobs:
           file: cobertura-coverage.xml
           language: JavaScript
           label: code-coverage-agent
+          # Code quality is not enabled for this repo (HTTP 403); report upload
+          # problems as warnings. Build and tests above still gate the job.
+          fail-on-error: false
