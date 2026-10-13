@@ -9,6 +9,8 @@ on:
 
 permissions:
   contents: read
+  # Required for the Qlty coverage upload to authenticate via OIDC.
+  id-token: write
 
 concurrency:
   group: node-ci-${{ github.workflow }}-${{ github.ref }}
@@ -40,6 +42,14 @@ jobs:
 
       - name: Test with coverage
         run: pnpm run test:coverage
+
+      # Pull requests from forks get no OIDC token, so skip the upload there.
+      - name: Upload coverage to Qlty
+        if: ${{ !github.event.pull_request.head.repo.fork }}
+        uses: qltysh/qlty-action/coverage@v2
+        with:
+          oidc: true
+          files: coverage/cobertura-coverage.xml
 
       - name: Upload coverage artifact
         if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
