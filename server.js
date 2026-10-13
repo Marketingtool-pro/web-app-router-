@@ -88,6 +88,36 @@ async function fileAt(candidate) {
 
 const ASSETS = path.join(ROOT, 'assets') + path.sep;
 
+/**
+ * Content Security Policy, shipped as Report-Only first so nothing breaks while the source list
+ * is confirmed in real browsers. Origins come from index.html, the Vite build and every network
+ * call in src/ (Appwrite, Windmill proxy, Google Identity / Firebase Auth, analytics loaders,
+ * geo JSON on jsdelivr, rich-text fonts). Keep in sync with the copy in firebase.json.
+ * Switch the header name to `content-security-policy` once the console shows no violations.
+ */
+const CSP = [
+  "default-src 'self'",
+  "script-src 'self' https://accounts.google.com/gsi/client https://apis.google.com https://www.google.com/recaptcha/ https://www.gstatic.com/recaptcha/ https://www.googletagmanager.com https://*.clarity.ms https://phpstack-207002-5085356.cloudwaysapps.com",
+  "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://accounts.google.com/gsi/style",
+  "font-src 'self' data: https://fonts.gstatic.com",
+  "img-src 'self' data: blob: https:",
+  "media-src 'self' blob: https:",
+  "connect-src 'self' https://app.marketingtool.pro https://api.marketingtool.pro wss://api.marketingtool.pro https://cdn.jsdelivr.net https://*.googleapis.com https://accounts.google.com https://*.google-analytics.com https://*.analytics.google.com https://*.googletagmanager.com https://*.clarity.ms",
+  'frame-src https://accounts.google.com https://*.firebaseapp.com https://www.google.com/recaptcha/ https://recaptcha.google.com',
+  "worker-src 'self' blob:",
+  "object-src 'none'",
+  "base-uri 'self'",
+  "form-action 'self'",
+  "frame-ancestors 'none'"
+].join('; ');
+
+const SECURITY_HEADERS = {
+  'x-content-type-options': 'nosniff',
+  'content-security-policy-report-only': CSP,
+  'referrer-policy': 'strict-origin-when-cross-origin',
+  'x-frame-options': 'DENY'
+};
+
 // Plain HTTP is intentional: TLS is terminated in front of this process
 // (Cloud Run / nginx), which forwards to it on the private port.
 // deepcode ignore HttpToHttps: TLS is terminated by the platform proxy in front of this server
@@ -131,7 +161,7 @@ const server = createServer(async (req, res) => {
 
   res.writeHead(200, {
     'content-type': TYPES.get(path.extname(file).toLowerCase()) ?? 'application/octet-stream',
-    'x-content-type-options': 'nosniff',
+    ...SECURITY_HEADERS,
     'cache-control': file.startsWith(ASSETS) ? 'public, max-age=31536000, immutable' : 'no-cache'
   });
 
