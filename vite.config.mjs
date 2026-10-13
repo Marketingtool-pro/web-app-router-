@@ -3,7 +3,7 @@ import react from "@vitejs/plugin-react";
 import jsconfigPaths from "vite-jsconfig-paths";
 
 export default defineConfig(({ mode }) => {
-  const env = loadEnv(mode, process.cwd(), "");
+  const env = loadEnv(mode, process.cwd(), "VITE_");
   const APP_BASE_URL = env.VITE_APP_BASE_URL || "/";
   const PORT = 3000;
 
