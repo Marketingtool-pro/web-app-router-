@@ -46,7 +46,7 @@ jobs:
       # Pull requests from forks get no OIDC token, so skip the upload there.
       - name: Upload coverage to Qlty
         if: ${{ !github.event.pull_request.head.repo.fork }}
-        uses: qltysh/qlty-action/coverage@v2
+        uses: qltysh/qlty-action/coverage@c9b09987143d1e4ac955f4803c7bea742102feb5  # v2.4.0
         with:
           oidc: true
           files: coverage/cobertura-coverage.xml
