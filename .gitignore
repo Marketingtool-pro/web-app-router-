@@ -21,3 +21,10 @@ public/videos/seo-hero.mp4
 
 # Code coverage reports
 coverage
+
+# Editor swap files, crash dumps, exported user records
+*.swp
+*.swo
+erl_crash.dump
+Raw. son
+
