@@ -1,7 +1,14 @@
 {
   "applinks": {
     "apps": [],
-    "details": []
+    "details": [
+      {
+        "appIDs": ["N465W7879Z.pro.marketingtool.app"],
+        "appID": "N465W7879Z.pro.marketingtool.app",
+        "components": [{ "/": "*" }],
+        "paths": ["*"]
+      }
+    ]
   },
   "webcredentials": {
     "apps": ["N465W7879Z.pro.marketingtool.app"]
