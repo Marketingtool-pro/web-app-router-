@@ -1,5 +1,9 @@
 overrides:
   qs: ^6.16.0
+  follow-redirects: ^1.16.1 # GHSA fix, Dependabot alerts on pnpm-lock.yaml
+  zod: ^4.6.6 # GHSA-mrhx-c7xc-m3w5
+  brace-expansion@1: ^1.1.21 # osv-scanner finding
+  "@grpc/grpc-js": ^1.13.6 # osv-scanner finding
 allowBuilds:
   esbuild: true
   lightningcss: true
