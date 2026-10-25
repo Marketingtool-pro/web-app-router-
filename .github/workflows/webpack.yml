@@ -28,9 +28,8 @@ jobs:
         run: pnpm install --no-frozen-lockfile
       - name: Build
         run: pnpm run build
-      - name: Upload dist
-        uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4  # v5
-        with:
-          name: dist
-          path: dist
-          retention-days: 7
+      # No dist upload (removed 2026-10-25): no workflow downloads it, and at
+      # ~800 MB per push (public/images is 763 MB) it filled the org's free-plan
+      # artifact storage, so every other workflow's artifact uploads failed.
+      - name: Report build size
+        run: du -sh dist
