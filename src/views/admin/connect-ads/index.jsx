@@ -22,7 +22,10 @@ import {
   IconStarFilled
 } from '@tabler/icons-react';
 
-const FB_APP_ID = '1582682256320433';
+// @project
+import { META_APP_ID } from '@/config';
+
+const FB_APP_ID = META_APP_ID;
 const FB_SCOPES = 'ads_read,ads_management,business_management,email';
 
 /***************************  CONNECT ADS — MADGICX-STYLE  ***************************/

@@ -23,17 +23,18 @@ export const SOCIAL_AUTH_PROVIDER = 'appwrite';
 
 /***************************  META APPS  ***************************/
 
-// Ads Connect and login are TWO DIFFERENT Meta apps. Read straight out of
-// Business Manager for the verified marketingtool.pro portfolio
-// (737035192427150) on 2026-09-13:
+// Ads Connect and login are TWO DIFFERENT Meta apps, both in business
+// portfolio 1214819780123174 (confirmed by the owner and the Meta developer
+// API on 2026-11-04):
 //
-//   1582682256320433  "MarketingTool Ads"  — ads scopes, its own OAuth popup
-//   1255201403175191  "Marketingtool"      — login, email + profile, via Appwrite
+//   2246709019441842  "marketingtool"      — ads connect (Facebook + Instagram
+//                     ads popups), all webhooks to wm.marketingtool.pro
+//   1830149205008066  "marketingtool pro"  — login only, via Appwrite
 //
 // This is the ads one. Appwrite OAuth handles login separately and must not use
-// it. ConnectAdsModal already imported META_APP_ID from here but nothing
-// exported it, which broke the production build with a missing-export error.
-export const META_APP_ID = '1582682256320433';
+// it. The old ads app 1582682256320433 sits in a different portfolio the owner
+// no longer uses.
+export const META_APP_ID = '2246709019441842';
 
 /***************************  THEME ENUM  ***************************/
 
