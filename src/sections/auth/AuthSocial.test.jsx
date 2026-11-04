@@ -56,4 +56,20 @@ describe('AuthSocial', () => {
     await waitFor(() => expect(loginWithGoogle).toHaveBeenCalledTimes(1));
     expect(replace).not.toHaveBeenCalled();
   });
+
+  it('shows the message of a Google error object', async () => {
+    loginWithGoogle.mockResolvedValue({ data: null, error: { message: 'Google said no' } });
+    render(<AuthSocial />);
+    fireEvent.click(screen.getByRole('button', { name: /Sign in with Google/ }));
+    expect(await screen.findByText('Google said no')).toBeInTheDocument();
+  });
+
+  it('shows a generic error when the login call throws', async () => {
+    const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {});
+    loginWithFacebook.mockRejectedValue(new Error('network down'));
+    render(<AuthSocial />);
+    fireEvent.click(screen.getByRole('button', { name: /Sign in with Facebook/ }));
+    expect(await screen.findByText('Social login failed. Please try again.')).toBeInTheDocument();
+    consoleError.mockRestore();
+  });
 });
