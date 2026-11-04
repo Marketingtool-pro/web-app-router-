@@ -486,9 +486,11 @@ export async function getRunStatus({ runId }) {
  * @returns {Promise<Object>} Connected accounts list
  */
 export async function fetchConnectedAccounts({ userId }) {
+  // appwriteJwt lets the script derive the user from the token instead of
+  // trusting the userId argument.
   return apiFetch('/jobs/run_wait_result/p/f/tools/fetch-connected-accounts', {
     method: 'POST',
-    body: JSON.stringify({ userId })
+    body: JSON.stringify({ userId, appwriteJwt: getAppwriteJwt() })
   });
 }
 
