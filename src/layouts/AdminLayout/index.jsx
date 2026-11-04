@@ -17,6 +17,7 @@ import Loader from '@/components/Loader';
 import { DRAWER_WIDTH } from '@/config';
 import useConfig from '@/hooks/useConfig';
 import { useAuth } from '@/contexts/AuthContext';
+import { hasAnyAdsConnection } from '@/utils/adsConnection';
 
 /***************************  ADMIN LAYOUT  ***************************/
 
@@ -29,14 +30,12 @@ export default function DashboardLayout() {
   } = useConfig();
 
   const downXL = useMediaQuery((theme) => theme.breakpoints.down('xl'));
-  const [showConnectAds, setShowConnectAds] = useState(() => localStorage.getItem('fb_ads_connected') !== 'true');
+  const [showConnectAds, setShowConnectAds] = useState(() => !hasAnyAdsConnection());
 
-  // Listen for fb_ads_connected changes (after callback redirect)
+  // Re-check after an OAuth callback redirect, another tab, or returning focus
   useEffect(() => {
     const checkConnection = () => {
-      if (localStorage.getItem('fb_ads_connected') === 'true') {
-        setShowConnectAds(false);
-      }
+      setShowConnectAds(!hasAnyAdsConnection());
     };
     window.addEventListener('storage', checkConnection);
     // Also check on focus (when returning from Facebook OAuth)

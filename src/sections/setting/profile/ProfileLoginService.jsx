@@ -33,7 +33,7 @@ import instagramImg from "@/assets/images/social/instagram.svg";
 // @project
 import { META_APP_ID } from "@/config";
 
-// OAuth config. META_APP_ID is the Ads app, 1582682256320433. This file held
+// OAuth config. META_APP_ID is the Ads app, 2246709019441842. This file held
 // the literal string "REPLACE_WITH_ACTIVE_META_APP_ID", which builds fine and
 // then fails at runtime the moment a customer presses Connect.
 const FB_APP_ID = META_APP_ID;
