@@ -655,18 +655,33 @@ Two real defects in the flow the customer actually walks:
   and `32769` (Super Productivity).
 - **`f/tools/meta-webhook`** writes to a `webhook_logs` table that does not exist; `except:
   pass` hides the 404 and it returns `success: true`. No `X-Hub-Signature-256` verification.
-- **Facebook App ID `1582682256320433`** is hardcoded in `ProfileLoginService.jsx`,
-  `connect-ads/index.jsx` and `ConnectAdsModal.jsx` (verified 2026-09-11) and ships in the
-  bundle, but it matches **neither** app in the Meta account. The two real apps, read live
-  from the Meta developer API on 2026-09-11, are `2246709019441842` ("marketingtool") and
-  `1830149205008066` ("marketingtool pro"), both admin-role and active.
-  The prior file named `925198393533156` and `1414526646867223` — those were also wrong.
+- ~~**Facebook App ID `1582682256320433`** hardcoded in the ads connect code~~ — **FIXED in
+  source by #149 (2026-11-04)**: all three files now use `META_APP_ID = '2246709019441842'`
+  from `src/config.js`. Production still serves the 12 Sep 2026 build with the old ID until
+  `main` is rebuilt and deployed.
 - **Google Ads developer token now has BASIC ACCESS** (owner-confirmed 2026-09-11). The
   prior "test access only" note is obsolete. The token value is held with the other
   credentials and is deliberately not recorded in this file.
 - **`reports/` and `chart/` views contain no backend call** despite being listed as done.
 
+## META APPS — WHICH ONE DOES WHAT (decided by the owner, 2026-11-04)
+
+Both apps sit in business portfolio `1214819780123174`. This split is final; do not mix them.
+
+| app | id | used for |
+|---|---|---|
+| marketingtool | `2246709019441842` | **All ads, everywhere** — web app and phone app, Facebook + Instagram ads connect, the force-connect popup, Settings → Ad Connections (incl. the web-only Instagram connect), and **all webhooks** (→ `wm.marketingtool.pro`) |
+| marketingtool pro | `1830149205008066` | **Login only, everywhere** — the Appwrite Facebook OAuth provider for the phone app and the web app. Nothing else. |
+
+`1582682256320433` ("MarketingTool Ads", older portfolio `737035192427150`) and
+`1255201403175191` are **not used**. The web app has no "Sign in with Instagram": the Appwrite
+SDK has no Instagram OAuth provider (that button produced `Missing required parameter:
+"provider"`), so login is Google + Facebook only.
+
 ## META APP REVIEW — NOTHING WAS EVER SUBMITTED (read live 2026-09-11)
+
+Re-read live on 2026-11-05: unchanged. `2246709019441842` still holds only `openid`,
+`public_profile` and `email`; the draft is still `UNSUBMITTED`.
 
 The owner believed Meta App Review had been pending for nine months. It has not. Read
 straight from the Meta developer API:
@@ -702,8 +717,8 @@ already been rejected — not for ads at all.
 `1582682256320433`, which is **neither** app above. Whatever that ID is, it is not in the
 set this account grants, so it cannot be inspected or reviewed from here.
 
-**Order of work to make Meta ads real:** decide which app is the product, point the
-frontend at that ID, request `ads_read` plus `ads_management` (and `business_management`
+**Order of work to make Meta ads real:** ~~decide which app is the product, point the
+frontend at that ID~~ (done: `2246709019441842`, see "META APPS" above), request `ads_read` plus `ads_management` (and `business_management`
 for account discovery), complete Data Use Checkup, then actually submit. Until submission
 happens, waiting achieves nothing.
 
