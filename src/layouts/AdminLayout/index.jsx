@@ -17,7 +17,8 @@ import Loader from '@/components/Loader';
 import { DRAWER_WIDTH } from '@/config';
 import useConfig from '@/hooks/useConfig';
 import { useAuth } from '@/contexts/AuthContext';
-import { hasAnyAdsConnection } from '@/utils/adsConnection';
+import { hasAnyAdsConnection, hasServerAdsConnection } from '@/utils/adsConnection';
+import { fetchConnectedAccounts } from '@/utils/api/windmill';
 
 /***************************  ADMIN LAYOUT  ***************************/
 
@@ -35,7 +36,7 @@ export default function DashboardLayout() {
   // Re-check after an OAuth callback redirect, another tab, or returning focus
   useEffect(() => {
     const checkConnection = () => {
-      setShowConnectAds(!hasAnyAdsConnection());
+      if (hasAnyAdsConnection()) setShowConnectAds(false);
     };
     window.addEventListener('storage', checkConnection);
     // Also check on focus (when returning from Facebook OAuth)
@@ -45,6 +46,21 @@ export default function DashboardLayout() {
       window.removeEventListener('focus', checkConnection);
     };
   }, []);
+
+  // Ask the server too: hide the modal when this user has ad_accounts rows,
+  // even if this browser has no flag (another device, cleared site data).
+  // The server never RE-shows the modal: a customer who connected but whose
+  // Meta app lacks ads_read has zero rows and would otherwise be locked out.
+  useEffect(() => {
+    if (isAdmin) return undefined;
+    let cancelled = false;
+    hasServerAdsConnection(user?.id, fetchConnectedAccounts).then((connected) => {
+      if (!cancelled && connected === true) setShowConnectAds(false);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [user?.id, isAdmin]);
 
   // set drawer media and `miniDrawer` config wise
   useEffect(() => {
