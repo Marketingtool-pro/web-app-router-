@@ -17,6 +17,7 @@ import Loader from '@/components/Loader';
 import { DRAWER_WIDTH } from '@/config';
 import useConfig from '@/hooks/useConfig';
 import { useAuth } from '@/contexts/AuthContext';
+import { hasAnyAdsConnection } from '@/utils/adsConnection';
 
 /***************************  ADMIN LAYOUT  ***************************/
 
@@ -29,11 +30,6 @@ export default function DashboardLayout() {
   } = useConfig();
 
   const downXL = useMediaQuery((theme) => theme.breakpoints.down('xl'));
-  // The hard Connect Ads modal stays up until at least ONE ad platform is
-  // connected. It used to check only fb_ads_connected, so a user who connected
-  // Google Ads (or Instagram from Settings) got the modal back on every reload.
-  const hasAnyAdsConnection = () =>
-    ['fb_ads_connected', 'google_ads_connected', 'ig_ads_connected'].some((key) => localStorage.getItem(key) === 'true');
   const [showConnectAds, setShowConnectAds] = useState(() => !hasAnyAdsConnection());
 
   // Re-check after an OAuth callback redirect, another tab, or returning focus
