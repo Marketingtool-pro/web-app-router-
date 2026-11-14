@@ -2,7 +2,10 @@
 name: warn-governance-flow
 enabled: true
 event: stop
-pattern: .*
+conditions:
+  - field: transcript
+    operator: regex_match
+    pattern: .*
 action: warn
 ---
 
@@ -10,7 +13,7 @@ action: warn
 
 Before coding in this workspace:
 - Read security and relevant root `*.md` files first
-- Work in the matching local repo under `/Users/anshsingh/Desktop/Developer`
+- Work in the matching repo under ~/ai-marketingtool-llc (web app: web-app-router-, phone app: AiMarketingtool-pro-fbaf2fad)
 - Do not jump to unrelated folders or skip repo context
 
 Before claiming completion:
