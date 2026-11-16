@@ -42,8 +42,17 @@ Still open on this journey:
   payment links, against the "direct integration only" rule. That page is the Django site on VPS 1,
   not this repo.
 - The pop-up shows a hard-coded "4.8 Rating" with five stars that is not backed by any data.
-- Production still serves the 12 Sep build; these fixes go live only after a rebuild + deploy,
-  which needs `.env` restored (see deploy section).
+- **DEPLOYED 2026-11-16** (owner-approved) from branch `worktree-final-flow`, replacing the 12 Sep
+  build. Built without `.env`, public values passed on the command line:
+  `VITE_APPWRITE_ENDPOINT=https://api.marketingtool.pro/v1 VITE_APPWRITE_PROJECT_ID=6952c8a0002d3365625d
+  VITE_WINDMILL_URL=https://app.marketingtool.pro VITE_WINDMILL_WORKSPACE=marketingtool-pro npx vite build`.
+  Checks passed: Appwrite endpoint + project id present; no `localhost/v1`, no `wm.marketingtool.pro`,
+  no old app id, no Instagram button. Live check: login page shows Google + Facebook; "Sign in
+  with Google" reaches Google's account chooser via `api.marketingtool.pro` and returns to
+  `/social-auth-callback`. Backup of the previous build:
+  `/root/web-app/dist-backup-predeploy-20261116-170909` on VPS 2.
+- **MUI X Pro licence is not set in production** — the 12 Sep build had no key either. Pro
+  charts/grids/date pickers show the "Missing license key" watermark until the key is supplied.
 
 ## REAL AD DATA — WHY IT STOPPED, AND WHAT RUNS NOW (checked live 2026-11-16)
 
