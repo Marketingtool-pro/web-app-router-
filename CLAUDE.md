@@ -43,6 +43,18 @@ rejected by Meta even though the Appwrite provider settings are correct (they ar
 encrypted in `_console_projects.oAuthProviders`). Fix is on Meta only: developers.facebook.com →
 app 1830149205008066 → App settings → Advanced → Security → **Require app secret: No** → Save.
 Do not "fix" it by pointing Appwrite at the ads app — the split is final (see META APPS).
+→ Owner switched it off 2026-11-16 (re-read from Meta: `require_app_secret: false`).
+
+**Next Facebook login error — "OAuth provider failed to return email." (401, 2026-11-16).**
+Read live from Meta: app `1830149205008066` is live, has no use cases configured, and holds
+`email` and `public_profile` at **Standard access only** (`openid` is Advanced). Standard access
+returns the email only to people with a role on the app; for every real customer Facebook returns
+no email and Appwrite rejects the login. Meta reports `email` can get **Advanced access without App
+Review** ("Get advanced access" in App Dashboard → App Review → Permissions and Features; requirement
+listed: business verification). Do the same for `public_profile`. If the owner's own account
+(which has a role) still gets this error, that Facebook account has no confirmed email or the email
+box was unticked on the consent screen — remove the app under Facebook Settings → Apps and Websites
+and sign in again.
 
 Still open on this journey:
 - **Meta App Review never submitted** — the pop-up asks Facebook for ads permissions the app does
