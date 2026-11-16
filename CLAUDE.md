@@ -155,7 +155,7 @@ All ten tasks were called one by one on 2026-11-16 and the real response read:
 | 2 | coding | Claude Sonnet 4.5 | Claude Sonnet 4.5 | **WORKS** |
 | 3 | default | Claude Sonnet 4.5 | Claude Sonnet 4.5 | **WORKS** |
 | 4 | research | Gemini 2.5 Flash | Gemini 2.5 Flash | **WORKS** |
-| 5 | automation | GPT-OSS-120B on Groq | nothing — 403 | **BLOCKED** — new key valid, model blocked by the Groq org setting |
+| 5 | automation | GPT-OSS-120B on Groq | GPT-OSS-120B (Groq), real answers | **WORKS** |
 | 6 | image_gen | GPT Image 2 (OpenAI), Stability fallback | GPT Image 2, real PNG | **WORKS** |
 | 7 | stable_image | Stable Diffusion 3.5 Large | SD 3.5, real PNG | **WORKS** |
 | 8 | video_gen | FAL.ai Kling (text/image-to-video) | FAL.ai Kling — real 5 s 1920×1080 H.264 MP4 | **WORKS** |
@@ -166,13 +166,11 @@ The 10 tasks use 7 providers (Claude serves creative, coding and default; OpenAI
 vision_analysis and ocr). OpenRouter is no longer on any route. The task
 table is frozen — do not reroute a task to another provider to make it "work".
 
-**The one account fix left (owner action, not code):**
-
-**Groq org model block.** A new Groq key was installed 2026-11-16 in `/root/.ai-api-env` and in
-Windmill `f/tools/groq_api_key`. Groq accepts it, but every text model on the account answers
-`model_permission_blocked_org` (`gpt-oss-120b`, `gpt-oss-20b`, `qwen3.8-27b`; Llama models are not on
-the account at all). Enable `openai/gpt-oss-120b` at console.groq.com → Settings → Limits. No
-restart is needed; `automation` then answers from Groq.
+**Groq (resolved 2026-11-16).** New key in `/root/.ai-api-env` and Windmill `f/tools/groq_api_key`.
+Groq org setting "Allowed Models" must include `openai/gpt-oss-120b` — it does now. Note: the org
+allowlist also names `llama-3.3-70b-versatile` and `qwen/qwen3-32b`, but Groq does not offer those
+on this account ("does not exist"), so do not switch automation to them. `gpt-oss-120b` is an
+open-weight model run on Groq's hardware; it is billed by Groq, not the OpenAI account.
 
 **OCR decision (owner, 2026-11-16):** OCR uses GPT-4o on the OpenAI key already paid for, not Qwen
 through OpenRouter. The ~290 engines/workers that call `ocr` and `vision_analysis` send text only,
@@ -727,7 +725,7 @@ Two real defects in the flow the customer actually walks:
 
 ## Known broken — do not assume these work
 
-- **AI Router: 9 of 10 tasks live** (2026-11-16). Only `automation` is blocked — Groq org model setting, see the router section.
+- ~~AI Router tasks down~~ — **10 of 10 live, each on its own model** (verified 2026-11-16).
 - **`marketingtool-agent` Cloud Run service does not exist** — the web app's designated
   tool engine per the spec has never been deployed.
 - **Production still runs the 12 Apr 2026 build with the Windmill token in the public

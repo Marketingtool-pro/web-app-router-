@@ -23,7 +23,7 @@ Each task answers from its own model; a failure is shown, never swapped for anot
 | 2 | coding | Claude Sonnet 4.5 | Anthropic | WORKING |
 | 3 | default | Claude Sonnet 4.5 | Anthropic | WORKING |
 | 4 | research | Gemini 2.5 Flash | Google | WORKING |
-| 5 | automation | GPT-OSS-120B | Groq | BLOCKED — enable the model in the Groq org settings |
+| 5 | automation | GPT-OSS-120B | Groq | WORKING |
 | 6 | image_gen | GPT Image 2 (Stability fallback) | OpenAI | WORKING — real PNG |
 | 7 | stable_image | Stable Diffusion 3.5 Large | Stability AI | WORKING — real PNG |
 | 8 | video_gen | Kling | FAL.ai | WORKING — real 1080p MP4 (takes minutes; use a ≥300 s timeout) |
@@ -185,7 +185,7 @@ Registry: tool_registry
 - 27 engines
 - 325+ workers
 - 29 Supabase tables
-- 9/10 AI Router tasks live (automation waits on the Groq org setting)
+- 10/10 AI Router tasks live, each on its own model (verified 2026-11-16)
 - 7 platforms scripted
 - All deployed to VPS 2
 
