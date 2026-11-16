@@ -45,6 +45,39 @@ Still open on this journey:
 - Production still serves the 12 Sep build; these fixes go live only after a rebuild + deploy,
   which needs `.env` restored (see deploy section).
 
+## REAL AD DATA — WHY IT STOPPED, AND WHAT RUNS NOW (checked live 2026-11-16)
+
+Supabase (VPS 2, all 13 containers healthy) — newest row per table: `campaign_metrics` and
+`daily_summary` **2026-03-19**; `ad_accounts`, `campaigns`, `workflow_runs` **2026-04-08**;
+`generations`, `credit_usage`, `webhook_logs` today. AI tool runs are saved; ad data is not.
+
+Why: the 10-minute sync `f/tools/cron-sync-platforms` (1) used one shared admin token from the
+old Meta app `1582682256320433`, which Meta now rejects ("user has not authorized application");
+(2) wrote columns that do not exist in `campaign_metrics`, `daily_summary` and `sync_logs`;
+(3) swallowed every error and returned `success: true` with 0 accounts. The 282 existing
+`campaign_metrics` rows have `ad_account_id` NULL — they belong to no customer.
+
+Now: `f/tools/cron-sync-meta` (source `windmill/f/tools/cron-sync-platforms.py`), schedule
+`f/tools/cron-sync-meta-schedule`, every 10 min. It uses each customer's own token from
+`ad_accounts`, upserts `campaign_metrics` on (`ad_account_id`, `campaign_id`, `date`) and writes
+every account's result — including errors — to `sync_logs`. Old schedule
+`f/tools/cron-sync-schedule` is paused (not deleted) for rollback.
+
+The connected accounts themselves are dead, checked one by one:
+
+| platform | rows | working | why not |
+|---|---|---|---|
+| Meta | 89 (5 customers; 60 = testuser) | **0** | 76 issued to the old app `1582682256320433`; 13 logged out / invalidated; 18 have a malformed `account_id` (not `act_…`) |
+| Google | 25 (5 customers) | **0** | `f/tools/google_client_secret` is rejected by Google ("invalid_client") for client `911925145433-lnqjvdu44j…` — this also breaks **Connect Google Ads** in the hard pop-up for every new customer |
+
+Also missing in Windmill: **no Google Ads developer token variable** (no Google Ads API call can
+work), and `f/tools/fb_ads_app_id` / `fb_ads_app_secret` still describe the old app.
+
+To get real ad data flowing: (1) put the correct client secret for `911925145433-lnqjvdu44j…`
+into `f/tools/google_client_secret`; (2) add the Google Ads developer token as a Windmill secret;
+(3) pass Meta App Review for app `2246709019441842`; (4) customers reconnect once through the
+hard pop-up. The sync then fills `campaign_metrics` on its own.
+
 ## HOW THE WEB APP WORKS — FINAL FLOW (owner, 2026-11-16). THIS IS FINAL.
 
 Every page is built from the same unit. No page is built any other way.
