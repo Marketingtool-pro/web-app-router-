@@ -36,6 +36,12 @@ ENGINE returns JSON  →  JS output  →  page renders the RICH RESULT at 1920
 
 Rules that follow from it:
 
+- **Ads are API-based both ways, on the real platform (owner, 2026-11-16).** Meta, Google and every
+  other ad/social platform: workers READ the customer's real data through the platform API, and
+  PUBLISH back to the real platform through the same API — create, edit, pause, resume, launch
+  campaigns, ads and posts on the customer's own connected account. Never a simulated or
+  "draft only" publish presented as live. The worker returns the platform's real object id (and
+  link) so the page can show what was published.
 - **All API-based, real results only.** A worker never returns sample, placeholder or invented
   data. No connected account → show zeros / the connect prompt, never fake numbers. The single
   exception stays `/ad-library` (intentional demo page, see Critical rules).
@@ -112,28 +118,29 @@ All ten tasks were called one by one on 2026-11-16 and the real response read:
 | 2 | coding | Claude Sonnet 4.5 | Claude Sonnet 4.5 | **WORKS** |
 | 3 | default | Claude Sonnet 4.5 | Claude Sonnet 4.5 | **WORKS** |
 | 4 | research | Gemini 2.5 Flash | Gemini 2.5 Flash | **WORKS** |
-| 5 | automation | GPT-OSS-120B on Groq | nothing — 502 | **DOWN** — Groq 401 "Invalid API Key" |
+| 5 | automation | GPT-OSS-120B on Groq | nothing — 403 | **BLOCKED** — new key valid, model blocked by the Groq org setting |
 | 6 | image_gen | GPT Image 2 (OpenAI), Stability fallback | GPT Image 2, real PNG | **WORKS** |
 | 7 | stable_image | Stable Diffusion 3.5 Large | SD 3.5, real PNG | **WORKS** |
 | 8 | video_gen | FAL.ai Kling (text/image-to-video) | FAL.ai Kling — real 5 s 1920×1080 H.264 MP4 | **WORKS** |
 | 9 | vision_analysis | GPT-4o Vision (OpenAI direct) | GPT-4o Vision | **WORKS** |
-| 10 | ocr | Qwen3-VL-8B (OpenRouter), GPT-4o fallback | GPT-4o Vision (fallback) | **FALLBACK** — OpenRouter account blocks Qwen |
+| 10 | ocr | GPT-4o OCR (OpenAI direct — owner decision, no OpenRouter cost) | GPT-4o OCR, read test text exactly | **WORKS** |
 
-The 10 tasks use 8 providers by design (Claude serves creative, coding and default). The task
+The 10 tasks use 7 providers (Claude serves creative, coding and default; OpenAI serves image_gen,
+vision_analysis and ocr). OpenRouter is no longer on any route. The task
 table is frozen — do not reroute a task to another provider to make it "work".
 
-**The two account fixes left (owner actions, not code):**
+**The one account fix left (owner action, not code):**
 
-1. **Groq key** — both stored keys are rejected: the router's (`/root/.ai-api-env`) and
-   Windmill `f/tools/groq_api_key` (tested 2026-11-16, 401). Create a new key at
-   console.groq.com, put it in `/root/.ai-api-env` and in `f/tools/groq_api_key`, then
-   `set -a; . /root/.ai-api-env; set +a; pm2 restart ai-router --update-env; pm2 save`.
-   Until then `automation` returns 502 — and the automation/insight engines that fan out to it
-   lose that one task.
-2. **OpenRouter allowed providers** — the router asks for `qwen/qwen3-vl-8b-instruct` first, and
-   OpenRouter answers *"your account's allowed-providers setting permits only: anthropic"*
-   (Qwen is served by `parasail`). In OpenRouter → Settings → allowed providers, allow
-   `parasail` (or remove the restriction). No code change is needed; `ocr` then answers from Qwen.
+**Groq org model block.** A new Groq key was installed 2026-11-16 in `/root/.ai-api-env` and in
+Windmill `f/tools/groq_api_key`. Groq accepts it, but every text model on the account answers
+`model_permission_blocked_org` (`gpt-oss-120b`, `gpt-oss-20b`, `qwen3.8-27b`; Llama models are not on
+the account at all). Enable `openai/gpt-oss-120b` at console.groq.com → Settings → Limits. No
+restart is needed; `automation` then answers from Groq.
+
+**OCR decision (owner, 2026-11-16):** OCR uses GPT-4o on the OpenAI key already paid for, not Qwen
+through OpenRouter. The ~290 engines/workers that call `ocr` and `vision_analysis` send text only,
+no image, so the router rejects them with "image required" and they add nothing to the result.
+Fix per page: send a real image (ad creative, screenshot, upload) or skip the call.
 
 **Timeout:** `video_gen` takes minutes. Any engine that calls it needs its own long timeout
 (≥ 300 s); the default 30 s in `call_ai_router` will always fail.
@@ -141,9 +148,9 @@ table is frozen — do not reroute a task to another provider to make it "work".
 **Image URLs must be publicly fetchable** by the provider for `vision_analysis`/`ocr`.
 `https://app.marketingtool.pro/...` works; some hosts (e.g. Wikipedia) are refused.
 
-Changed 2026-11-16 on VPS 1 (backup `/root/app.py.bak-ocr-labels-20261116-160641`): `ocr` calls
-Qwen first again (it had been wired straight to GPT-4o), and every label now names the real
-model — `/` used to claim DALL-E 3, SD 3 and "Claude Sonnet 4", and Groq answers were labelled
+Changed 2026-11-16 on VPS 1 (backups `/root/app.py.bak-ocr-labels-20261116-160641`,
+`/root/app.py.bak-ocr-openai-*`, `/root/.ai-api-env.bak-groq-*`): `ocr` is GPT-4o via OpenAI
+direct, the new Groq key is installed, and every label now names the real model — `/` used to claim DALL-E 3, SD 3 and "Claude Sonnet 4", and Groq answers were labelled
 "Llama-3.3-70B" while `gpt-oss-120b` ran.
 
 Re-check any time:
@@ -683,7 +690,7 @@ Two real defects in the flow the customer actually walks:
 
 ## Known broken — do not assume these work
 
-- **AI Router: 2 of 10 tasks not on their own model** (2026-11-16): `automation` is down (Groq key 401) and `ocr` falls back to GPT-4o until OpenRouter allows the Qwen provider. The other 8 answer from their own model. See the router table above.
+- **AI Router: 9 of 10 tasks live** (2026-11-16). Only `automation` is blocked — Groq org model setting, see the router section.
 - **`marketingtool-agent` Cloud Run service does not exist** — the web app's designated
   tool engine per the spec has never been deployed.
 - **Production still runs the 12 Apr 2026 build with the Windmill token in the public

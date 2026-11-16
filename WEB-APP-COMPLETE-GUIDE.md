@@ -1,6 +1,10 @@
 # MarketingTool.pro — Web App Complete Guide
 
 ## Architecture (LOCKED)
+Final rule (owner, 2026-11-16): every page = ~10 tools = 10 python workers = 1 engine = 1 AI Router.
+JS input + Appwrite JWT → engine → workers call the real platform APIs (Meta, Google, Shopify, AWS…),
+read real data AND publish to the real platform → hand real data to the AI Router → rich JSON
+output → page shows it at 1920 with downloads (PDF, CSV, PNG, MP4, TXT). Full rules: CLAUDE.md.
 ```
 Customer → Web App (React/MUI 1920px) → windmill/index.js (469 JS functions)
                                               ↓
@@ -11,19 +15,23 @@ Customer → Web App (React/MUI 1920px) → windmill/index.js (469 JS functions)
                                      └── Supabase (service_role key, VPS 2)
 ```
 
-## AI Router — 8 Models (VPS 1, port 9000)
-| Task | Model | Provider | Status |
-|------|-------|----------|--------|
-| creative | Claude Sonnet 4 | Anthropic | WORKING |
-| research | Gemini 2.5 Flash | Google | WORKING |
-| coding | Claude Sonnet 4 | Anthropic | WORKING |
-| image_gen | DALL-E 3 | OpenAI | WORKING |
-| vision_analysis | DALL-E 3 | OpenRouter | WORKING |
-| ocr | Qwen3-VL-8B | OpenRouter | WORKING |
-| automation | Llama-3.3-70B | Groq | WORKING |
-| default | Claude Sonnet 4 | Anthropic | WORKING |
+## AI Router — 10 tasks (VPS 1, port 9000) — verified live 2026-11-16
+Each task answers from its own model; a failure is shown, never swapped for another model.
+| # | Task | Model | Provider | Status |
+|---|------|-------|----------|--------|
+| 1 | creative | Claude Sonnet 4.5 | Anthropic | WORKING |
+| 2 | coding | Claude Sonnet 4.5 | Anthropic | WORKING |
+| 3 | default | Claude Sonnet 4.5 | Anthropic | WORKING |
+| 4 | research | Gemini 2.5 Flash | Google | WORKING |
+| 5 | automation | GPT-OSS-120B | Groq | BLOCKED — enable the model in the Groq org settings |
+| 6 | image_gen | GPT Image 2 (Stability fallback) | OpenAI | WORKING — real PNG |
+| 7 | stable_image | Stable Diffusion 3.5 Large | Stability AI | WORKING — real PNG |
+| 8 | video_gen | Kling | FAL.ai | WORKING — real 1080p MP4 (takes minutes; use a ≥300 s timeout) |
+| 9 | vision_analysis | GPT-4o Vision | OpenAI | WORKING — needs a public image URL |
+| 10 | ocr | GPT-4o OCR | OpenAI | WORKING — needs a public image URL |
 
-URL: `http://172.17.0.1:9000` (Docker) / `http://31.220.107.19:9000` (external)
+URL: `http://172.17.0.1:9000` from Windmill containers. Port 9000 is firewalled from the internet
+(localhost and Docker networks only). OpenRouter is not used on any route.
 
 ## Main Pages (Free Trial — Customer Conversion Key)
 
@@ -128,7 +136,8 @@ URL: `http://172.17.0.1:9000` (Docker) / `http://31.220.107.19:9000` (external)
 ## Meta API — CONFIRMED WORKING
 - Token: stored as `f/tools/fb_ads_access_token` (secret)
 - App Secret: `<YOUR_META_APP_SECRET>` (stored as `f/tools/fb_ads_app_secret`)
-- App ID: `1582682256320433` (MarketingTool Ads)
+- App ID: `2246709019441842` (marketingtool) — all ads, web and phone. Login only: `1830149205008066`.
+  `1582682256320433` is the old app and is not used (see CLAUDE.md "META APPS").
 - Requires `appsecret_proof` — handled by `meta-api-helper` script
 - 7 accounts found: act_337789233629380 (main, ₹9L), act_1725433101404586 (Antiviruspoint), etc.
 - 11 active campaigns on main account
@@ -176,7 +185,7 @@ Registry: tool_registry
 - 27 engines
 - 325+ workers
 - 29 Supabase tables
-- 8/8 AI models active
+- 9/10 AI Router tasks live (automation waits on the Groq org setting)
 - 7 platforms scripted
 - All deployed to VPS 2
 
