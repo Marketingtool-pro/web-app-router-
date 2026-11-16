@@ -1,6 +1,6 @@
 /***************************  TOOL OUTPUT - EXPORT HELPERS  ***************************/
 
-import { blocksToHtml, parseMarkdown } from './markdown';
+import { blocksToHtml, parseInline, parseMarkdown } from './markdown';
 
 /** A filesystem-safe base name, e.g. "Ad Copy Generator!" -> "ad-copy-generator". */
 export function safeFileName(name, fallback = 'result') {
@@ -17,16 +17,99 @@ export async function copyText(text) {
   await navigator.clipboard.writeText(text);
 }
 
-export function downloadTxt(text, fileName) {
-  const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
+function saveBlob(blob, fullName) {
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
-  a.download = `${safeFileName(fileName)}.txt`;
+  a.download = fullName;
   document.body.appendChild(a);
   a.click();
   a.remove();
   setTimeout(() => URL.revokeObjectURL(url), 0);
+}
+
+export function downloadTxt(text, fileName) {
+  saveBlob(new Blob([text], { type: 'text/plain;charset=utf-8' }), `${safeFileName(fileName)}.txt`);
+}
+
+/***************************  TABLES → CSV  ***************************/
+
+const cellText = (cell) =>
+  parseInline(String(cell ?? ''))
+    .map((t) => t.value)
+    .join('')
+    .trim();
+
+/** Every markdown table in the output, as { header: string[], rows: string[][] } with inline formatting removed. */
+export function tablesFromMarkdown(markdown) {
+  return parseMarkdown(String(markdown || ''))
+    .filter((b) => b.type === 'table')
+    .map((b) => ({ header: b.header.map(cellText), rows: b.rows.map((r) => r.map(cellText)) }));
+}
+
+const csvCell = (v) => {
+  const s = String(v ?? '');
+  return /[",\r\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
+};
+
+/** RFC 4180 CSV. Several tables are separated by one blank line. */
+export function tablesToCsv(tables) {
+  return tables.map((t) => [t.header, ...t.rows].map((r) => r.map(csvCell).join(',')).join('\r\n')).join('\r\n\r\n');
+}
+
+export function downloadCsv(markdown, fileName) {
+  const tables = tablesFromMarkdown(markdown);
+  if (!tables.length) throw new Error('This result has no table to export.');
+  // BOM so Excel opens UTF-8 correctly.
+  saveBlob(new Blob(['﻿' + tablesToCsv(tables)], { type: 'text/csv;charset=utf-8' }), `${safeFileName(fileName)}.csv`);
+}
+
+/***************************  IMAGES / VIDEO  ***************************/
+
+const DATA_IMAGE = /data:image\/(?:png|jpe?g|webp|gif);base64,[A-Za-z0-9+/=]+/g;
+const HTTP_IMAGE = /https?:\/\/[^\s)"'<>]+?\.(?:png|jpe?g|webp|gif)(?:\?[^\s)"'<>]*)?(?=[\s)"'<>]|$)/gi;
+const HTTP_VIDEO = /https?:\/\/[^\s)"'<>]+?\.(?:mp4|webm|mov)(?:\?[^\s)"'<>]*)?(?=[\s)"'<>]|$)/gi;
+
+const uniq = (arr) => [...new Set(arr.filter(Boolean))];
+
+/** Images and videos the AI Router returned inside the text (data: URLs or https links). */
+export function extractMedia(text) {
+  const s = String(text || '');
+  return {
+    images: uniq([...(s.match(DATA_IMAGE) || []), ...(s.match(HTTP_IMAGE) || [])]),
+    videos: uniq(s.match(HTTP_VIDEO) || [])
+  };
+}
+
+function extFor(url, blobType, fallback) {
+  const fromType = (blobType || '').split('/')[1];
+  if (fromType && /^[a-z0-9]+$/.test(fromType)) return fromType === 'jpeg' ? 'jpg' : fromType;
+  const m = String(url).match(/^data:\w+\/(\w+)|\.(\w{3,4})(?:\?|$)/);
+  return (m && (m[1] || m[2])) || fallback;
+}
+
+/**
+ * Download an image or video. data: URLs and CORS-enabled hosts are saved as a file;
+ * if the host blocks cross-origin reads, the file opens in a new tab instead so the
+ * customer can still save it.
+ */
+export async function downloadMedia(url, fileName, fallbackExt = 'bin') {
+  try {
+    const res = await fetch(url);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const blob = await res.blob();
+    saveBlob(blob, `${safeFileName(fileName)}.${extFor(url, blob.type, fallbackExt)}`);
+  } catch {
+    if (String(url).startsWith('data:')) throw new Error('This file could not be saved.');
+    window.open(url, '_blank', 'noopener');
+  }
+}
+
+/** Download several files one after another, numbered. */
+export async function downloadAllMedia(urls, fileName, fallbackExt) {
+  for (let i = 0; i < urls.length; i += 1) {
+    await downloadMedia(urls[i], urls.length > 1 ? `${fileName}-${i + 1}` : fileName, fallbackExt);
+  }
 }
 
 // Print stylesheet for paper. Colours are the app's own light-mode text and divider

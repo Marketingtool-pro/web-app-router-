@@ -1,5 +1,5 @@
 import PropTypes from 'prop-types';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 // @mui
 import CircularProgress from '@mui/material/CircularProgress';
@@ -15,7 +15,10 @@ import {
   IconCopy,
   IconDeviceFloppy,
   IconFileText,
+  IconFileTypeCsv,
   IconFileTypePdf,
+  IconMovie,
+  IconPhotoDown,
   IconRefresh,
   IconRocket,
   IconShare,
@@ -26,7 +29,7 @@ import {
 } from '@tabler/icons-react';
 
 // @project
-import { copyText, downloadTxt, printAsPdf } from './exportOutput';
+import { copyText, downloadAllMedia, downloadCsv, downloadTxt, extractMedia, printAsPdf, tablesFromMarkdown } from './exportOutput';
 
 /***************************  OUTPUT TOOLBAR  ***************************/
 
@@ -42,6 +45,10 @@ const LABELS = {
   copy: 'Copy',
   pdf: 'Save as PDF',
   txt: 'Download .txt',
+  csv: 'Download tables (.csv)',
+  image: 'Download image',
+  images: 'Download images',
+  video: 'Download video',
   save: 'Save',
   regenerate: 'Regenerate',
   share: 'Copy share link',
@@ -203,7 +210,56 @@ function BackendActions({ states, run, disabled, ...props }) {
   );
 }
 
-export default function OutputToolbar({ output, title = 'Result', fileName, ...backend }) {
+// CSV, image and video downloads only appear when the result really contains a table,
+// an image or a video — either inside the text (the AI Router's data: URLs and links) or
+// passed separately by the page as `images` / `videos` from the engine's JSON output.
+function MediaActions({ output, name, images = [], videos = [], states, run }) {
+  const found = useMemo(() => {
+    const inText = extractMedia(output);
+    return {
+      tables: tablesFromMarkdown(output).length > 0,
+      images: [...new Set([...images, ...inText.images])],
+      videos: [...new Set([...videos, ...inText.videos])]
+    };
+  }, [output, images, videos]);
+
+  return (
+    <>
+      {found.tables && (
+        <ActionButton
+          id="csv"
+          label={LABELS.csv}
+          successLabel="Downloaded"
+          icon={<IconFileTypeCsv size={18} />}
+          state={states.csv}
+          onClick={() => run('csv', async () => downloadCsv(output, name))}
+        />
+      )}
+      {found.images.length > 0 && (
+        <ActionButton
+          id="image"
+          label={found.images.length > 1 ? `${LABELS.images} (${found.images.length})` : LABELS.image}
+          successLabel="Downloaded"
+          icon={<IconPhotoDown size={18} />}
+          state={states.image}
+          onClick={() => run('image', () => downloadAllMedia(found.images, `${name}-image`, 'png'))}
+        />
+      )}
+      {found.videos.length > 0 && (
+        <ActionButton
+          id="video"
+          label={LABELS.video}
+          successLabel="Downloaded"
+          icon={<IconMovie size={18} />}
+          state={states.video}
+          onClick={() => run('video', () => downloadAllMedia(found.videos, `${name}-video`, 'mp4'))}
+        />
+      )}
+    </>
+  );
+}
+
+export default function OutputToolbar({ output, title = 'Result', fileName, images, videos, ...backend }) {
   const [states, run] = useActionStates();
   const disabled = !(typeof output === 'string' && output.trim().length > 0);
   const hasBackend = ['onSave', 'onRegenerate', 'onShare', 'onRate', 'onLaunch'].some((k) => backend[k]);
@@ -242,6 +298,7 @@ export default function OutputToolbar({ output, title = 'Result', fileName, ...b
         disabled={disabled}
         onClick={() => run('pdf', () => printAsPdf(output, title))}
       />
+      {!disabled && <MediaActions output={output} name={fileName || title} images={images} videos={videos} states={states} run={run} />}
       {hasBackend && <Divider orientation="vertical" flexItem sx={{ mx: 0.5, my: 0.75 }} />}
       <BackendActions states={states} run={run} disabled={disabled} {...backend} />
     </Stack>
@@ -273,10 +330,21 @@ ActionButton.propTypes = {
   successLabel: PropTypes.string
 };
 
+MediaActions.propTypes = {
+  output: PropTypes.string,
+  name: PropTypes.string,
+  images: PropTypes.arrayOf(PropTypes.string),
+  videos: PropTypes.arrayOf(PropTypes.string),
+  states: PropTypes.object,
+  run: PropTypes.func
+};
+
 OutputToolbar.propTypes = {
   output: PropTypes.string,
   title: PropTypes.string,
   fileName: PropTypes.string,
+  images: PropTypes.arrayOf(PropTypes.string),
+  videos: PropTypes.arrayOf(PropTypes.string),
   onSave: PropTypes.func,
   onRegenerate: PropTypes.func,
   onShare: PropTypes.func,

@@ -8,6 +8,66 @@
 > The design intent lives in the owner's architecture spec. This file records what is
 > **actually running**. When the two disagree, that disagreement is the point of this file.
 
+## HOW THE WEB APP WORKS — FINAL FLOW (owner, 2026-11-16). THIS IS FINAL.
+
+Every page is built from the same unit. No page is built any other way.
+
+```
+~10 tools  =  10 python worker scripts (1 per tool)  =  1 engine  =  1 AI Router
+
+browser page (React, 1920 desktop, dark)
+   │  JS input  +  Appwrite JWT  (src/utils/api/windmill/index.js → Bearer <jwt>)
+   ▼
+VPS 2 nginx proxy (adds the Windmill token server-side, allows only /jobs/run_wait_result/)
+   ▼
+page's own Windmill ENGINE          f/tools/engine-<page>     validates JWT, scopes user_id
+   ▼  fans out to its WORKERS        f/tools/worker-<tool>     one python script per tool
+WORKERS call the REAL vendor APIs with the customer's own connected token:
+   Meta Marketing API · Google Ads / Analytics · Shopify Admin · AWS · every other tool's API
+CRON JOBS keep the source data fresh (Windmill schedules, see below)
+   ▼  worker HANDS OVER the real data
+AI ROUTER  (VPS 1 :9000, from containers http://172.17.0.1:9000/generate)
+   10 tasks, each answered by ITS OWN model, always active, never silently swapped
+   returns rich output: text, tables, chart data, images (PNG), video (MP4)
+   ▼
+ENGINE returns JSON  →  JS output  →  page renders the RICH RESULT at 1920
+                                      + DOWNLOAD on every page: PDF · CSV · PNG · MP4 · TXT
+```
+
+Rules that follow from it:
+
+- **All API-based, real results only.** A worker never returns sample, placeholder or invented
+  data. No connected account → show zeros / the connect prompt, never fake numbers. The single
+  exception stays `/ad-library` (intentional demo page, see Critical rules).
+- **The router analyses, it does not invent.** Real data goes in; the router turns it into rich
+  results. If a task's own model fails, the response says so — it is never answered by another
+  model under the same label.
+- **MCP connectors** (Meta, Google, AWS, Shopify, Appwrite, Windmill, Supabase …) are what we use
+  to build, test and verify each worker against the live service. At runtime the worker calls the
+  vendor API directly.
+- **GCloud Agent Worker** = the same role as a Windmill worker (one per page). It is never placed
+  inside or in front of the AI Router. (Not deployed yet — see "Request path".)
+- **Web stays in `f/tools/*`, phone stays in `f/mobile/*`.** Same workspace `marketingtool-pro`.
+- **One page at a time**, in the order the owner names. A page is done when: its engine checks
+  the JWT and scopes by user, every tool has a worker, a live run returns real data through the
+  router, the result renders rich at 1920, and every download button produces a real file.
+
+What already exists in Windmill (2026-11-16): ~60 `f/tools/engine-*` scripts (chat creative /
+automation / insight, analytics, meta-audit, ad-library, campaign meta/google, command-centre
+meta/google, reports, platform overview …) and ~90 `f/tools/worker-*` scripts (36 chat tool
+workers, campaign meta/google CRUD, command-centre actions, audience/bid/creative workers).
+The chat page already follows the unit exactly: 36 tools = 3 engines × 12
+(`src/views/admin/chat/ToolInlineForm.jsx` `SLUG_TO_ENGINE`).
+
+Cron jobs (Windmill schedules, all enabled):
+
+| schedule | runs | script |
+|---|---|---|
+| `f/tools/cron-sync-schedule` | every 10 min (Asia/Kolkata) | `f/tools/cron-sync-platforms` |
+| `f/schedules/campaign-scheduler` | hourly (UTC) | `f/tools/campaign-scheduler` |
+| `f/schedules/daily-sync` | 00:00 UTC | `f/tools/cron-daily-sync` |
+| `u/admin/health_monitor` | every 5 min | `u/admin/health_check` |
+
 ## THIS IS A CUSTOMER PORTAL, NOT ADMIN
 
 - Web App = desktop only (1920px), dark theme. React + Vite + MUI 9 (paid SaasAble template).
@@ -34,78 +94,66 @@ VPS 1 `nginx.service` is **failed but enabled** — nginx-proxy-manager owns 80/
 everything in `/etc/nginx/sites-enabled/` there is inert. The apex is **not a static
 docroot**: `/var/www/aiwave/` is a Django app on SQLite.
 
-## AI Router — READ THIS FIRST, HALF OF IT IS SILENTLY DOWNGRADED
+## AI Router — 10 tasks, each its own model (verified live 2026-11-16)
 
-The router is up (PM2 `ai-router`, uvicorn on `:9000`) and **correctly firewalled** —
-iptables accepts 9000 only from localhost and Docker nets and DROPs the rest. Verified
-refused from the public internet.
+The router is up (PM2 `ai-router`, uvicorn on `:9000`, code `/root/app.py`, started by
+`/root/start-ai-router.sh`) and **correctly firewalled** — iptables accepts 9000 only from
+localhost and Docker nets. From a Windmill container use `http://172.17.0.1:9000`.
 
-The routing **code is correct**: each task tries its own model first and treats OpenRouter
-as an error path. But three provider accounts are failing, and `_first_ok()` swallows the
-exception without logging, so every failure is invisible and answers arrive as
-`gpt-4o-mini`.
+Every task routes to its own model first. A fallback, where one exists, is printed as
+`[AI-ROUTER] provider FAILED ...` and the response `model` field names the model that really
+answered. Unknown task → 400 with the valid list. `vision_analysis`/`ocr` without an image → 400.
 
-Verified by live call on 2026-09-11:
+All ten tasks were called one by one on 2026-11-16 and the real response read:
 
-All ten task names were executed individually and the real response inspected. Not
-inferred from imports or auth checks — actually run.
+| # | task | its own model | answered today | state |
+|---|---|---|---|---|
+| 1 | creative | Claude Sonnet 4.5 (`claude-sonnet-4-5`) | Claude Sonnet 4.5 | **WORKS** |
+| 2 | coding | Claude Sonnet 4.5 | Claude Sonnet 4.5 | **WORKS** |
+| 3 | default | Claude Sonnet 4.5 | Claude Sonnet 4.5 | **WORKS** |
+| 4 | research | Gemini 2.5 Flash | Gemini 2.5 Flash | **WORKS** |
+| 5 | automation | GPT-OSS-120B on Groq | nothing — 502 | **DOWN** — Groq 401 "Invalid API Key" |
+| 6 | image_gen | GPT Image 2 (OpenAI), Stability fallback | GPT Image 2, real PNG | **WORKS** |
+| 7 | stable_image | Stable Diffusion 3.5 Large | SD 3.5, real PNG | **WORKS** |
+| 8 | video_gen | FAL.ai Kling (text/image-to-video) | re-test in progress 2026-11-16 | last verified working 2026-09-11 |
+| 9 | vision_analysis | GPT-4o Vision (OpenAI direct) | GPT-4o Vision | **WORKS** |
+| 10 | ocr | Qwen3-VL-8B (OpenRouter), GPT-4o fallback | GPT-4o Vision (fallback) | **FALLBACK** — OpenRouter account blocks Qwen |
 
-| task | intended | what answered | state |
-|---|---|---|---|
-| creative | Claude | `gpt-4o-mini` | **BROKEN** — Anthropic credit balance too low |
-| coding | Claude | `gpt-4o-mini` | **BROKEN** — same |
-| default | Claude | `gpt-4o-mini` | **BROKEN** — same |
-| research | Gemini | `gpt-4o-mini` | **BROKEN** — Gemini "API key not valid" |
-| automation | Llama / Groq | `gpt-4o-mini` | **BROKEN** — Groq 401 invalid key |
-| image_gen | DALL-E 3 | falls to Stability | **BROKEN** — OpenAI 429 "no credits remaining" |
-| stable_image | sd3.5-large | Stable Diffusion 3.5 | **WORKS** — returned a real PNG |
-| video_gen | Kling / FAL | FAL.ai Video (Kling) | **WORKS** — returned a real MP4 URL |
-| vision_analysis | `openai/gpt-4o` | GPT-4o Vision | **WORKS** — correct description of a real image |
-| ocr | `qwen/qwen-2.5-vl-72b` | Qwen2.5-VL-72B | **WORKS** — correct text from a real image |
+The 10 tasks use 8 providers by design (Claude serves creative, coding and default). The task
+table is frozen — do not reroute a task to another provider to make it "work".
 
-**4 of 10 work. 6 are down, and they need exactly 4 account fixes:**
+**The two account fixes left (owner actions, not code):**
 
-| fix | tasks it restores |
-|---|---|
-| add credit to Anthropic | creative, coding, default |
-| valid Gemini key | research |
-| valid Groq key | automation |
-| add credit to OpenAI | image_gen |
+1. **Groq key** — both stored keys are rejected: the router's (`/root/.ai-api-env`) and
+   Windmill `f/tools/groq_api_key` (tested 2026-11-16, 401). Create a new key at
+   console.groq.com, put it in `/root/.ai-api-env` and in `f/tools/groq_api_key`, then
+   `set -a; . /root/.ai-api-env; set +a; pm2 restart ai-router --update-env; pm2 save`.
+   Until then `automation` returns 502 — and the automation/insight engines that fan out to it
+   lose that one task.
+2. **OpenRouter allowed providers** — the router asks for `qwen/qwen3-vl-8b-instruct` first, and
+   OpenRouter answers *"your account's allowed-providers setting permits only: anthropic"*
+   (Qwen is served by `parasail`). In OpenRouter → Settings → allowed providers, allow
+   `parasail` (or remove the restriction). No code change is needed; `ocr` then answers from Qwen.
 
-The routing code is correct and needs no change. Every failure is an account state, not a
-bug. OpenAI's key is still valid — it authenticates and rejects on prompt length — it has
-simply run out of credit, so `image_gen` silently serves Stability instead of DALL-E 3.
+**Timeout:** `video_gen` takes minutes. Any engine that calls it needs its own long timeout
+(≥ 300 s); the default 30 s in `call_ai_router` will always fail.
 
-**Timeout constraint:** `video_gen` took **over 3 minutes** to return. `call_ai_router` in
-the engines defaults to a 30-second timeout, and the parallel fan-outs use 25-40 seconds.
-No script calls `video_gen` today (verified: 0 scripts reference it), but any engine that
-adds it at those timeouts will always fail. Give video its own long timeout.
+**Image URLs must be publicly fetchable** by the provider for `vision_analysis`/`ocr`.
+`https://app.marketingtool.pro/...` works; some hosts (e.g. Wikipedia) are refused.
 
-**Do NOT "fix" this by routing Claude/Gemini/Llama through OpenRouter.** The task table is
-frozen: each task uses its own provider. Rerouting would recreate exactly the failure this
-document exists to prevent, where the router claims one provider and another answers.
+Changed 2026-11-16 on VPS 1 (backup `/root/app.py.bak-ocr-labels-20261116-160641`): `ocr` calls
+Qwen first again (it had been wired straight to GPT-4o), and every label now names the real
+model — `/` used to claim DALL-E 3, SD 3 and "Claude Sonnet 4", and Groq answers were labelled
+"Llama-3.3-70B" while `gpt-oss-120b` ran.
 
-**Image URLs must be publicly fetchable by the provider.** `vision_analysis` and `ocr` pass
-the URL to OpenRouter, which downloads it server-side. A Wikipedia URL was refused
-("Failed to download image"); `https://app.marketingtool.pro/images/...` worked. Workers
-handing images to these two tasks must supply URLs the provider can actually reach.
-
-So **five of ten task names — every text task — silently answer from the cheapest model.**
-Keys are all present in the process environment with plausible lengths; the SDKs are
-current (anthropic 0.84.0, google-genai 1.66.0, openai 2.26.0); all provider hosts are
-reachable from the box. The failures are account-side: one billing, two bad keys.
-
-To see a swallowed provider error without adding logging, force both providers to fail by
-sending an over-long prompt — the 502 then contains both error strings:
+Re-check any time:
 
 ```
-curl -s -X POST http://127.0.0.1:9000/generate -H 'Content-Type: application/json' \
-  -d "{\"task\":\"creative\",\"prompt\":\"$(python3 -c 'print("x"*900000)')\"}"
+for t in creative coding default research automation image_gen stable_image; do
+  curl -s -X POST http://127.0.0.1:9000/generate -H 'Content-Type: application/json' \
+    -d "{\"task\":\"$t\",\"prompt\":\"Reply OK\"}" | head -c 120; echo; done
+pm2 logs ai-router --nostream | grep "provider FAILED" | tail
 ```
-
-The `/` endpoint still prints three **stale labels** — "Claude Sonnet 4" (it is 4.5),
-"Stable Diffusion 3" (3.5-large), "Qwen3 VL 8B" (Qwen2.5-VL-72B). Cosmetic, but it is what
-callers are told.
 
 ### Provider failures are now LOGGED (patched 2026-09-11)
 
@@ -635,7 +683,7 @@ Two real defects in the flow the customer actually walks:
 
 ## Known broken — do not assume these work
 
-- **Five of ten AI Router tasks silently downgrade to gpt-4o-mini** (see table above).
+- **AI Router: 2 of 10 tasks not on their own model** (2026-11-16): `automation` is down (Groq key 401) and `ocr` falls back to GPT-4o until OpenRouter allows the Qwen provider. The other 8 answer from their own model. See the router table above.
 - **`marketingtool-agent` Cloud Run service does not exist** — the web app's designated
   tool engine per the spec has never been deployed.
 - **Production still runs the 12 Apr 2026 build with the Windmill token in the public
