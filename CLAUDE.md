@@ -35,6 +35,15 @@ ignored failures, so a failed connect closed the hard pop-up with nothing connec
 server-confirmed `success: true` counts. The pop-up also claimed "Read-only access — we never
 modify your ads" while requesting `ads_management`; corrected.
 
+**Facebook LOGIN fails — "API calls from the server require an appsecret_proof argument"
+(Appwrite `user_oauth2_bad_request`, 2026-11-16).** Read live from Meta: login app
+`1830149205008066` has **Require App Secret = ON**; ads app `2246709019441842` has it OFF.
+Appwrite's Facebook OAuth adapter never sends `appsecret_proof`, so every Facebook login is
+rejected by Meta even though the Appwrite provider settings are correct (they are stored
+encrypted in `_console_projects.oAuthProviders`). Fix is on Meta only: developers.facebook.com →
+app 1830149205008066 → App settings → Advanced → Security → **Require app secret: No** → Save.
+Do not "fix" it by pointing Appwrite at the ads app — the split is final (see META APPS).
+
 Still open on this journey:
 - **Meta App Review never submitted** — the pop-up asks Facebook for ads permissions the app does
   not hold, so real customers' Facebook connect is refused until review passes (see META APP REVIEW).
