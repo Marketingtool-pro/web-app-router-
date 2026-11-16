@@ -70,13 +70,20 @@ The connected accounts themselves are dead, checked one by one:
 | Meta | 89 (5 customers; 60 = testuser) | **0** | 76 issued to the old app `1582682256320433`; 13 logged out / invalidated; 18 have a malformed `account_id` (not `act_…`) |
 | Google | 25 (5 customers) | **0** | `f/tools/google_client_secret` is rejected by Google ("invalid_client") for client `911925145433-lnqjvdu44j…` — this also breaks **Connect Google Ads** in the hard pop-up for every new customer |
 
-Also missing in Windmill: **no Google Ads developer token variable** (no Google Ads API call can
-work), and `f/tools/fb_ads_app_id` / `fb_ads_app_secret` still describe the old app.
+Google Ads developer token: stored 2026-11-16 as Windmill secret
+`f/tools/google_ads_developer_token` (Basic access — 15,000 operations/day, production; the value
+lives only in Windmill). `f/tools/fb_ads_app_id` / `fb_ads_app_secret` still describe the old app
+`1582682256320433`; the ads app is `2246709019441842` (owner confirmed both apps 2026-11-16).
 
 To get real ad data flowing: (1) put the correct client secret for `911925145433-lnqjvdu44j…`
-into `f/tools/google_client_secret`; (2) add the Google Ads developer token as a Windmill secret;
-(3) pass Meta App Review for app `2246709019441842`; (4) customers reconnect once through the
-hard pop-up. The sync then fills `campaign_metrics` on its own.
+into `f/tools/google_client_secret`; (2) pass Meta App Review for app `2246709019441842`;
+(3) customers reconnect once through the hard pop-up. The sync then fills `campaign_metrics`.
+
+AI media quality, checked by eye 2026-11-16: `image_gen` (GPT Image 2) and `stable_image`
+(SD 3.5) both return 1024×1024 photoreal, ad-ready PNGs; GPT Image 2 follows the prompt more
+closely (theme, empty space for headline). `video_gen` (FAL Kling) returns a sharp 5 s
+1920×1080 H.264 MP4; on-screen text inside the video is garbled, as with all AI video — fine for
+b-roll, not for text-critical shots.
 
 ## HOW THE WEB APP WORKS — FINAL FLOW (owner, 2026-11-16). THIS IS FINAL.
 
