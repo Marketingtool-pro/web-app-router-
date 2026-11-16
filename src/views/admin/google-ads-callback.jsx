@@ -13,6 +13,7 @@ import Button from '@mui/material/Button';
 
 // @project
 import { AUTH_USER_KEY } from '@/config';
+import { connectGoogleAds } from '@/utils/adsConnection';
 
 /***************************  GOOGLE ADS CONNECT CALLBACK  ***************************/
 
@@ -61,26 +62,19 @@ export default function GoogleAdsCallback() {
         return;
       }
 
-      // Save Google connected status
-      localStorage.setItem('google_ads_connected', 'true');
-
-      // Send auth code to Windmill for token exchange (non-blocking)
+      // Exchange the code on the server; success is shown only when it is confirmed.
       try {
-        const API_BASE = import.meta.env.VITE_WINDMILL_URL || 'https://app.marketingtool.pro';
-        const API_WORKSPACE = import.meta.env.VITE_WINDMILL_WORKSPACE || 'marketingtool-pro';
-        const appwriteJwt = userData?.access_token || '';
-        const redirectUri = `${window.location.origin}/oauth/google-ads`;
-
-        fetch(`${API_BASE}/api/w/${API_WORKSPACE}/jobs/run_wait_result/p/f/tools/google-ads-connect`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${getAppwriteJwt()}`
-          },
-          body: JSON.stringify({ code, redirectUri, userId, appwriteJwt })
-        }).catch(() => {});
-      } catch {
-        // Windmill script not ready yet — that's fine
+        await connectGoogleAds({
+          code,
+          redirectUri: `${window.location.origin}/oauth/google-ads`,
+          userId,
+          appwriteJwt: userData?.access_token,
+          authJwt: getAppwriteJwt()
+        });
+      } catch (err) {
+        setStatus('error');
+        setError(`Google Ads could not be connected: ${err?.message || 'unknown error'}. Please try again.`);
+        return;
       }
 
       setStatus('success');
@@ -107,7 +101,17 @@ export default function GoogleAdsCallback() {
 
         {status === 'success' && (
           <>
-            <Box sx={{ width: 56, height: 56, borderRadius: '50%', bgcolor: 'rgba(62,183,94,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <Box
+              sx={{
+                width: 56,
+                height: 56,
+                borderRadius: '50%',
+                bgcolor: 'rgba(62,183,94,0.12)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center'
+              }}
+            >
               <Typography sx={{ fontSize: 28 }}>&#10003;</Typography>
             </Box>
             <Typography variant="h6" sx={{ color: '#fff', fontWeight: 600 }}>
@@ -121,8 +125,14 @@ export default function GoogleAdsCallback() {
 
         {status === 'error' && (
           <>
-            <Alert severity="error" sx={{ borderRadius: 2 }}>{error}</Alert>
-            <Button variant="contained" onClick={() => navigate('/dashboard', { replace: true })} sx={{ bgcolor: '#805AF5', '&:hover': { bgcolor: '#6B44E0' }, textTransform: 'none' }}>
+            <Alert severity="error" sx={{ borderRadius: 2 }}>
+              {error}
+            </Alert>
+            <Button
+              variant="contained"
+              onClick={() => navigate('/dashboard', { replace: true })}
+              sx={{ bgcolor: '#805AF5', '&:hover': { bgcolor: '#6B44E0' }, textTransform: 'none' }}
+            >
               Go to Dashboard
             </Button>
           </>

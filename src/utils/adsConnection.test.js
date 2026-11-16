@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { ADS_CONNECTED_KEYS, hasAnyAdsConnection, hasServerAdsConnection } from './adsConnection';
+import { ADS_CONNECTED_KEYS, connectGoogleAds, hasAnyAdsConnection, hasServerAdsConnection } from './adsConnection';
 
 describe('hasAnyAdsConnection', () => {
   beforeEach(() => localStorage.clear());
@@ -41,5 +41,39 @@ describe('hasServerAdsConnection', () => {
     expect(fetchAccounts).not.toHaveBeenCalled();
     await expect(hasServerAdsConnection('u1', vi.fn().mockResolvedValue({ error: 'x' }))).resolves.toBeNull();
     await expect(hasServerAdsConnection('u1', vi.fn().mockRejectedValue(new Error('down')))).resolves.toBeNull();
+  });
+});
+
+describe('connectGoogleAds', () => {
+  beforeEach(() => {
+    localStorage.clear();
+    vi.restoreAllMocks();
+  });
+
+  const args = { code: 'c', redirectUri: 'postmessage', userId: 'u1', appwriteJwt: 'a', authJwt: 'j' };
+  const answer = (status, body) => vi.spyOn(globalThis, 'fetch').mockResolvedValue({ ok: status < 400, status, json: async () => body });
+
+  it('marks Google connected only when the server confirms success', async () => {
+    answer(200, { success: true, platform: 'google', account_name: 'Acme' });
+    await expect(connectGoogleAds(args)).resolves.toMatchObject({ success: true });
+    expect(localStorage.getItem('google_ads_connected')).toBe('true');
+  });
+
+  it('throws the server error and leaves the modal flag unset on failure', async () => {
+    answer(200, { success: false, error: 'Token exchange failed: invalid_grant' });
+    await expect(connectGoogleAds(args)).rejects.toThrow('invalid_grant');
+    expect(localStorage.getItem('google_ads_connected')).toBeNull();
+  });
+
+  it('throws on an HTTP error with no JSON body', async () => {
+    vi.spyOn(globalThis, 'fetch').mockResolvedValue({
+      ok: false,
+      status: 502,
+      json: async () => {
+        throw new Error('x');
+      }
+    });
+    await expect(connectGoogleAds(args)).rejects.toThrow('502');
+    expect(localStorage.getItem('google_ads_connected')).toBeNull();
   });
 });

@@ -8,6 +8,43 @@
 > The design intent lives in the owner's architecture spec. This file records what is
 > **actually running**. When the two disagree, that disagreement is the point of this file.
 
+## THE CUSTOMER JOURNEY (owner, 2026-11-16). THIS IS FINAL.
+
+```
+1. marketingtool.pro            customer clicks "Get Started"  →  app.marketingtool.pro/login
+                                ("Join Now" → /register)
+2. Login                        Google or Facebook, through Appwrite OAuth (createOAuth2Session).
+                                Login app = Meta app 1830149205008066. No Instagram login.
+3. Hard Connect-Ads pop-up      shown on EVERY page, EVERY visit, until the customer has a
+                                connected ad account. No close button, no Escape — only
+                                "Connect Facebook & Instagram Ads", "Connect Google Ads", or Logout.
+                                Ads app = Meta app 2246709019441842.
+4. Connected                    the pop-up disappears only after the SERVER confirms the account
+                                was saved (ad_accounts rows, or google-ads-connect success:true).
+                                Then the full app opens; every page follows the final flow below.
+```
+
+Where it lives: `src/layouts/AdminLayout/index.jsx` (decides when), `src/components/ConnectAdsModal.jsx`
+(the pop-up), `src/utils/adsConnection.js` (`hasAnyAdsConnection`, `hasServerAdsConnection`,
+`connectGoogleAds`). Admin accounts skip the pop-up.
+
+Checked 2026-11-16: homepage "Get Started" → `/login` and "Join Now" → `/register` (live HTML);
+login uses Appwrite Google + Facebook (source). Fixed: all three Google connect paths (pop-up,
+`/oauth/google-ads` callback, Settings) marked Google "connected" BEFORE the server answered and
+ignored failures, so a failed connect closed the hard pop-up with nothing connected. Now only a
+server-confirmed `success: true` counts. The pop-up also claimed "Read-only access — we never
+modify your ads" while requesting `ads_management`; corrected.
+
+Still open on this journey:
+- **Meta App Review never submitted** — the pop-up asks Facebook for ads permissions the app does
+  not hold, so real customers' Facebook connect is refused until review passes (see META APP REVIEW).
+- **Pricing "Get Started" buttons on marketingtool.pro go to `buy.stripe.com` links** — external
+  payment links, against the "direct integration only" rule. That page is the Django site on VPS 1,
+  not this repo.
+- The pop-up shows a hard-coded "4.8 Rating" with five stars that is not backed by any data.
+- Production still serves the 12 Sep build; these fixes go live only after a rebuild + deploy,
+  which needs `.env` restored (see deploy section).
+
 ## HOW THE WEB APP WORKS — FINAL FLOW (owner, 2026-11-16). THIS IS FINAL.
 
 Every page is built from the same unit. No page is built any other way.
