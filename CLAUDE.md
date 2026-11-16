@@ -51,8 +51,13 @@ Still open on this journey:
   with Google" reaches Google's account chooser via `api.marketingtool.pro` and returns to
   `/social-auth-callback`. Backup of the previous build:
   `/root/web-app/dist-backup-predeploy-20261116-170909` on VPS 2.
-- **MUI X Pro licence is not set in production** — the 12 Sep build had no key either. Pro
-  charts/grids/date pickers show the "Missing license key" watermark until the key is supplied.
+- **MUI X Pro licence: LIVE since the second deploy 2026-11-16** (backup of the deploy before it:
+  `/root/web-app/dist-backup-predeploy-20261116-172320`). Passed at build time as
+  `VITE_MUI_X_LICENSE_KEY=…` (value held by the owner, not recorded here). Checked with MUI's own
+  `verifyLicense` against the installed v9.16.0 (released 2026-10-20): **Valid** for x-charts-pro,
+  x-date-pickers-pro and x-data-grid-pro. Plan Pro, annual, expires 2027-03-20 — renew before then
+  or every Pro chart/grid/picker gets the watermark back. Live login page console: no errors.
+  DataGrid AI needs `x-data-grid-premium` + a **Premium** licence (this key is Pro) — not installed.
 
 ## REAL AD DATA — WHY IT STOPPED, AND WHAT RUNS NOW (checked live 2026-11-16)
 
