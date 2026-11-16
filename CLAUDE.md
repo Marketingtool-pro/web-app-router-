@@ -115,7 +115,7 @@ All ten tasks were called one by one on 2026-11-16 and the real response read:
 | 5 | automation | GPT-OSS-120B on Groq | nothing — 502 | **DOWN** — Groq 401 "Invalid API Key" |
 | 6 | image_gen | GPT Image 2 (OpenAI), Stability fallback | GPT Image 2, real PNG | **WORKS** |
 | 7 | stable_image | Stable Diffusion 3.5 Large | SD 3.5, real PNG | **WORKS** |
-| 8 | video_gen | FAL.ai Kling (text/image-to-video) | re-test in progress 2026-11-16 | last verified working 2026-09-11 |
+| 8 | video_gen | FAL.ai Kling (text/image-to-video) | FAL.ai Kling — real 5 s 1920×1080 H.264 MP4 | **WORKS** |
 | 9 | vision_analysis | GPT-4o Vision (OpenAI direct) | GPT-4o Vision | **WORKS** |
 | 10 | ocr | Qwen3-VL-8B (OpenRouter), GPT-4o fallback | GPT-4o Vision (fallback) | **FALLBACK** — OpenRouter account blocks Qwen |
 
