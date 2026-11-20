@@ -23,6 +23,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { fetchConnectedAccounts, getAppwriteJwt } from "@/utils/api/windmill";
 import { AUTH_USER_KEY } from "@/config";
 import { AvatarSize } from "@/enum";
+import { connectGoogleAds } from "@/utils/adsConnection";
 
 // @assets
 import { IconCheck } from "@tabler/icons-react";
@@ -110,32 +111,19 @@ export default function SettingServiceCard() {
             return;
           }
 
-          // Save connected status
-          localStorage.setItem("google_ads_connected", "true");
-
-          // Send auth code to Windmill for token exchange
+          // Exchange the code on the server; report success only when it is confirmed.
           try {
-            const API_BASE = import.meta.env.VITE_WINDMILL_URL || 'https://app.marketingtool.pro';
-            const API_WORKSPACE = import.meta.env.VITE_WINDMILL_WORKSPACE || 'marketingtool-pro';
-
-            await fetch(
-              `${API_BASE}/api/w/${API_WORKSPACE}/jobs/run_wait_result/p/f/tools/google-ads-connect`,
-              {
-                method: "POST",
-                headers: {
-                  "Content-Type": "application/json",
-                  Authorization: `Bearer ${getAppwriteJwt()}`,
-                },
-                body: JSON.stringify({
-                  code: response.code,
-                  redirectUri: "postmessage",
-                  userId,
-                  appwriteJwt: userData?.access_token || "",
-                }),
-              },
-            );
-          } catch {
-            /* Windmill sync non-blocking */
+            await connectGoogleAds({
+              code: response.code,
+              redirectUri: "postmessage",
+              userId,
+              appwriteJwt: userData?.access_token,
+              authJwt: getAppwriteJwt(),
+            });
+          } catch (err) {
+            enqueueSnackbar(`Google Ads could not be connected: ${err?.message || "unknown error"}`, { variant: "error" });
+            setConnecting("");
+            return;
           }
 
           enqueueSnackbar("Google Ads connected successfully!", { variant: "success" });

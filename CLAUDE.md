@@ -8,6 +8,184 @@
 > The design intent lives in the owner's architecture spec. This file records what is
 > **actually running**. When the two disagree, that disagreement is the point of this file.
 
+## THE CUSTOMER JOURNEY (owner, 2026-11-16). THIS IS FINAL.
+
+```
+1. marketingtool.pro            customer clicks "Get Started"  →  app.marketingtool.pro/login
+                                ("Join Now" → /register)
+2. Login                        Google or Facebook, through Appwrite OAuth (createOAuth2Session).
+                                Login app = Meta app 1830149205008066. No Instagram login.
+3. Hard Connect-Ads pop-up      shown on EVERY page, EVERY visit, until the customer has a
+                                connected ad account. No close button, no Escape — only
+                                "Connect Facebook & Instagram Ads", "Connect Google Ads", or Logout.
+                                Ads app = Meta app 2246709019441842.
+4. Connected                    the pop-up disappears only after the SERVER confirms the account
+                                was saved (ad_accounts rows, or google-ads-connect success:true).
+                                Then the full app opens; every page follows the final flow below.
+```
+
+Where it lives: `src/layouts/AdminLayout/index.jsx` (decides when), `src/components/ConnectAdsModal.jsx`
+(the pop-up), `src/utils/adsConnection.js` (`hasAnyAdsConnection`, `hasServerAdsConnection`,
+`connectGoogleAds`). Admin accounts skip the pop-up.
+
+Checked 2026-11-16: homepage "Get Started" → `/login` and "Join Now" → `/register` (live HTML);
+login uses Appwrite Google + Facebook (source). Fixed: all three Google connect paths (pop-up,
+`/oauth/google-ads` callback, Settings) marked Google "connected" BEFORE the server answered and
+ignored failures, so a failed connect closed the hard pop-up with nothing connected. Now only a
+server-confirmed `success: true` counts. The pop-up also claimed "Read-only access — we never
+modify your ads" while requesting `ads_management`; corrected.
+
+**Facebook LOGIN fails — "API calls from the server require an appsecret_proof argument"
+(Appwrite `user_oauth2_bad_request`, 2026-11-16).** Read live from Meta: login app
+`1830149205008066` has **Require App Secret = ON**; ads app `2246709019441842` has it OFF.
+Appwrite's Facebook OAuth adapter never sends `appsecret_proof`, so every Facebook login is
+rejected by Meta even though the Appwrite provider settings are correct (they are stored
+encrypted in `_console_projects.oAuthProviders`). Fix is on Meta only: developers.facebook.com →
+app 1830149205008066 → App settings → Advanced → Security → **Require app secret: No** → Save.
+Do not "fix" it by pointing Appwrite at the ads app — the split is final (see META APPS).
+→ Owner switched it off 2026-11-16 (re-read from Meta: `require_app_secret: false`).
+
+**Next Facebook login error — "OAuth provider failed to return email." (401, 2026-11-16).**
+Read live from Meta: app `1830149205008066` is live, has no use cases configured, and holds
+`email` and `public_profile` at **Standard access only** (`openid` is Advanced). Standard access
+returns the email only to people with a role on the app; for every real customer Facebook returns
+no email and Appwrite rejects the login. Meta reports `email` can get **Advanced access without App
+Review** ("Get advanced access" in App Dashboard → App Review → Permissions and Features; requirement
+listed: business verification). Do the same for `public_profile`. If the owner's own account
+(which has a role) still gets this error, that Facebook account has no confirmed email or the email
+box was unticked on the consent screen — remove the app under Facebook Settings → Apps and Websites
+and sign in again.
+
+Still open on this journey:
+- **Meta App Review never submitted** — the pop-up asks Facebook for ads permissions the app does
+  not hold, so real customers' Facebook connect is refused until review passes (see META APP REVIEW).
+- **Pricing "Get Started" buttons on marketingtool.pro go to `buy.stripe.com` links** — external
+  payment links, against the "direct integration only" rule. That page is the Django site on VPS 1,
+  not this repo.
+- The pop-up shows a hard-coded "4.8 Rating" with five stars that is not backed by any data.
+- **DEPLOYED 2026-11-16** (owner-approved) from branch `worktree-final-flow`, replacing the 12 Sep
+  build. Built without `.env`, public values passed on the command line:
+  `VITE_APPWRITE_ENDPOINT=https://api.marketingtool.pro/v1 VITE_APPWRITE_PROJECT_ID=6952c8a0002d3365625d
+  VITE_WINDMILL_URL=https://app.marketingtool.pro VITE_WINDMILL_WORKSPACE=marketingtool-pro npx vite build`.
+  Checks passed: Appwrite endpoint + project id present; no `localhost/v1`, no `wm.marketingtool.pro`,
+  no old app id, no Instagram button. Live check: login page shows Google + Facebook; "Sign in
+  with Google" reaches Google's account chooser via `api.marketingtool.pro` and returns to
+  `/social-auth-callback`. Backup of the previous build:
+  `/root/web-app/dist-backup-predeploy-20261116-170909` on VPS 2.
+- **MUI X Pro licence: LIVE since the second deploy 2026-11-16** (backup of the deploy before it:
+  `/root/web-app/dist-backup-predeploy-20261116-172320`). Passed at build time as
+  `VITE_MUI_X_LICENSE_KEY=…` (value held by the owner, not recorded here). Checked with MUI's own
+  `verifyLicense` against the installed v9.16.0 (released 2026-10-20): **Valid** for x-charts-pro,
+  x-date-pickers-pro and x-data-grid-pro. Plan Pro, annual, expires 2027-03-20 — renew before then
+  or every Pro chart/grid/picker gets the watermark back. Live login page console: no errors.
+  DataGrid AI needs `x-data-grid-premium` + a **Premium** licence (this key is Pro) — not installed.
+
+## REAL AD DATA — WHY IT STOPPED, AND WHAT RUNS NOW (checked live 2026-11-16)
+
+Supabase (VPS 2, all 13 containers healthy) — newest row per table: `campaign_metrics` and
+`daily_summary` **2026-03-19**; `ad_accounts`, `campaigns`, `workflow_runs` **2026-04-08**;
+`generations`, `credit_usage`, `webhook_logs` today. AI tool runs are saved; ad data is not.
+
+Why: the 10-minute sync `f/tools/cron-sync-platforms` (1) used one shared admin token from the
+old Meta app `1582682256320433`, which Meta now rejects ("user has not authorized application");
+(2) wrote columns that do not exist in `campaign_metrics`, `daily_summary` and `sync_logs`;
+(3) swallowed every error and returned `success: true` with 0 accounts. The 282 existing
+`campaign_metrics` rows have `ad_account_id` NULL — they belong to no customer.
+
+Now: `f/tools/cron-sync-meta` (source `windmill/f/tools/cron-sync-platforms.py`), schedule
+`f/tools/cron-sync-meta-schedule`, every 10 min. It uses each customer's own token from
+`ad_accounts`, upserts `campaign_metrics` on (`ad_account_id`, `campaign_id`, `date`) and writes
+every account's result — including errors — to `sync_logs`. Old schedule
+`f/tools/cron-sync-schedule` is paused (not deleted) for rollback.
+
+The connected accounts themselves are dead, checked one by one:
+
+| platform | rows | working | why not |
+|---|---|---|---|
+| Meta | 89 (5 customers; 60 = testuser) | **0** | 76 issued to the old app `1582682256320433`; 13 logged out / invalidated; 18 have a malformed `account_id` (not `act_…`) |
+| Google | 25 (5 customers) | **0** | `f/tools/google_client_secret` is rejected by Google ("invalid_client") for client `911925145433-lnqjvdu44j…` — this also breaks **Connect Google Ads** in the hard pop-up for every new customer |
+
+Google Ads developer token: stored 2026-11-16 as Windmill secret
+`f/tools/google_ads_developer_token` (Basic access — 15,000 operations/day, production; the value
+lives only in Windmill). `f/tools/fb_ads_app_id` / `fb_ads_app_secret` still describe the old app
+`1582682256320433`; the ads app is `2246709019441842` (owner confirmed both apps 2026-11-16).
+
+To get real ad data flowing: (1) put the correct client secret for `911925145433-lnqjvdu44j…`
+into `f/tools/google_client_secret`; (2) pass Meta App Review for app `2246709019441842`;
+(3) customers reconnect once through the hard pop-up. The sync then fills `campaign_metrics`.
+
+AI media quality, checked by eye 2026-11-16: `image_gen` (GPT Image 2) and `stable_image`
+(SD 3.5) both return 1024×1024 photoreal, ad-ready PNGs; GPT Image 2 follows the prompt more
+closely (theme, empty space for headline). `video_gen` (FAL Kling) returns a sharp 5 s
+1920×1080 H.264 MP4; on-screen text inside the video is garbled, as with all AI video — fine for
+b-roll, not for text-critical shots.
+
+## HOW THE WEB APP WORKS — FINAL FLOW (owner, 2026-11-16). THIS IS FINAL.
+
+Every page is built from the same unit. No page is built any other way.
+
+```
+~10 tools  =  10 python worker scripts (1 per tool)  =  1 engine  =  1 AI Router
+
+browser page (React, 1920 desktop, dark)
+   │  JS input  +  Appwrite JWT  (src/utils/api/windmill/index.js → Bearer <jwt>)
+   ▼
+VPS 2 nginx proxy (adds the Windmill token server-side, allows only /jobs/run_wait_result/)
+   ▼
+page's own Windmill ENGINE          f/tools/engine-<page>     validates JWT, scopes user_id
+   ▼  fans out to its WORKERS        f/tools/worker-<tool>     one python script per tool
+WORKERS call the REAL vendor APIs with the customer's own connected token:
+   Meta Marketing API · Google Ads / Analytics · Shopify Admin · AWS · every other tool's API
+CRON JOBS keep the source data fresh (Windmill schedules, see below)
+   ▼  worker HANDS OVER the real data
+AI ROUTER  (VPS 1 :9000, from containers http://172.17.0.1:9000/generate)
+   10 tasks, each answered by ITS OWN model, always active, never silently swapped
+   returns rich output: text, tables, chart data, images (PNG), video (MP4)
+   ▼
+ENGINE returns JSON  →  JS output  →  page renders the RICH RESULT at 1920
+                                      + DOWNLOAD on every page: PDF · CSV · PNG · MP4 · TXT
+```
+
+Rules that follow from it:
+
+- **Ads are API-based both ways, on the real platform (owner, 2026-11-16).** Meta, Google and every
+  other ad/social platform: workers READ the customer's real data through the platform API, and
+  PUBLISH back to the real platform through the same API — create, edit, pause, resume, launch
+  campaigns, ads and posts on the customer's own connected account. Never a simulated or
+  "draft only" publish presented as live. The worker returns the platform's real object id (and
+  link) so the page can show what was published.
+- **All API-based, real results only.** A worker never returns sample, placeholder or invented
+  data. No connected account → show zeros / the connect prompt, never fake numbers. The single
+  exception stays `/ad-library` (intentional demo page, see Critical rules).
+- **The router analyses, it does not invent.** Real data goes in; the router turns it into rich
+  results. If a task's own model fails, the response says so — it is never answered by another
+  model under the same label.
+- **MCP connectors** (Meta, Google, AWS, Shopify, Appwrite, Windmill, Supabase …) are what we use
+  to build, test and verify each worker against the live service. At runtime the worker calls the
+  vendor API directly.
+- **GCloud Agent Worker** = the same role as a Windmill worker (one per page). It is never placed
+  inside or in front of the AI Router. (Not deployed yet — see "Request path".)
+- **Web stays in `f/tools/*`, phone stays in `f/mobile/*`.** Same workspace `marketingtool-pro`.
+- **One page at a time**, in the order the owner names. A page is done when: its engine checks
+  the JWT and scopes by user, every tool has a worker, a live run returns real data through the
+  router, the result renders rich at 1920, and every download button produces a real file.
+
+What already exists in Windmill (2026-11-16): ~60 `f/tools/engine-*` scripts (chat creative /
+automation / insight, analytics, meta-audit, ad-library, campaign meta/google, command-centre
+meta/google, reports, platform overview …) and ~90 `f/tools/worker-*` scripts (36 chat tool
+workers, campaign meta/google CRUD, command-centre actions, audience/bid/creative workers).
+The chat page already follows the unit exactly: 36 tools = 3 engines × 12
+(`src/views/admin/chat/ToolInlineForm.jsx` `SLUG_TO_ENGINE`).
+
+Cron jobs (Windmill schedules, all enabled):
+
+| schedule | runs | script |
+|---|---|---|
+| `f/tools/cron-sync-schedule` | every 10 min (Asia/Kolkata) | `f/tools/cron-sync-platforms` |
+| `f/schedules/campaign-scheduler` | hourly (UTC) | `f/tools/campaign-scheduler` |
+| `f/schedules/daily-sync` | 00:00 UTC | `f/tools/cron-daily-sync` |
+| `u/admin/health_monitor` | every 5 min | `u/admin/health_check` |
+
 ## THIS IS A CUSTOMER PORTAL, NOT ADMIN
 
 - Web App = desktop only (1920px), dark theme. React + Vite + MUI 9 (paid SaasAble template).
@@ -34,78 +212,65 @@ VPS 1 `nginx.service` is **failed but enabled** — nginx-proxy-manager owns 80/
 everything in `/etc/nginx/sites-enabled/` there is inert. The apex is **not a static
 docroot**: `/var/www/aiwave/` is a Django app on SQLite.
 
-## AI Router — READ THIS FIRST, HALF OF IT IS SILENTLY DOWNGRADED
+## AI Router — 10 tasks, each its own model (verified live 2026-11-16)
 
-The router is up (PM2 `ai-router`, uvicorn on `:9000`) and **correctly firewalled** —
-iptables accepts 9000 only from localhost and Docker nets and DROPs the rest. Verified
-refused from the public internet.
+The router is up (PM2 `ai-router`, uvicorn on `:9000`, code `/root/app.py`, started by
+`/root/start-ai-router.sh`) and **correctly firewalled** — iptables accepts 9000 only from
+localhost and Docker nets. From a Windmill container use `http://172.17.0.1:9000`.
 
-The routing **code is correct**: each task tries its own model first and treats OpenRouter
-as an error path. But three provider accounts are failing, and `_first_ok()` swallows the
-exception without logging, so every failure is invisible and answers arrive as
-`gpt-4o-mini`.
+Every task routes to its own model first. A fallback, where one exists, is printed as
+`[AI-ROUTER] provider FAILED ...` and the response `model` field names the model that really
+answered. Unknown task → 400 with the valid list. `vision_analysis`/`ocr` without an image → 400.
 
-Verified by live call on 2026-09-11:
+All ten tasks were called one by one on 2026-11-16 and the real response read:
 
-All ten task names were executed individually and the real response inspected. Not
-inferred from imports or auth checks — actually run.
+| # | task | its own model | answered today | state |
+|---|---|---|---|---|
+| 1 | creative | Claude Sonnet 4.5 (`claude-sonnet-4-5`) | Claude Sonnet 4.5 | **WORKS** |
+| 2 | coding | Claude Sonnet 4.5 | Claude Sonnet 4.5 | **WORKS** |
+| 3 | default | Claude Sonnet 4.5 | Claude Sonnet 4.5 | **WORKS** |
+| 4 | research | Gemini 2.5 Flash | Gemini 2.5 Flash | **WORKS** |
+| 5 | automation | GPT-OSS-120B on Groq | GPT-OSS-120B (Groq), real answers | **WORKS** |
+| 6 | image_gen | GPT Image 2 (OpenAI), Stability fallback | GPT Image 2, real PNG | **WORKS** |
+| 7 | stable_image | Stable Diffusion 3.5 Large | SD 3.5, real PNG | **WORKS** |
+| 8 | video_gen | FAL.ai Kling (text/image-to-video) | FAL.ai Kling — real 5 s 1920×1080 H.264 MP4 | **WORKS** |
+| 9 | vision_analysis | GPT-4o Vision (OpenAI direct) | GPT-4o Vision | **WORKS** |
+| 10 | ocr | GPT-4o OCR (OpenAI direct — owner decision, no OpenRouter cost) | GPT-4o OCR, read test text exactly | **WORKS** |
 
-| task | intended | what answered | state |
-|---|---|---|---|
-| creative | Claude | `gpt-4o-mini` | **BROKEN** — Anthropic credit balance too low |
-| coding | Claude | `gpt-4o-mini` | **BROKEN** — same |
-| default | Claude | `gpt-4o-mini` | **BROKEN** — same |
-| research | Gemini | `gpt-4o-mini` | **BROKEN** — Gemini "API key not valid" |
-| automation | Llama / Groq | `gpt-4o-mini` | **BROKEN** — Groq 401 invalid key |
-| image_gen | DALL-E 3 | falls to Stability | **BROKEN** — OpenAI 429 "no credits remaining" |
-| stable_image | sd3.5-large | Stable Diffusion 3.5 | **WORKS** — returned a real PNG |
-| video_gen | Kling / FAL | FAL.ai Video (Kling) | **WORKS** — returned a real MP4 URL |
-| vision_analysis | `openai/gpt-4o` | GPT-4o Vision | **WORKS** — correct description of a real image |
-| ocr | `qwen/qwen-2.5-vl-72b` | Qwen2.5-VL-72B | **WORKS** — correct text from a real image |
+The 10 tasks use 7 providers (Claude serves creative, coding and default; OpenAI serves image_gen,
+vision_analysis and ocr). OpenRouter is no longer on any route. The task
+table is frozen — do not reroute a task to another provider to make it "work".
 
-**4 of 10 work. 6 are down, and they need exactly 4 account fixes:**
+**Groq (resolved 2026-11-16).** New key in `/root/.ai-api-env` and Windmill `f/tools/groq_api_key`.
+Groq org setting "Allowed Models" must include `openai/gpt-oss-120b` — it does now. Note: the org
+allowlist also names `llama-3.3-70b-versatile` and `qwen/qwen3-32b`, but Groq does not offer those
+on this account ("does not exist"), so do not switch automation to them. `gpt-oss-120b` is an
+open-weight model run on Groq's hardware; it is billed by Groq, not the OpenAI account.
 
-| fix | tasks it restores |
-|---|---|
-| add credit to Anthropic | creative, coding, default |
-| valid Gemini key | research |
-| valid Groq key | automation |
-| add credit to OpenAI | image_gen |
+**OCR decision (owner, 2026-11-16):** OCR uses GPT-4o on the OpenAI key already paid for, not Qwen
+through OpenRouter. The ~290 engines/workers that call `ocr` and `vision_analysis` send text only,
+no image, so the router rejects them with "image required" and they add nothing to the result.
+Fix per page: send a real image (ad creative, screenshot, upload) or skip the call.
 
-The routing code is correct and needs no change. Every failure is an account state, not a
-bug. OpenAI's key is still valid — it authenticates and rejects on prompt length — it has
-simply run out of credit, so `image_gen` silently serves Stability instead of DALL-E 3.
+**Timeout:** `video_gen` takes minutes. Any engine that calls it needs its own long timeout
+(≥ 300 s); the default 30 s in `call_ai_router` will always fail.
 
-**Timeout constraint:** `video_gen` took **over 3 minutes** to return. `call_ai_router` in
-the engines defaults to a 30-second timeout, and the parallel fan-outs use 25-40 seconds.
-No script calls `video_gen` today (verified: 0 scripts reference it), but any engine that
-adds it at those timeouts will always fail. Give video its own long timeout.
+**Image URLs must be publicly fetchable** by the provider for `vision_analysis`/`ocr`.
+`https://app.marketingtool.pro/...` works; some hosts (e.g. Wikipedia) are refused.
 
-**Do NOT "fix" this by routing Claude/Gemini/Llama through OpenRouter.** The task table is
-frozen: each task uses its own provider. Rerouting would recreate exactly the failure this
-document exists to prevent, where the router claims one provider and another answers.
+Changed 2026-11-16 on VPS 1 (backups `/root/app.py.bak-ocr-labels-20261116-160641`,
+`/root/app.py.bak-ocr-openai-*`, `/root/.ai-api-env.bak-groq-*`): `ocr` is GPT-4o via OpenAI
+direct, the new Groq key is installed, and every label now names the real model — `/` used to claim DALL-E 3, SD 3 and "Claude Sonnet 4", and Groq answers were labelled
+"Llama-3.3-70B" while `gpt-oss-120b` ran.
 
-**Image URLs must be publicly fetchable by the provider.** `vision_analysis` and `ocr` pass
-the URL to OpenRouter, which downloads it server-side. A Wikipedia URL was refused
-("Failed to download image"); `https://app.marketingtool.pro/images/...` worked. Workers
-handing images to these two tasks must supply URLs the provider can actually reach.
-
-So **five of ten task names — every text task — silently answer from the cheapest model.**
-Keys are all present in the process environment with plausible lengths; the SDKs are
-current (anthropic 0.84.0, google-genai 1.66.0, openai 2.26.0); all provider hosts are
-reachable from the box. The failures are account-side: one billing, two bad keys.
-
-To see a swallowed provider error without adding logging, force both providers to fail by
-sending an over-long prompt — the 502 then contains both error strings:
+Re-check any time:
 
 ```
-curl -s -X POST http://127.0.0.1:9000/generate -H 'Content-Type: application/json' \
-  -d "{\"task\":\"creative\",\"prompt\":\"$(python3 -c 'print("x"*900000)')\"}"
+for t in creative coding default research automation image_gen stable_image; do
+  curl -s -X POST http://127.0.0.1:9000/generate -H 'Content-Type: application/json' \
+    -d "{\"task\":\"$t\",\"prompt\":\"Reply OK\"}" | head -c 120; echo; done
+pm2 logs ai-router --nostream | grep "provider FAILED" | tail
 ```
-
-The `/` endpoint still prints three **stale labels** — "Claude Sonnet 4" (it is 4.5),
-"Stable Diffusion 3" (3.5-large), "Qwen3 VL 8B" (Qwen2.5-VL-72B). Cosmetic, but it is what
-callers are told.
 
 ### Provider failures are now LOGGED (patched 2026-09-11)
 
@@ -635,7 +800,7 @@ Two real defects in the flow the customer actually walks:
 
 ## Known broken — do not assume these work
 
-- **Five of ten AI Router tasks silently downgrade to gpt-4o-mini** (see table above).
+- ~~AI Router tasks down~~ — **10 of 10 live, each on its own model** (verified 2026-11-16).
 - **`marketingtool-agent` Cloud Run service does not exist** — the web app's designated
   tool engine per the spec has never been deployed.
 - **Production still runs the 12 Apr 2026 build with the Windmill token in the public
