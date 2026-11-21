@@ -4,6 +4,7 @@ overrides:
   zod: ^4.6.6 # GHSA-mrhx-c7xc-m3w5
   brace-expansion@1: ^1.1.21 # osv-scanner finding
   "@grpc/grpc-js": ^1.13.6 # osv-scanner finding
+  parse5: 8.1.0 # jsdom 31 and parse5-parser-stream must share one parse5 (tokenizer.flushCharacters)
 allowBuilds:
   esbuild: true
   lightningcss: true
